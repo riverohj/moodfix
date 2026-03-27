@@ -19,7 +19,6 @@ Esta primera version no implementa todavia el producto. Solo deja preparado el e
 ├── backend/
 ├── docs/
 ├── frontend/
-├── CLAUDE.md
 └── README.md
 ```
 
@@ -56,4 +55,3 @@ npm run dev
 2. Invitar al resto del equipo.
 3. Instalar dependencias y comprobar que frontend y backend arrancan.
 4. Cerrar la taxonomia inicial del MVP antes de tocar la logica de producto.
-

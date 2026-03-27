@@ -17,11 +17,10 @@ Cada actualizacion debe incluir:
 
 ### 2026-03-27
 
-- Que se hizo: se creo la base del repositorio con `backend/`, `frontend/`, `docs/`, `README.md`, `.env.example` y `CLAUDE.md`.
+- Que se hizo: se creo la base del repositorio con `backend/`, `frontend/`, `docs/`, `README.md` y `.env.example`.
 - Que queda: crear repo remoto, invitar colaboradores, instalar dependencias y validar arranque local.
 - Bloqueos o riesgos: aun no estan cerradas las definiciones operativas del MVP para empezar producto.
 
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.
-
