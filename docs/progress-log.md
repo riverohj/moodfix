@@ -21,6 +21,24 @@ Cada actualizacion debe incluir:
 - Que queda: crear repo remoto, invitar colaboradores, instalar dependencias y validar arranque local.
 - Bloqueos o riesgos: aun no estan cerradas las definiciones operativas del MVP para empezar producto.
 
+### 2026-03-27
+
+- Que se hizo: se creo la carpeta `docs/contracts/` y se redacto una primera version del contrato de EPIC 0.
+- Que queda: cerrar los puntos pendientes de moods, tiempo, energia, epoca, defaults y orden de fallback.
+- Bloqueos o riesgos: `Inspiracionales` y `Entender el mundo` siguen siendo los moods mas ambiguos del MVP.
+
+### 2026-03-27
+
+- Que se hizo: se anadio el documento `epic-0-tmdb-mapping.md` para separar datos nativos de TMDb y derivaciones propias de MoodFix.
+- Que queda: validar con el equipo si algun `hard no` se modelara solo por genero o tambien por keywords.
+- Bloqueos o riesgos: los providers por region pueden introducir inconsistencias y conviene testearlos pronto.
+
+### 2026-03-27
+
+- Que se hizo: se anadio `epic-0-proposed-decisions.md` con propuestas operativas para cerrar tiempo, epoca, idiomas, defaults, fallback y moods ambiguos.
+- Que queda: validar estas propuestas en equipo y convertir las aceptadas en contrato cerrado.
+- Bloqueos o riesgos: si no se validan pronto, EPIC 1 y EPIC 4 pueden avanzar con interpretaciones distintas.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

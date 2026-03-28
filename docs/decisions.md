@@ -37,7 +37,20 @@ Cada entrada debe incluir:
 - Impacto: no puede bloquear el desarrollo del sistema base.
 - Responsable o acuerdo del equipo: especificaciones del proyecto.
 
+### 2026-03-27 · Contratos por epic
+
+- Decision: cada epic tendra su propio contrato documentado en `docs/contracts/`.
+- Motivo: necesitamos alinear producto, front, backend, datos y motor antes de implementar.
+- Impacto: EPIC 0 se documenta como contrato operativo y servira de base para los siguientes epics.
+- Responsable o acuerdo del equipo: acuerdo de trabajo del equipo.
+
+### 2026-03-27 · TMDb como fuente de datos, no como semantica de producto
+
+- Decision: TMDb se usara como fuente de datos y MoodFix derivara su propia semantica de producto.
+- Motivo: TMDb aporta generos, runtime, idiomas y providers, pero no moods, energia o seguro/descubrir como conceptos nativos.
+- Impacto: se documenta un mapeo explicito `TMDb -> derivacion MoodFix` dentro del contrato de EPIC 0.
+- Responsable o acuerdo del equipo: especificaciones del proyecto y validacion con documentacion oficial de TMDb.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.
-
