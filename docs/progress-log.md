@@ -39,6 +39,12 @@ Cada actualizacion debe incluir:
 - Que queda: validar estas propuestas en equipo y convertir las aceptadas en contrato cerrado.
 - Bloqueos o riesgos: si no se validan pronto, EPIC 1 y EPIC 4 pueden avanzar con interpretaciones distintas.
 
+### 2026-03-30
+
+- Que se hizo: se consolidaron los contratos base de EPIC 0 y se eliminaron los documentos provisionales. Quedaron cerrados moods, señales de sesion, señales estables de perfil, reglas base del motor y mapeo TMDb.
+- Que queda: usar este contrato cerrado como base para arrancar EPIC 1, EPIC 2 y EPIC 3 sin reinterpretaciones.
+- Bloqueos o riesgos: conviene validar pronto con datos reales de TMDb que los providers por region y los moods cerrados devuelven resultados razonables al pasar a implementacion.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

@@ -51,6 +51,41 @@ Cada entrada debe incluir:
 - Impacto: se documenta un mapeo explicito `TMDb -> derivacion MoodFix` dentro del contrato de EPIC 0.
 - Responsable o acuerdo del equipo: especificaciones del proyecto y validacion con documentacion oficial de TMDb.
 
+### 2026-03-30 · Seguro o descubrir pasa a ser senal de sesion
+
+- Decision: `seguro_o_descubrir` deja de ser una preferencia estable del perfil y pasa a modelarse como senal de sesion.
+- Motivo: el usuario puede querer ir a lo seguro un dia y descubrir otro, asi que encaja mejor como intencion puntual que como rasgo estable.
+- Impacto: se documenta en `epic-0-session-signals.md` y sale de `epic-0-profile-signals.md`.
+- Responsable o acuerdo del equipo: validacion interna del contrato de EPIC 0.
+
+### 2026-03-30 · Onboarding completamente opcional
+
+- Decision: ningun campo del onboarding es obligatorio para entrar en el producto.
+- Motivo: se prioriza bajar friccion de entrada y permitir uso rapido, aunque con menor precision en la recomendacion.
+- Impacto: el sistema debe funcionar con perfil incompleto y comunicar al usuario que, cuanto mas sepa de el, mejor afinara la recomendacion.
+- Responsable o acuerdo del equipo: validacion interna del contrato de EPIC 0.
+
+### 2026-03-30 · Plataformas y no rotundos quedan simplificados para MVP
+
+- Decision: `plataformas` se modela con `provider_id` de TMDb como fuente de verdad y `no_rotundos` se modela como lista de `genre_id` de TMDb.
+- Motivo: es la opcion mas simple, auditable e implementable para el MVP.
+- Impacto: si `plataformas = []`, no se aplica filtro de plataforma. `no_rotundos` evita clasificaciones propias complejas en esta fase.
+- Responsable o acuerdo del equipo: validacion interna del contrato de EPIC 0.
+
+### 2026-03-30 · Reglas operativas cerradas para tiempo, epoca, energia y fallback
+
+- Decision: se cierran los umbrales de tiempo y epoca, la heuristica minima de energia, y el fallback del motor.
+- Motivo: el equipo necesitaba dejar de trabajar con definiciones ambiguas antes de implementar.
+- Impacto: `algo_rapido < 90`, `tengo_tiempo >= 90`, `actual >= 2015`, `moderna >= 1990 y < 2015`, `clasica < 1990`. El fallback solo relaja epoca y tiempo y mantiene restricciones duras.
+- Responsable o acuerdo del equipo: validacion interna del contrato de EPIC 0.
+
+### 2026-03-30 · Nombres visibles y generos principales de moods cerrados
+
+- Decision: se cierran los seis moods del MVP con nombres visibles y generos principales definidos, incluyendo `Historias que inspiran` y `Descubre el mundo`.
+- Motivo: era necesario alinear nombre visible, expectativa de usuario y simplificacion del motor.
+- Impacto: el motor podra trabajar con generos principales por mood sin sistema de puntuaciones en esta primera version.
+- Responsable o acuerdo del equipo: validacion interna del contrato de EPIC 0.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.

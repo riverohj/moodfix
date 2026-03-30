@@ -6,9 +6,9 @@ Este documento es el cuaderno de ruta del proyecto. Su funcion es decir en que p
 
 ## Estado del proyecto
 
-- Estado general: arranque tecnico y organizativo
+- Estado general: contrato de EPIC 0 cerrado
 - Fecha objetivo del MVP: 24 de abril
-- Estado actual: boilerplate y documentacion base
+- Estado actual: boilerplate listo y documentacion base consolidada para pasar a implementacion
 
 ## Bloques de trabajo
 
@@ -18,15 +18,39 @@ Objetivo:
 Cerrar definiciones compartidas para que front, backend y motor usen el mismo lenguaje.
 
 Estado:
-Pendiente
+Cerrado
 
 ### EPIC 1 · Catalogo local e integracion con TMDb
 
 Objetivo:
-Preparar el catalogo local minimo y la ingestión necesaria para no depender de TMDb en cada recomendacion.
+Construir un catalogo local minimo de peliculas con los datos necesarios para que Mood Radar recomiende sin depender de TMDb en cada decision.
 
 Estado:
 Pendiente
+
+Alcance esperado:
+
+- conexion con TMDb y obtencion de peliculas
+- normalizacion y almacenamiento local de:
+  - titulo
+  - poster
+  - runtime
+  - ano
+  - `original_language`
+  - generos
+  - overview
+  - `popularity`
+  - `vote_count`
+  - providers por region
+- modelo de base de datos para catalogo y providers
+- estrategia simple de recarga manual
+- catalogo inicial suficiente para demo y pruebas del motor
+
+Notas de implementacion:
+
+- TMDb es fuente de datos, no logica de recomendacion
+- no hace falta refresh automatico en esta fase
+- conviene fijar un tamano inicial de catalogo de unas `200-300` peliculas utiles para demo
 
 ### EPIC 2 · Perfil estable del usuario y onboarding con skip
 
@@ -79,4 +103,3 @@ Pendiente
 ## Regla de uso
 
 Cuando cambiemos de fase o cerremos un bloque, se actualiza este archivo en vez de abrir documentos nuevos.
-
