@@ -31,7 +31,7 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-flask --app run.py run --debug --port 5001
+python run.py
 ```
 
 ### Frontend
@@ -48,6 +48,16 @@ npm run dev
 - Commits con `Conventional Commits`
 - Decisiones importantes en `docs/decisions.md`
 - Progreso y bloqueos en `docs/progress-log.md`
+
+## URL inicial de la API
+
+La URL base inicial del backend es:
+
+`http://localhost:5001/api`
+
+Endpoint de comprobacion:
+
+`http://localhost:5001/api/health`
 
 ## Siguientes pasos
 
