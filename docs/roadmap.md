@@ -6,9 +6,9 @@ Este documento es el cuaderno de ruta del proyecto. Su funcion es decir en que p
 
 ## Estado del proyecto
 
-- Estado general: contrato de EPIC 0 cerrado
+- Estado general: EPIC 0 cerrado y EPIC 1 en arranque tecnico
 - Fecha objetivo del MVP: 24 de abril
-- Estado actual: boilerplate listo y documentacion base consolidada para pasar a implementacion
+- Estado actual: boilerplate listo, contrato de EPIC 0 consolidado y primeras decisiones tecnicas de EPIC 1 en marcha
 
 ## Bloques de trabajo
 
@@ -26,7 +26,7 @@ Objetivo:
 Construir un catalogo local minimo de peliculas con los datos necesarios para que Mood Radar recomiende sin depender de TMDb en cada decision.
 
 Estado:
-Pendiente
+En curso
 
 Alcance esperado:
 
@@ -51,6 +51,8 @@ Notas de implementacion:
 - TMDb es fuente de datos, no logica de recomendacion
 - no hace falta refresh automatico en esta fase
 - conviene fijar un tamano inicial de catalogo de unas `200-300` peliculas utiles para demo
+- la autenticacion contra TMDb debe priorizar `TMDB_READ_ACCESS_TOKEN`
+- `TMDB_API_KEY` queda como respaldo documentado
 
 ### EPIC 2 · Perfil estable del usuario y onboarding con skip
 

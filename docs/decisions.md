@@ -86,6 +86,20 @@ Cada entrada debe incluir:
 - Impacto: el motor podra trabajar con generos principales por mood sin sistema de puntuaciones en esta primera version.
 - Responsable o acuerdo del equipo: validacion interna del contrato de EPIC 0.
 
+### 2026-03-30 · Credenciales TMDb definidas para EPIC 1
+
+- Decision: EPIC 1 trabajara con dos credenciales documentadas para TMDb, priorizando `TMDB_READ_ACCESS_TOKEN` y dejando `TMDB_API_KEY` como respaldo.
+- Motivo: el equipo necesita una forma clara y consistente de autenticarse contra TMDb al arrancar la integracion.
+- Impacto: las credenciales deben vivir en variables de entorno y no deben quedar expuestas en frontend, logs, capturas ni documentos con valores reales.
+- Responsable o acuerdo del equipo: arranque tecnico de EPIC 1.
+
+### 2026-03-30 · EPIC 1 se centra en catalogo local minimo y carga manual inicial
+
+- Decision: EPIC 1 se limita a conexion con TMDb, esquema local, ingestión inicial, providers por region y recarga manual simple.
+- Motivo: hace falta una base de datos local suficiente para el motor sin sobredisenar la arquitectura.
+- Impacto: no entra refresh automatico, no entra motor final, no entra IA ni contenido de series.
+- Responsable o acuerdo del equipo: alcance del core MVP.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.

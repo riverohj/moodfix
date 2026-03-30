@@ -45,6 +45,12 @@ Cada actualizacion debe incluir:
 - Que queda: usar este contrato cerrado como base para arrancar EPIC 1, EPIC 2 y EPIC 3 sin reinterpretaciones.
 - Bloqueos o riesgos: conviene validar pronto con datos reales de TMDb que los providers por region y los moods cerrados devuelven resultados razonables al pasar a implementacion.
 
+### 2026-03-30
+
+- Que se hizo: arranco EPIC 1 con el contrato de credenciales TMDb y la definicion refinada del alcance del catalogo local minimo.
+- Que queda: cerrar endpoints concretos, esquema de `movies` y `movie_providers`, e implementar la primera ingestión.
+- Bloqueos o riesgos: si las credenciales reales se comparten en documentos o capturas, deben rotarse y pasar a variables de entorno cuanto antes.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

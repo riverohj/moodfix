@@ -14,7 +14,7 @@ Este documento deja cerrado el contrato de credenciales para integracion con la 
 - Valor:
 
 ```txt
-eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhZDY5MjVjYWQyODc0MjFkM2M2ZTgxNTA3YzI0ZjQ5NiIsIm5iZiI6MTc3NDg3MTA0Ni4wMDQ5OTk5LCJzdWIiOiI2OWNhNjIwNTBiNjkyNDc4MzI4YWE4YjUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.u-2eMaOIW9-ttidLGC8tQ5E39pB-Vt3gH17H0ya9NXY
+definir_en_variable_de_entorno
 ```
 
 ### Clave de la API
@@ -25,7 +25,7 @@ eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhZDY5MjVjYWQyODc0MjFkM2M2ZTgxNTA3YzI0ZjQ5NiIsIm5
 - Valor:
 
 ```txt
-ad6925cad287421d3c6e81507c24f496
+definir_en_variable_de_entorno
 ```
 
 ## Regla general
@@ -78,6 +78,7 @@ Se considera correcta la integracion cuando:
 - si estas credenciales se publican en repositorios abiertos, deben rotarse
 - si se usan directamente en frontend sin proteccion, pueden quedar expuestas
 - si hay dudas entre ambas opciones, debe usarse primero el token de lectura
+- no deben dejarse valores reales en archivos `.md`, commits ni capturas compartidas
 
 ## Estado
 
