@@ -26,4 +26,3 @@ Este documento fija el alcance real del MVP. Su funcion es proteger al equipo de
 ## Regla de oro
 
 Si una idea no ayuda directamente a recomendar 3 peliculas validas para la demo del MVP, no entra en esta fase salvo decision explicita del equipo.
-
