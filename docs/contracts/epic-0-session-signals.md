@@ -6,12 +6,12 @@ Este documento define las señales situacionales de la sesion. Su funcion es cer
 
 ## Variables de sesion
 
-### Entry mode
+### Modo de entrada
 
 - Nombre visible: `Sorprendeme` / `Preguntame`
-- Nombre tecnico: `entry_mode`
+- Nombre tecnico: `modo_entrada`
 - Tipo: enumeracion
-- Valores permitidos: `surprise_me`, `ask_me`
+- Valores permitidos: `sorprendeme`, `preguntame`
 - Origen: input usuario
 - Uso en motor: determina cuantas señales de sesion existen
 - Persistencia: si, dentro de `sessions`
@@ -22,71 +22,95 @@ Este documento define las señales situacionales de la sesion. Su funcion es cer
 - Nombre tecnico: `mood`
 - Tipo: enumeracion
 - Valores permitidos:
-  - `accelerate_heart`
-  - `solve_a_crime`
-  - `emotional_movies`
-  - `have_a_good_time`
-  - `inspirational`
-  - `understand_the_world`
+  - `acelerar_corazon`
+  - `resuelve_un_crimen`
+  - `peliculas_emocionales`
+  - `pasar_un_buen_rato`
+  - `historias_que_inspiran`
+  - `descubre_el_mundo`
 - Origen: input usuario
 - Uso en motor: orientacion principal de la sesion
 - Persistencia: si, dentro de `sessions`
 
-### Time preference
+### Preferencia de tiempo
 
 - Nombre visible: `Algo rapido` / `Tengo tiempo`
-- Nombre tecnico: `time_preference`
+- Nombre tecnico: `preferencia_tiempo`
 - Tipo: enumeracion
-- Valores permitidos: `quick`, `have_time`
+- Valores permitidos: `algo_rapido`, `tengo_tiempo`
 - Origen: input usuario
 - Uso en motor: filtro duro o casi duro por duracion
 - Persistencia: si, dentro de `sessions`
-- Pendiente de cierre: equivalencia exacta en minutos
+- Regla cerrada:
+  - `algo_rapido` = `runtime < 90`
+  - `tengo_tiempo` = `runtime >= 90`
 
-### Energy preference
+### Preferencia de energia
 
 - Nombre visible: `Ponmelo facil` / `Acepto el reto`
-- Nombre tecnico: `energy_preference`
+- Nombre tecnico: `preferencia_energia`
 - Tipo: enumeracion
-- Valores permitidos: `easy`, `challenge`
+- Valores permitidos: `facil`, `reto`
 - Origen: input usuario
-- Uso en motor: filtro blando o ranking, no necesariamente filtro duro
+- Uso en motor: ranking secundario, no filtro duro
 - Persistencia: si, dentro de `sessions`
-- Pendiente de cierre: como se deriva operativamente usando datos reales
+- Regla cerrada:
+  - `facil` prioriza `runtime < 120` y `vote_average >= 6`
+  - `reto` prioriza `runtime >= 100` y `vote_average >= 7.2`
+- Nota: es una heuristica debil y no debe venderse como medida exacta de complejidad cognitiva
 
-### Era preference
+### Seguro o descubrir
+
+- Nombre visible: `Ir a lo seguro` / `Descubrir`
+- Nombre tecnico: `seguro_o_descubrir`
+- Tipo: enumeracion
+- Valores permitidos: `seguro`, `descubrir`
+- Origen: input usuario
+- Uso en motor: ranking, no filtro duro
+- Persistencia: si, dentro de `sessions`
+- Regla cerrada:
+  - `seguro` prioriza candidatas con `vote_count >= 10000`
+  - `descubrir` prioriza candidatas con `vote_count >= 1000 AND vote_count < 10000`
+- Nota: `vote_count` se usa como señal principal porque es mas estable que `popularity`
+
+### Preferencia de epoca
 
 - Nombre visible: `Actual` / `Moderna` / `Clasica`
-- Nombre tecnico: `era_preference`
+- Nombre tecnico: `preferencia_epoca`
 - Tipo: enumeracion
-- Valores permitidos: `current`, `modern`, `classic`
+- Valores permitidos: `actual`, `moderna`, `clasica`
 - Origen: input usuario
 - Uso en motor: filtro duro o casi duro por rango de anos
 - Persistencia: si, dentro de `sessions`
-- Pendiente de cierre: equivalencia exacta de anos
+- Regla cerrada:
+  - `actual` = `release_year >= 2015`
+  - `moderna` = `release_year >= 1990 AND release_year < 2015`
+  - `clasica` = `release_year < 1990`
 
 ## Contrato de flujo
 
 ### Sorprendeme
 
-- Recoge solo `entry_mode`
+- Recoge solo `modo_entrada`
 - No hace preguntas adicionales
 - Debe apoyarse en perfil estable
-- Si falta perfil estable, requiere defaults definidos por el equipo
+- Si falta perfil estable, usa estos defaults:
+  - `pais = ES` para demo
+  - `plataformas = []`
+  - `idiomas_comodos = ['es', 'en']`
+  - `tolerancia_subtitulos = si`
+  - `no_rotundos = []`
+  - no filtra por plataforma si `plataformas` esta vacio
 
 ### Preguntame
 
 - Recoge `mood`
-- Recoge `time_preference`
-- Recoge `energy_preference`
-- Recoge `era_preference`
+- Recoge `preferencia_tiempo`
+- Recoge `preferencia_energia`
+- Recoge `seguro_o_descubrir`
+- Recoge `preferencia_epoca`
 - Debe generar un payload de sesion consistente y reutilizable
 
-## Puntos pendientes de cierre
+## Estado
 
-- valores por defecto cuando falte perfil
-- definicion exacta de `quick`
-- definicion exacta de `easy`
-- definicion exacta de `challenge`
-- definicion exacta de `current`, `modern`, `classic`
-
+Las senales de sesion quedan cerradas para MVP. La validacion con ejemplos reales del catalogo se hara ya en fase de implementacion y prueba, no como parte del contrato.

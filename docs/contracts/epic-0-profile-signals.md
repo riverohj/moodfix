@@ -6,103 +6,93 @@ Este documento define las señales estables del perfil del usuario. Su funcion e
 
 ## Variables de perfil
 
-### Country
+### Pais
 
 - Nombre visible: `Pais`
-- Nombre tecnico: `country`
+- Nombre tecnico: `pais`
 - Tipo: string o codigo de pais
 - Origen: input usuario
 - Uso en motor: filtro duro de disponibilidad regional
 - Persistencia: si
-- Obligatorio: pendiente de cierre
+- Obligatorio: no
+- Formato cerrado: `ISO 3166-1 alpha-2`
 
-### Platforms
+### Plataformas
 
 - Nombre visible: `Plataformas que usa`
-- Nombre tecnico: `platforms`
+- Nombre tecnico: `plataformas`
 - Tipo: lista
 - Origen: input usuario
 - Uso en motor: filtro duro de disponibilidad por proveedor
 - Persistencia: si
-- Obligatorio: pendiente de cierre
+- Obligatorio: no
+- Nota de modelado: deben guardarse con un identificador estable y vinculable a proveedores de TMDb, no solo como texto libre
+- Regla cerrada:
+  - la fuente de verdad interna sera `provider_id` de TMDb
+  - si `plataformas = []`, no se aplica filtro de plataforma y el motor trabaja con todas las plataformas disponibles
 
-### Comfortable languages
+### Idiomas comodos
 
 - Nombre visible: `Idiomas en los que ve cine comodo`
-- Nombre tecnico: `comfortable_languages`
+- Nombre tecnico: `idiomas_comodos`
 - Tipo: lista
 - Origen: input usuario
 - Uso en motor: filtro duro o casi duro por barrera de idioma
 - Persistencia: si
-- Obligatorio: pendiente de cierre
+- Obligatorio: no
 
-### Subtitle tolerance
+### Tolerancia a subtitulos
 
 - Nombre visible: `Tolerancia a subtitulos`
-- Nombre tecnico: `subtitle_tolerance`
+- Nombre tecnico: `tolerancia_subtitulos`
 - Tipo: enumeracion
-- Valores permitidos sugeridos: `yes`, `depends`, `no`
+- Valores permitidos cerrados: `si`, `no`
 - Origen: input usuario
 - Uso en motor: filtro duro o casi duro combinado con idioma
 - Persistencia: si
-- Obligatorio: pendiente de cierre
+- Obligatorio: no
 
-### Safe vs discover
-
-- Nombre visible: `Ir a lo seguro` / `Descubrir`
-- Nombre tecnico: `safe_vs_discover`
-- Tipo: enumeracion
-- Valores permitidos sugeridos: `safe`, `discover`
-- Origen: input usuario
-- Uso en motor: ranking, no filtro duro
-- Persistencia: si
-- Obligatorio: pendiente de cierre
-
-### Hard nos
+### No rotundos
 
 - Nombre visible: `Lineas rojas`
-- Nombre tecnico: `hard_nos`
+- Nombre tecnico: `no_rotundos`
 - Tipo: lista
 - Origen: input usuario
 - Uso en motor: filtro duro
 - Persistencia: si
 - Obligatorio: no
+- Nota de modelado: en MVP se recomienda modelarlo como lista de `genre_id` de TMDb para mantenerlo simple y auditable
 
-### Disliked titles
+### Titulos descartados
 
 - Nombre visible: `Peliculas rechazadas`
-- Nombre tecnico: `disliked_titles`
+- Nombre tecnico: `titulos_descartados`
 - Tipo: lista de peliculas
 - Origen: interaccion usuario
 - Uso en motor: filtro duro o penalizacion fuerte
 - Persistencia: si
 - Obligatorio: no
 
-### Watch later
+### Ver luego
 
 - Nombre visible: `Ver luego`
-- Nombre tecnico: `watch_later`
+- Nombre tecnico: `ver_luego`
 - Tipo: lista de peliculas
 - Origen: interaccion usuario
 - Uso en motor: señal positiva de afinidad
 - Persistencia: si
 - Obligatorio: no
 
-### History
+### Historial
 
 - Nombre visible: `Historial`
-- Nombre tecnico: `history`
+- Nombre tecnico: `historial`
 - Tipo: lista de peliculas o eventos
 - Origen: interaccion usuario
 - Uso en motor: evitar repeticiones y detectar patrones basicos
 - Persistencia: si
 - Obligatorio: no
 
-## Puntos pendientes de cierre
+## Estado
 
-- que campos del perfil son obligatorios en onboarding
-- que defaults se aplican si el usuario hace skip
-- formato exacto de `country`
-- formato exacto de `platforms`
-- modelado final de `hard_nos`
-
+Las senales estables del perfil quedan cerradas para MVP con onboarding completamente opcional.

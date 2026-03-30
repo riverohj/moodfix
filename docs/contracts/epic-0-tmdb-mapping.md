@@ -118,7 +118,7 @@ Este documento define el mapeo entre las necesidades del MVP de MoodFix y los da
 - Decision: derivacion propia de MoodFix
 - Riesgo: alto
 
-### Safe vs discover
+### Seguro o descubrir
 
 - Necesidad de MoodFix: modular si el usuario quiere algo mas seguro o mas exploratorio
 - Disponibilidad en TMDb: no directa
@@ -143,7 +143,7 @@ Este documento define el mapeo entre las necesidades del MVP de MoodFix y los da
 - Riesgo: medio
 - Nota: no todo `hard no` tendra correspondencia simple con un campo TMDb
 
-### Watch later, disliked, history
+### Ver luego, titulos descartados e historial
 
 - Necesidad de MoodFix: recordar afinidades, rechazos y repeticiones
 - Disponibilidad en TMDb: no como fuente de verdad del producto
@@ -177,4 +177,3 @@ Este documento define el mapeo entre las necesidades del MVP de MoodFix y los da
 ## Decision de producto derivada
 
 EPIC 0 no debe asumir que TMDb resuelve la semantica del producto. TMDb aporta base de datos y MoodFix define la logica que convierte esa base en recomendacion.
-

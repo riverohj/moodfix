@@ -12,47 +12,47 @@ Mood Radar no recibe deseos vagos. Recibe variables cerradas y las traduce a fil
 
 ### Filtros duros esperados
 
-- `country`
-- `platforms`
-- `comfortable_languages`
-- `subtitle_tolerance`
-- `hard_nos`
-- `history` o repeticion reciente
-- `disliked_titles`
+- `pais`
+- `plataformas`
+- `idiomas_comodos`
+- `tolerancia_subtitulos`
+- `no_rotundos`
+- `historial` o repeticion reciente
+- `titulos_descartados`
 
-## Filtros duros o casi duros pendientes de cierre exacto
+## Filtros duros o casi duros
 
-- `time_preference`
-- `era_preference`
+- `preferencia_tiempo`
+- `preferencia_epoca`
 
 ## Señales de ranking o filtro blando
 
-- `safe_vs_discover`
-- `energy_preference`
-- `watch_later`
+- `seguro_o_descubrir`
+- `preferencia_energia`
+- `ver_luego`
 - parte de la interpretacion del `mood`
 
 ## Contrato minimo de entrada del motor
 
 ### Perfil estable
 
-- `country`
-- `platforms`
-- `comfortable_languages`
-- `subtitle_tolerance`
-- `safe_vs_discover`
-- `hard_nos`
-- `history`
-- `watch_later`
-- `disliked_titles`
+- `pais`
+- `plataformas`
+- `idiomas_comodos`
+- `tolerancia_subtitulos`
+- `no_rotundos`
+- `historial`
+- `ver_luego`
+- `titulos_descartados`
 
 ### Sesion
 
-- `entry_mode`
+- `modo_entrada`
 - `mood`
-- `time_preference`
-- `energy_preference`
-- `era_preference`
+- `preferencia_tiempo`
+- `preferencia_energia`
+- `seguro_o_descubrir`
+- `preferencia_epoca`
 
 ### Catalogo local
 
@@ -65,50 +65,68 @@ Mood Radar no recibe deseos vagos. Recibe variables cerradas y las traduce a fil
 
 ## Contrato minimo de salida del motor
 
-- `candidate_pool` o conjunto inicial util
-- `shortlist`
-- `top_3`
+- `conjunto_candidato` o conjunto inicial util
+- `lista_corta`
+- `top_3_final`
 - trazabilidad interna minima de por que una candidata entro o salio
 
-## Reglas pendientes de cierre exacto
+## Reglas operativas cerradas
 
-### Quick
+### Algo rapido
 
 - valor visible: `Algo rapido`
-- valor tecnico: `quick`
-- pendiente: rango exacto de minutos
+- valor tecnico: `algo_rapido`
+- regla cerrada: `runtime < 90`
 
-### Have time
+### Tengo tiempo
 
 - valor visible: `Tengo tiempo`
-- valor tecnico: `have_time`
-- pendiente: si elimina tope o si usa un umbral alto
+- valor tecnico: `tengo_tiempo`
+- regla cerrada: `runtime >= 90`
 
-### Easy
+### Facil
 
 - valor visible: `Ponmelo facil`
-- valor tecnico: `easy`
-- pendiente: heuristica concreta con datos reales
+- valor tecnico: `facil`
+- regla cerrada: prioriza `runtime < 120` y `vote_average >= 6`
+- nota: actua solo como ranking secundario
 
-### Challenge
+### Reto
 
 - valor visible: `Acepto el reto`
-- valor tecnico: `challenge`
-- pendiente: heuristica concreta con datos reales
+- valor tecnico: `reto`
+- regla cerrada: prioriza `runtime >= 100` y `vote_average >= 7.2`
+- nota: actua solo como ranking secundario
 
-### Current / Modern / Classic
+### Actual / Moderna / Clasica
 
 - valores visibles: `Actual`, `Moderna`, `Clasica`
-- valores tecnicos: `current`, `modern`, `classic`
-- pendiente: rangos exactos de anos
+- valores tecnicos: `actual`, `moderna`, `clasica`
+- reglas cerradas:
+  - `actual` = `release_year >= 2015`
+  - `moderna` = `release_year >= 1990 AND release_year < 2015`
+  - `clasica` = `release_year < 1990`
 
-### Safe / Discover
+### Seguro / Descubrir
 
 - valores visibles: `Ir a lo seguro`, `Descubrir`
-- valores tecnicos: `safe`, `discover`
-- pendiente: traduccion concreta a ranking y exploracion
+- valores tecnicos: `seguro`, `descubrir`
+- reglas cerradas:
+  - `seguro` prioriza candidatas con `vote_count >= 10000`
+  - `descubrir` prioriza candidatas con `vote_count >= 1000 AND vote_count < 10000`
+- nota: `vote_count` se usa como señal principal porque es mas estable que `popularity`
+- clasificacion: señal de ranking de sesion, no señal estable de perfil
 
-## Fallback pendiente de cierre
+## Fallback
 
-Si tras aplicar filtros quedan menos de 3 candidatas, el equipo debe definir un orden de relajacion controlado. Este orden no esta cerrado todavia y debe quedar documentado antes de implementar el motor.
+Si tras aplicar filtros quedan menos de 3 candidatas, se aplica este orden de relajacion controlado:
 
+1. relajar `preferencia_epoca`
+2. relajar `preferencia_tiempo`
+3. mantener siempre:
+   - `no_rotundos`
+   - incompatibilidades fuertes de idioma
+   - filtro de `pais` si existe
+   - filtro de `plataformas` si existe
+
+La relajacion de `preferencia_epoca` y `preferencia_tiempo` debe ser moderada y no abrir demasiado el intervalo de cada una.
