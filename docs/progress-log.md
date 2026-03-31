@@ -57,6 +57,12 @@ Cada actualizacion debe incluir:
 - Que queda: cerrar el esquema de base de datos del catalogo local y arrancar la primera ingestión con datos reales.
 - Bloqueos o riesgos: si la ingestión se apoya solo en `discover/movie`, el catalogo inicial puede quedar demasiado sesgado hacia peliculas mainstream.
 
+### 2026-03-31
+
+- Que se hizo: se documento e implemento el esquema minimo de base de datos del catalogo local con `movies` y `movie_providers`, y se dejo creado el contrato de ingestión inicial.
+- Que queda: implementar el script o servicio que traiga peliculas desde TMDb y las persista en estas tablas.
+- Bloqueos o riesgos: sigue siendo importante no depender solo de `discover/movie` con orden por popularidad para evitar un catalogo demasiado sesgado.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

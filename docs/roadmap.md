@@ -54,6 +54,7 @@ Notas de implementacion:
 - la autenticacion contra TMDb debe priorizar `TMDB_READ_ACCESS_TOKEN`
 - `TMDB_API_KEY` queda como respaldo documentado
 - conviene separar endpoints minimos de ingestión de endpoints de apoyo o validacion
+- la siguiente pieza critica es cerrar e implementar la ingestión inicial del catalogo
 
 ### EPIC 2 · Perfil estable del usuario y onboarding con skip
 

@@ -107,6 +107,20 @@ Cada entrada debe incluir:
 - Impacto: el flujo minimo se apoya en `genre/movie/list`, `discover/movie`, `movie/{movie_id}` y `movie/{movie_id}/watch/providers`. El resto queda como apoyo.
 - Responsable o acuerdo del equipo: revision del contrato de endpoints de TMDb.
 
+### 2026-03-31 · Esquema minimo de catalogo local cerrado para EPIC 1
+
+- Decision: el catalogo local del MVP se modela con dos tablas base: `movies` y `movie_providers`.
+- Motivo: es el minimo suficiente para soportar filtros por tiempo, epoca, idioma, pais y plataformas sin sobredisenar la base de datos.
+- Impacto: el backend ya puede crear la base local y servir como soporte para la ingestión inicial.
+- Responsable o acuerdo del equipo: arranque tecnico de EPIC 1.
+
+### 2026-03-31 · Ingestión inicial manual cerrada como siguiente paso de EPIC 1
+
+- Decision: la primera carga del catalogo sera manual y se apoyara en `genre/movie/list`, `discover/movie`, `movie/{movie_id}` y `movie/{movie_id}/watch/providers`.
+- Motivo: necesitamos una primera version funcional y reproducible del catalogo antes de pensar en automatizaciones.
+- Impacto: la siguiente implementacion debe centrarse en traer unas `200-300` peliculas y poblar `movies` y `movie_providers`.
+- Responsable o acuerdo del equipo: continuidad tecnica de EPIC 1.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.
