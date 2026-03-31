@@ -53,6 +53,7 @@ Notas de implementacion:
 - conviene fijar un tamano inicial de catalogo de unas `200-300` peliculas utiles para demo
 - la autenticacion contra TMDb debe priorizar `TMDB_READ_ACCESS_TOKEN`
 - `TMDB_API_KEY` queda como respaldo documentado
+- conviene separar endpoints minimos de ingestión de endpoints de apoyo o validacion
 
 ### EPIC 2 · Perfil estable del usuario y onboarding con skip
 

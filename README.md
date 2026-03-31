@@ -59,6 +59,10 @@ Endpoint de comprobacion:
 
 `http://localhost:5001/api/health`
 
+Endpoint de comprobacion de base de datos:
+
+`http://localhost:5001/api/db/status`
+
 ## Siguientes pasos
 
 1. Crear el repositorio remoto en GitHub.

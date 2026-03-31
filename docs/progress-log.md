@@ -51,6 +51,12 @@ Cada actualizacion debe incluir:
 - Que queda: cerrar endpoints concretos, esquema de `movies` y `movie_providers`, e implementar la primera ingestión.
 - Bloqueos o riesgos: si las credenciales reales se comparten en documentos o capturas, deben rotarse y pasar a variables de entorno cuanto antes.
 
+### 2026-03-31
+
+- Que se hizo: se anadio y reviso el contrato de endpoints de TMDb para EPIC 1, separando endpoints minimos obligatorios de endpoints de apoyo o validacion.
+- Que queda: cerrar el esquema de base de datos del catalogo local y arrancar la primera ingestión con datos reales.
+- Bloqueos o riesgos: si la ingestión se apoya solo en `discover/movie`, el catalogo inicial puede quedar demasiado sesgado hacia peliculas mainstream.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

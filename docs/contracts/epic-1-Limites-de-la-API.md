@@ -1,8 +1,12 @@
-# EPIC 1 Limites de la API
+# EPIC 1 Endpoints y Limites de la API
 
 ## Definicion
 
 Este documento deja cerrado que endpoints de TMDb necesitamos en EPIC 1 para construir el catalogo local del MVP. Su funcion es limitar la integracion a las llamadas estrictamente necesarias para poblar peliculas, generos, regiones, idiomas y providers, sin abrir alcance a logica de recomendacion ni a funcionalidades fuera del MVP.
+
+## Resumen sencillo
+
+En este epic usamos TMDb solo para traer y validar datos del catalogo. No usamos TMDb para recomendar. Lo que queremos construir es una base local minima con peliculas, metadata y providers por region para que Mood Radar pueda trabajar despues sin llamar a TMDb en cada decision.
 
 ## Regla general
 
@@ -271,6 +275,10 @@ def fetch_movie_providers_catalog(region="ES"):
     return response.json()["results"]
 ```
 
+### Estado en EPIC 1
+
+Util para validacion y apoyo. No es obligatorio para poblar la tabla `movie_providers` si ya se usa `movie/{movie_id}/watch/providers` como fuente principal.
+
 ### 6. Regiones disponibles para watch providers
 
 - Uso en EPIC 1: validar que region soporta datos de providers antes de poblar o filtrar
@@ -304,6 +312,10 @@ def fetch_provider_regions():
     return response.json()["results"]
 ```
 
+### Estado en EPIC 1
+
+Util para validacion y apoyo. No es obligatorio para la carga minima del catalogo si el equipo ya trabaja con una region objetivo conocida, como `ES`.
+
 ### 7. Configuration countries
 
 - Uso en EPIC 1: validar codigos de pais usados por el sistema y alinear `pais` con ISO 3166-1
@@ -335,6 +347,10 @@ def fetch_countries():
     response.raise_for_status()
     return response.json()
 ```
+
+### Estado en EPIC 1
+
+Util para validacion y consistencia de codigos de pais. No es obligatorio para arrancar la primera ingestión si `pais` ya se controla con `ISO 3166-1 alpha-2`.
 
 ### 8. Configuration languages
 
@@ -368,6 +384,10 @@ def fetch_languages():
     return response.json()
 ```
 
+### Estado en EPIC 1
+
+Util para validacion y consistencia de idiomas. No es obligatorio para arrancar la primera ingestión si el equipo solo necesita persistir `original_language`.
+
 ## Endpoint opcional pero util para validacion manual
 
 ### Search movie
@@ -390,12 +410,20 @@ curl --request GET \
 ## Flujo minimo recomendado para el MVP
 
 1. llamar a `genre/movie/list` para tener diccionario oficial de generos
-2. llamar a `configuration/countries` y `configuration/languages` para validar catalogos base
-3. llamar a `watch/providers/regions` y `watch/providers/movie` para validar providers y regiones relevantes
-4. llamar a `discover/movie` para obtener candidatas
-5. por cada `movie_id` elegida, llamar a `movie/{movie_id}` para completar metadata minima
-6. por cada `movie_id` elegida, llamar a `movie/{movie_id}/watch/providers` para poblar providers por region
-7. persistir todo en catalogo local para que Mood Radar no dependa de TMDb en cada recomendacion
+2. llamar a `discover/movie` para obtener candidatas
+3. por cada `movie_id` elegida, llamar a `movie/{movie_id}` para completar metadata minima
+4. por cada `movie_id` elegida, llamar a `movie/{movie_id}/watch/providers` para poblar providers por region
+5. persistir todo en catalogo local para que Mood Radar no dependa de TMDb en cada recomendacion
+
+## Endpoints de apoyo o validacion
+
+- `watch/providers/movie`
+- `watch/providers/regions`
+- `configuration/countries`
+- `configuration/languages`
+- `search/movie`
+
+Estos endpoints son utiles para validar, depurar o reforzar consistencia, pero no deben bloquear la primera version funcional de la ingestión.
 
 ## Lo que no debemos usar en este epic
 
@@ -410,6 +438,7 @@ curl --request GET \
 - TMDb mantiene limites altos pero documenta que puede devolver `429` si se abusa del servicio: https://developer.themoviedb.org/docs/rate-limiting
 - conviene hacer carga por lotes controlados y guardar localmente todo lo necesario
 - `discover/movie` sirve para explorar catalogo, pero no reemplaza la normalizacion posterior
+- `discover/movie` no debe convertirse en la unica fuente del catalogo inicial; conviene combinar estrategias de carga para no sesgar todo a peliculas demasiado mainstream
 - `movie/{movie_id}/watch/providers` debe persistirse localmente porque el motor no debe consultar TMDb en cada decision
 - los providers pueden variar por region, asi que no se debe guardar una sola disponibilidad global por pelicula
 

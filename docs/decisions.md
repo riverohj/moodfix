@@ -100,6 +100,13 @@ Cada entrada debe incluir:
 - Impacto: no entra refresh automatico, no entra motor final, no entra IA ni contenido de series.
 - Responsable o acuerdo del equipo: alcance del core MVP.
 
+### 2026-03-31 · Endpoints minimos y endpoints de apoyo quedan separados en EPIC 1
+
+- Decision: en EPIC 1 se distinguen endpoints minimos obligatorios para la primera ingestión y endpoints de apoyo o validacion.
+- Motivo: el equipo necesita una version funcional rapida del catalogo local sin bloquearse por validaciones auxiliares.
+- Impacto: el flujo minimo se apoya en `genre/movie/list`, `discover/movie`, `movie/{movie_id}` y `movie/{movie_id}/watch/providers`. El resto queda como apoyo.
+- Responsable o acuerdo del equipo: revision del contrato de endpoints de TMDb.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.
