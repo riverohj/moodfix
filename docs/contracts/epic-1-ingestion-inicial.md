@@ -39,7 +39,17 @@ Construir una primera carga local de peliculas suficiente para demo y pruebas de
 - solo peliculas, no series
 - `include_adult=false`
 - `include_video=false`
-- no depender solo de una fuente demasiado mainstream si el equipo amplia despues la estrategia de carga
+- no depender solo de una fuente demasiado mainstream
+
+## Estrategia recomendada para reducir sesgo del catalogo
+
+La carga inicial no debe salir solo de `discover/movie` ordenado por popularidad. La recomendacion para EPIC 1 es combinar:
+
+- una parte de candidatas por `sort_by=popularity.desc`
+- una parte de candidatas con `vote_average.gte` y `vote_count.gte` para incluir peliculas bien valoradas
+- una parte guiada por generos o moods del MVP para que el catalogo no se quede solo en lo mas conocido
+
+Esto no sustituye `popularity`: la complementa.
 
 ## Campos minimos que deben persistirse
 
@@ -67,6 +77,7 @@ Construir una primera carga local de peliculas suficiente para demo y pruebas de
 
 - `tmdb_id` debe ser unico en `movies`
 - no deben insertarse duplicados en `movie_providers`
+- si el script informa de filas insertadas en `movie_providers`, ese contador debe reflejar solo inserciones reales y no intentos ignorados por duplicado
 - si una pelicula no tiene providers para una region, no debe inventarse disponibilidad
 - si `plataformas = []` en el perfil del usuario, el motor no filtrara por plataforma aunque la tabla de providers exista
 
@@ -88,4 +99,3 @@ La ingestión inicial se considera lograda cuando:
 - `movies` contiene la metadata minima acordada
 - `movie_providers` contiene disponibilidad por region
 - el equipo puede consultar el catalogo local sin llamar a TMDb para cada recomendacion
-

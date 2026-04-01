@@ -2,11 +2,11 @@
 
 ## Definicion
 
-Este documento deja cerrado que endpoints de TMDb necesitamos en EPIC 1 para construir el catalogo local del MVP. Su funcion es limitar la integracion a las llamadas estrictamente necesarias para poblar peliculas, generos, regiones, idiomas y providers, sin abrir alcance a logica de recomendacion ni a funcionalidades fuera del MVP.
+Este documento deja cerrado que endpoints de TMDb necesitamos en EPIC 1 para construir el catalogo local del MVP. Su funcion es limitar la integracion a las llamadas estrictamente necesarias para poblar peliculas, generos y providers, sin abrir alcance a logica de recomendacion.
 
 ## Resumen sencillo
 
-En este epic usamos TMDb solo para traer y validar datos del catalogo. No usamos TMDb para recomendar. Lo que queremos construir es una base local minima con peliculas, metadata y providers por region para que Mood Radar pueda trabajar despues sin llamar a TMDb en cada decision.
+En este epic usamos TMDb solo para traer y validar datos. No usamos TMDb para recomendar. Lo que queremos construir es una base local minima con peliculas, metadata y providers por region para que Mood Radar pueda trabajar despues sin llamar a TMDb en cada decision.
 
 ## Regla general
 
@@ -18,67 +18,36 @@ En este epic usamos TMDb solo para traer y validar datos del catalogo. No usamos
 ## Base de autenticacion
 
 - Base URL API v3: `https://api.themoviedb.org/3`
-- Metodo recomendado: header `Authorization: Bearer TMDB_READ_ACCESS_TOKEN`
-- Metodo alternativo: query param `api_key=TMDB_API_KEY`
+- Metodo actual del proyecto: query param `api_key=TMDB_API_KEY`
+- Metodo alternativo documentado: header `Authorization: Bearer TMDB_READ_ACCESS_TOKEN`
 
-### Ejemplo base con Bearer token
+### Diferencia sencilla entre ambos formatos
+
+- `API key`: se envia en la URL y simplifica scripts pequenos y pruebas rapidas
+- `Bearer token`: se envia en el header `Authorization` y suele usarse mas en integraciones backend formales
+
+Para EPIC 1, la implementacion actual del proyecto usa `TMDB_API_KEY`, asi que este contrato sigue esa fuente de verdad.
+
+### Ejemplo base con API key
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/genre/movie/list?language=es-ES' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
+  --url 'https://api.themoviedb.org/3/genre/movie/list?api_key=TMDB_API_KEY&language=es-ES' \
   --header 'accept: application/json'
 ```
 
-## Endpoints que si necesitamos
+## Endpoints obligatorios
 
-### 1. Listado oficial de generos de peliculas
+### 1. `genre/movie/list`
 
-- Uso en EPIC 1: disponer del diccionario oficial de generos TMDb para normalizar genero y validar el mapeo cerrado en EPIC 0
-- Metodo: `GET`
-- URL endpoint: `https://api.themoviedb.org/3/genre/movie/list`
+- Uso en EPIC 1: disponer del diccionario oficial de generos de peliculas
+- Por que es obligatorio: necesitamos normalizar `genre_id` y validar el mapeo de EPIC 0
 - Documentacion oficial: https://developer.themoviedb.org/reference/genre-movie-list
 
-### Query params recomendados
+### 2. `discover/movie`
 
-- `language=es-ES` o `en-US`
-
-### Ejemplo de llamada
-
-```bash
-curl --request GET \
-  --url 'https://api.themoviedb.org/3/genre/movie/list?language=es-ES' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
-  --header 'accept: application/json'
-```
-
-### Ejemplo de implementacion en backend
-
-```python
-import os
-import requests
-
-BASE_URL = "https://api.themoviedb.org/3"
-
-def fetch_movie_genres():
-    response = requests.get(
-        f"{BASE_URL}/genre/movie/list",
-        params={"language": "es-ES"},
-        headers={
-            "Authorization": f"Bearer {os.environ['TMDB_READ_ACCESS_TOKEN']}",
-            "accept": "application/json",
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.json()["genres"]
-```
-
-### 2. Discover movies
-
-- Uso en EPIC 1: obtener peliculas candidatas para poblar el catalogo inicial de demo
-- Metodo: `GET`
-- URL endpoint: `https://api.themoviedb.org/3/discover/movie`
+- Uso en EPIC 1: obtener candidatas para poblar el catalogo inicial
+- Por que es obligatorio: es el punto de arranque de la ingestión
 - Documentacion oficial: https://developer.themoviedb.org/reference/discover-movie
 
 ### Query params utiles para el MVP
@@ -88,57 +57,27 @@ def fetch_movie_genres():
 - `sort_by=popularity.desc`
 - `include_adult=false`
 - `include_video=false`
-- `vote_count.gte=...`
+- `vote_count.gte=100`
+- `vote_average.gte=...`
 - `with_genres=...`
 - `with_original_language=...`
 - `primary_release_date.gte=...`
 - `primary_release_date.lte=...`
-- `watch_region=ES` si se quiere acotar por region en exploracion
-- `with_watch_providers=...` si se quiere acotar por provider concreto
 
-### Ejemplo de llamada
+### Nota de estrategia para evitar sesgo
 
-```bash
-curl --request GET \
-  --url 'https://api.themoviedb.org/3/discover/movie?language=es-ES&page=1&sort_by=popularity.desc&include_adult=false&include_video=false&vote_count.gte=100' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
-  --header 'accept: application/json'
-```
+`discover/movie` no debe apoyarse solo en `sort_by=popularity.desc`. Para la carga inicial conviene combinar:
 
-### Ejemplo de implementacion en backend
+- una parte de peliculas conocidas por `popularity.desc`
+- una parte con `vote_average.gte` y `vote_count.gte` para incorporar peliculas bien valoradas
+- una parte guiada por generos o moods del MVP para no dejar fuera zonas utiles del catalogo
 
-```python
-def discover_movies(page=1, genre_ids=None):
-    params = {
-        "language": "es-ES",
-        "page": page,
-        "sort_by": "popularity.desc",
-        "include_adult": "false",
-        "include_video": "false",
-        "vote_count.gte": 100,
-    }
+La idea no es sustituir `popularity`, sino complementarla.
 
-    if genre_ids:
-        params["with_genres"] = ",".join(str(gid) for gid in genre_ids)
+### 3. `movie/{movie_id}`
 
-    response = requests.get(
-        f"{BASE_URL}/discover/movie",
-        params=params,
-        headers={
-            "Authorization": f"Bearer {os.environ['TMDB_READ_ACCESS_TOKEN']}",
-            "accept": "application/json",
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.json()["results"]
-```
-
-### 3. Movie details
-
-- Uso en EPIC 1: completar metadata minima por pelicula para el catalogo local
-- Metodo: `GET`
-- URL endpoint: `https://api.themoviedb.org/3/movie/{movie_id}`
+- Uso en EPIC 1: completar metadata minima por pelicula
+- Por que es obligatorio: `discover/movie` no devuelve todo lo que necesitamos persistir
 - Documentacion oficial: https://developer.themoviedb.org/reference/movie-details
 
 ### Campos del MVP que esperamos sacar de aqui
@@ -153,295 +92,92 @@ def discover_movies(page=1, genre_ids=None):
 - `popularity`
 - `vote_count`
 
-### Ejemplo de llamada
-
-```bash
-curl --request GET \
-  --url 'https://api.themoviedb.org/3/movie/550?language=es-ES' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
-  --header 'accept: application/json'
-```
-
-### Ejemplo de implementacion en backend
-
-```python
-def fetch_movie_details(movie_id):
-    response = requests.get(
-        f"{BASE_URL}/movie/{movie_id}",
-        params={"language": "es-ES"},
-        headers={
-            "Authorization": f"Bearer {os.environ['TMDB_READ_ACCESS_TOKEN']}",
-            "accept": "application/json",
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    data = response.json()
-
-    return {
-        "tmdb_id": data["id"],
-        "title": data["title"],
-        "poster_path": data["poster_path"],
-        "runtime": data["runtime"],
-        "release_year": int(data["release_date"][:4]) if data.get("release_date") else None,
-        "original_language": data["original_language"],
-        "overview": data["overview"],
-        "popularity": data["popularity"],
-        "vote_count": data["vote_count"],
-    }
-```
-
-### 4. Watch providers por pelicula
+### 4. `movie/{movie_id}/watch/providers`
 
 - Uso en EPIC 1: poblar la tabla local de providers por pelicula y region
-- Metodo: `GET`
-- URL endpoint: `https://api.themoviedb.org/3/movie/{movie_id}/watch/providers`
+- Por que es obligatorio: necesitamos respetar despues `pais` y `plataformas` sin consultar TMDb en cada decision
 - Documentacion oficial: https://developer.themoviedb.org/reference/movie-watch-providers
 
-### Nota importante
+## Endpoints de apoyo
 
-Los providers vienen agrupados por region dentro de `results`. Este endpoint es clave para poder respetar despues `pais` y `plataformas` sin consultar TMDb en cada decision del motor.
+### `watch/providers/movie`
 
-### Ejemplo de llamada
+- Uso: validacion del catalogo global de providers y cruce por `provider_id`
+- Por que es de apoyo: no es obligatorio para poblar `movie_providers` si ya usamos `movie/{movie_id}/watch/providers`
 
-```bash
-curl --request GET \
-  --url 'https://api.themoviedb.org/3/movie/550/watch/providers' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
-  --header 'accept: application/json'
-```
+### `watch/providers/regions`
 
-### Ejemplo de implementacion en backend
+- Uso: validar regiones disponibles
+- Por que es de apoyo: ayuda a comprobar paises, pero no bloquea la primera ingestión
 
-```python
-def fetch_movie_watch_providers(movie_id):
-    response = requests.get(
-        f"{BASE_URL}/movie/{movie_id}/watch/providers",
-        headers={
-            "Authorization": f"Bearer {os.environ['TMDB_READ_ACCESS_TOKEN']}",
-            "accept": "application/json",
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    data = response.json()
+### `configuration/countries`
 
-    rows = []
-    for region_code, payload in data.get("results", {}).items():
-        for provider_type in ("flatrate", "rent", "buy"):
-            for provider in payload.get(provider_type, []):
-                rows.append(
-                    {
-                        "tmdb_id": movie_id,
-                        "region": region_code,
-                        "provider_id": provider["provider_id"],
-                        "provider_name": provider["provider_name"],
-                        "provider_type": provider_type,
-                    }
-                )
-    return rows
-```
+- Uso: validar codigos de pais
+- Por que es de apoyo: util para checks, no imprescindible para arrancar
 
-### 5. Listado global de movie providers
+### `configuration/languages`
 
-- Uso en EPIC 1: disponer del catalogo oficial de providers de TMDb para validacion, nombres y cruce por `provider_id`
-- Metodo: `GET`
-- URL endpoint: `https://api.themoviedb.org/3/watch/providers/movie`
-- Documentacion oficial: https://developer.themoviedb.org/reference/watch-providers-movie-list
+- Uso: validar idiomas
+- Por que es de apoyo: util para checks, no imprescindible para la carga base
 
-### Ejemplo de llamada
+### `search/movie`
+
+- Uso: pruebas manuales o debugging
+- Por que es de apoyo: no hace falta para la ingestión inicial
+
+## Ejemplos minimos de llamada
+
+### Generos
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/watch/providers/movie?language=es-ES&watch_region=ES' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
+  --url 'https://api.themoviedb.org/3/genre/movie/list?api_key=TMDB_API_KEY&language=es-ES' \
   --header 'accept: application/json'
 ```
 
-### Ejemplo de implementacion en backend
-
-```python
-def fetch_movie_providers_catalog(region="ES"):
-    response = requests.get(
-        f"{BASE_URL}/watch/providers/movie",
-        params={"language": "es-ES", "watch_region": region},
-        headers={
-            "Authorization": f"Bearer {os.environ['TMDB_READ_ACCESS_TOKEN']}",
-            "accept": "application/json",
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.json()["results"]
-```
-
-### Estado en EPIC 1
-
-Util para validacion y apoyo. No es obligatorio para poblar la tabla `movie_providers` si ya se usa `movie/{movie_id}/watch/providers` como fuente principal.
-
-### 6. Regiones disponibles para watch providers
-
-- Uso en EPIC 1: validar que region soporta datos de providers antes de poblar o filtrar
-- Metodo: `GET`
-- URL endpoint: `https://api.themoviedb.org/3/watch/providers/regions`
-- Documentacion oficial: https://developer.themoviedb.org/reference/watch-providers-available-regions
-
-### Ejemplo de llamada
+### Discover
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/watch/providers/regions?language=es-ES' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
+  --url 'https://api.themoviedb.org/3/discover/movie?api_key=TMDB_API_KEY&language=es-ES&page=1&sort_by=popularity.desc&include_adult=false&include_video=false&vote_count.gte=100' \
   --header 'accept: application/json'
 ```
 
-### Ejemplo de implementacion en backend
-
-```python
-def fetch_provider_regions():
-    response = requests.get(
-        f"{BASE_URL}/watch/providers/regions",
-        params={"language": "es-ES"},
-        headers={
-            "Authorization": f"Bearer {os.environ['TMDB_READ_ACCESS_TOKEN']}",
-            "accept": "application/json",
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.json()["results"]
-```
-
-### Estado en EPIC 1
-
-Util para validacion y apoyo. No es obligatorio para la carga minima del catalogo si el equipo ya trabaja con una region objetivo conocida, como `ES`.
-
-### 7. Configuration countries
-
-- Uso en EPIC 1: validar codigos de pais usados por el sistema y alinear `pais` con ISO 3166-1
-- Metodo: `GET`
-- URL endpoint: `https://api.themoviedb.org/3/configuration/countries`
-- Documentacion oficial: https://developer.themoviedb.org/reference/configuration-countries
-
-### Ejemplo de llamada
+### Details
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/configuration/countries' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
+  --url 'https://api.themoviedb.org/3/movie/550?api_key=TMDB_API_KEY&language=es-ES' \
   --header 'accept: application/json'
 ```
 
-### Ejemplo de implementacion en backend
-
-```python
-def fetch_countries():
-    response = requests.get(
-        f"{BASE_URL}/configuration/countries",
-        headers={
-            "Authorization": f"Bearer {os.environ['TMDB_READ_ACCESS_TOKEN']}",
-            "accept": "application/json",
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.json()
-```
-
-### Estado en EPIC 1
-
-Util para validacion y consistencia de codigos de pais. No es obligatorio para arrancar la primera ingestión si `pais` ya se controla con `ISO 3166-1 alpha-2`.
-
-### 8. Configuration languages
-
-- Uso en EPIC 1: disponer del catalogo oficial de idiomas y validar `original_language` e `idiomas_comodos`
-- Metodo: `GET`
-- URL endpoint: `https://api.themoviedb.org/3/configuration/languages`
-- Documentacion oficial: https://developer.themoviedb.org/reference/configuration-languages
-
-### Ejemplo de llamada
+### Providers por pelicula
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/configuration/languages' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
+  --url 'https://api.themoviedb.org/3/movie/550/watch/providers?api_key=TMDB_API_KEY' \
   --header 'accept: application/json'
 ```
 
-### Ejemplo de implementacion en backend
+## Flujo minimo recomendado
 
-```python
-def fetch_languages():
-    response = requests.get(
-        f"{BASE_URL}/configuration/languages",
-        headers={
-            "Authorization": f"Bearer {os.environ['TMDB_READ_ACCESS_TOKEN']}",
-            "accept": "application/json",
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.json()
-```
-
-### Estado en EPIC 1
-
-Util para validacion y consistencia de idiomas. No es obligatorio para arrancar la primera ingestión si el equipo solo necesita persistir `original_language`.
-
-## Endpoint opcional pero util para validacion manual
-
-### Search movie
-
-- Uso en EPIC 1: comprobar manualmente peliculas concretas cuando el equipo quiera validar un titulo o buscar su `movie_id`
-- Metodo: `GET`
-- URL endpoint: `https://api.themoviedb.org/3/search/movie`
-- Documentacion oficial: https://developer.themoviedb.org/reference/search-movie
-- Estado en EPIC 1: util para debugging y curacion manual, no obligatorio para la carga base
-
-### Ejemplo de llamada
-
-```bash
-curl --request GET \
-  --url 'https://api.themoviedb.org/3/search/movie?query=Fight%20Club&language=es-ES' \
-  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
-  --header 'accept: application/json'
-```
-
-## Flujo minimo recomendado para el MVP
-
-1. llamar a `genre/movie/list` para tener diccionario oficial de generos
-2. llamar a `discover/movie` para obtener candidatas
-3. por cada `movie_id` elegida, llamar a `movie/{movie_id}` para completar metadata minima
+1. llamar a `genre/movie/list` para tener el diccionario de generos
+2. llamar a `discover/movie` para obtener candidatas desde una estrategia mixta de carga
+3. por cada `movie_id` elegida, llamar a `movie/{movie_id}` para completar metadata
 4. por cada `movie_id` elegida, llamar a `movie/{movie_id}/watch/providers` para poblar providers por region
-5. persistir todo en catalogo local para que Mood Radar no dependa de TMDb en cada recomendacion
-
-## Endpoints de apoyo o validacion
-
-- `watch/providers/movie`
-- `watch/providers/regions`
-- `configuration/countries`
-- `configuration/languages`
-- `search/movie`
-
-Estos endpoints son utiles para validar, depurar o reforzar consistencia, pero no deben bloquear la primera version funcional de la ingestión.
+5. persistir resultados en `movies` y `movie_providers`
 
 ## Lo que no debemos usar en este epic
 
-- endpoints de TV o series
-- endpoints de cuenta TMDb, watchlist o favoritos
-- endpoints pensados para interaccion de usuario autenticado de TMDb
-- endpoints que resuelvan producto fuera del catalogo local
-- cualquier llamada que intente sustituir la logica de Mood Radar
+- endpoints de series
+- endpoints de cuenta o usuario TMDb
+- watchlists o favoritos de TMDb
+- autenticacion de usuarios finales
+- IA o logica de recomendacion apoyada en TMDb
 
-## Limites operativos y cautelas
+## Cierre operativo
 
-- TMDb mantiene limites altos pero documenta que puede devolver `429` si se abusa del servicio: https://developer.themoviedb.org/docs/rate-limiting
-- conviene hacer carga por lotes controlados y guardar localmente todo lo necesario
 - `discover/movie` sirve para explorar catalogo, pero no reemplaza la normalizacion posterior
-- `discover/movie` no debe convertirse en la unica fuente del catalogo inicial; conviene combinar estrategias de carga para no sesgar todo a peliculas demasiado mainstream
+- `discover/movie` no debe convertirse en la unica fuente del catalogo inicial; conviene combinar popularidad, buen volumen de votos y variedad de generos
 - `movie/{movie_id}/watch/providers` debe persistirse localmente porque el motor no debe consultar TMDb en cada decision
-- los providers pueden variar por region, asi que no se debe guardar una sola disponibilidad global por pelicula
-
-## Estado
-
-Queda cerrado para EPIC 1 que la integracion con TMDb se limitara a estos endpoints para construir y validar el catalogo local del MVP, sin ampliar alcance a motor, series, cuentas de usuario ni funcionalidades fuera de demo.
+- los endpoints de apoyo ayudan a validar, pero no bloquean la primera version funcional del catalogo

@@ -51,9 +51,10 @@ Notas de implementacion:
 - TMDb es fuente de datos, no logica de recomendacion
 - no hace falta refresh automatico en esta fase
 - conviene fijar un tamano inicial de catalogo de unas `200-300` peliculas utiles para demo
-- la autenticacion contra TMDb debe priorizar `TMDB_READ_ACCESS_TOKEN`
-- `TMDB_API_KEY` queda como respaldo documentado
+- la implementacion actual contra TMDb usa `TMDB_API_KEY`
+- `TMDB_READ_ACCESS_TOKEN` queda como alternativa documentada
 - conviene separar endpoints minimos de ingestión de endpoints de apoyo o validacion
+- la carga inicial no debe apoyarse solo en `popularity.desc`; conviene combinar popularidad, peliculas bien valoradas y variedad de generos
 - la siguiente pieza critica es cerrar e implementar la ingestión inicial del catalogo
 
 ### EPIC 2 · Perfil estable del usuario y onboarding con skip

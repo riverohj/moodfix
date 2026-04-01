@@ -63,6 +63,12 @@ Cada actualizacion debe incluir:
 - Que queda: implementar el script o servicio que traiga peliculas desde TMDb y las persista en estas tablas.
 - Bloqueos o riesgos: sigue siendo importante no depender solo de `discover/movie` con orden por popularidad para evitar un catalogo demasiado sesgado.
 
+### 2026-04-01
+
+- Que se hizo: se actualizo la documentacion de EPIC 1 para alinearla con la implementacion actual por `TMDB_API_KEY`, se documento la diferencia con Bearer token y se cerro una estrategia mixta de carga inicial para reducir sesgo.
+- Que queda: integrar el script de ingestión en `main`, corregir el conteo de `movie_providers` para reflejar solo inserciones reales y exponer un endpoint minimo de consulta del catalogo.
+- Bloqueos o riesgos: mientras el script viva en una rama separada, la correccion del contador y la estrategia de carga no quedan integradas en el flujo principal del equipo.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

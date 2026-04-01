@@ -88,8 +88,8 @@ Cada entrada debe incluir:
 
 ### 2026-03-30 · Credenciales TMDb definidas para EPIC 1
 
-- Decision: EPIC 1 trabajara con dos credenciales documentadas para TMDb, priorizando `TMDB_READ_ACCESS_TOKEN` y dejando `TMDB_API_KEY` como respaldo.
-- Motivo: el equipo necesita una forma clara y consistente de autenticarse contra TMDb al arrancar la integracion.
+- Decision: EPIC 1 trabajara con dos credenciales documentadas para TMDb, usando `TMDB_API_KEY` como mecanismo principal en la implementacion actual y dejando `TMDB_READ_ACCESS_TOKEN` como alternativa documentada.
+- Motivo: el equipo necesita una forma clara y consistente de autenticarse contra TMDb al arrancar la integracion, y el script real de ingestión usa API key.
 - Impacto: las credenciales deben vivir en variables de entorno y no deben quedar expuestas en frontend, logs, capturas ni documentos con valores reales.
 - Responsable o acuerdo del equipo: arranque tecnico de EPIC 1.
 
@@ -120,6 +120,20 @@ Cada entrada debe incluir:
 - Motivo: necesitamos una primera version funcional y reproducible del catalogo antes de pensar en automatizaciones.
 - Impacto: la siguiente implementacion debe centrarse en traer unas `200-300` peliculas y poblar `movies` y `movie_providers`.
 - Responsable o acuerdo del equipo: continuidad tecnica de EPIC 1.
+
+### 2026-04-01 · Estrategia de carga mixta para evitar sesgo del catalogo inicial
+
+- Decision: la ingestión inicial no debe apoyarse solo en `popularity.desc`; debe combinar popularidad, peliculas bien valoradas con volumen suficiente de votos y variedad por generos o moods.
+- Motivo: una carga basada solo en popularidad sesga el catalogo hacia peliculas demasiado conocidas y empobrece el MVP.
+- Impacto: `popularity` se mantiene como señal util, pero se complementa con `vote_average` y criterios de variedad.
+- Responsable o acuerdo del equipo: refinamiento tecnico de EPIC 1.
+
+### 2026-04-01 · Conteo de providers debe reflejar inserciones reales
+
+- Decision: cualquier script de ingestión que inserte en `movie_providers` debe contar solo filas realmente insertadas, no intentos ignorados por duplicados.
+- Motivo: el equipo necesita metricas fiables al validar la calidad de la carga inicial.
+- Impacto: al integrar el script de ingestión, el contador de providers debe basarse en inserciones reales.
+- Responsable o acuerdo del equipo: calidad de datos de EPIC 1.
 
 ## Regla de uso
 
