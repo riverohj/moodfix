@@ -20,6 +20,7 @@ import sqlite3
 import sys
 import time
 from pathlib import Path
+from typing import Dict, List, Optional, Set
 
 try:
     import requests
@@ -81,7 +82,7 @@ def get_db_path() -> Path:
 
 
 # ── TMDb helpers ──────────────────────────────────────────────────────────────
-def tmdb_get(endpoint: str, params: dict = None, retries: int = 3) -> dict:
+def tmdb_get(endpoint: str, params: Optional[Dict] = None, retries: int = 3) -> Dict:
     if params is None:
         params = {}
     params["api_key"] = TMDB_API_KEY
@@ -106,7 +107,7 @@ def tmdb_get(endpoint: str, params: dict = None, retries: int = 3) -> dict:
     return {}
 
 
-def normalize_provider_name(name: str | None) -> str:
+def normalize_provider_name(name: Optional[str]) -> str:
     if not name:
         return ""
     normalized = "".join(ch for ch in name.lower() if ch.isalnum() or ch == "+")
@@ -114,7 +115,7 @@ def normalize_provider_name(name: str | None) -> str:
 
 
 # ── Fetch funciones ───────────────────────────────────────────────────────────
-def extend_movie_ids(movie_ids: list[int], seen_ids: set[int], results: list[dict], limit: int) -> None:
+def extend_movie_ids(movie_ids: List[int], seen_ids: Set[int], results: List[Dict], limit: int) -> None:
     for movie in results:
         movie_id = movie.get("id")
         if not movie_id or movie_id in seen_ids:
@@ -125,10 +126,10 @@ def extend_movie_ids(movie_ids: list[int], seen_ids: set[int], results: list[dic
             break
 
 
-def fetch_movie_ids(limit: int) -> list[int]:
+def fetch_movie_ids(limit: int) -> List[int]:
     """Construye una lista mixta de IDs para reducir sesgo de catalogo."""
-    movie_ids: list[int] = []
-    seen_ids: set[int] = set()
+    movie_ids: List[int] = []
+    seen_ids: Set[int] = set()
 
     query_batches = [
         {
@@ -205,7 +206,7 @@ def fetch_detail(tmdb_id: int) -> dict:
     return tmdb_get(f"movie/{tmdb_id}")
 
 
-def fetch_providers(tmdb_id: int, countries: list) -> list:
+def fetch_providers(tmdb_id: int, countries: List[str]) -> List[Dict]:
     """Proveedores permitidos para los paises dados."""
     data = tmdb_get(f"movie/{tmdb_id}/watch/providers")
     results = data.get("results", {})
@@ -283,7 +284,7 @@ def upsert_movie(conn: sqlite3.Connection, detail: dict):
     return row[0] if row else None
 
 
-def insert_providers(conn: sqlite3.Connection, movie_db_id: int, providers: list) -> int:
+def insert_providers(conn: sqlite3.Connection, movie_db_id: int, providers: List[Dict]) -> int:
     """Inserta proveedores ignorando duplicados. Devuelve cantidad insertada."""
     count = 0
     for p in providers:
@@ -312,7 +313,7 @@ def insert_providers(conn: sqlite3.Connection, movie_db_id: int, providers: list
 
 
 # ── Runner principal ──────────────────────────────────────────────────────────
-def run(limit: int, countries: list) -> None:
+def run(limit: int, countries: List[str]) -> None:
     if not TMDB_API_KEY:
         print("TMDB_API_KEY no esta configurada. Añadela a tu archivo .env")
         sys.exit(1)
