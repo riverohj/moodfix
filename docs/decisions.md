@@ -149,6 +149,13 @@ Cada entrada debe incluir:
 - Impacto: EPIC 1 ya cubre no solo la carga local sino tambien una primera lectura util del catalogo desde backend.
 - Responsable o acuerdo del equipo: cierre tecnico de EPIC 1.
 
+### 2026-04-01 · EPIC 1 queda cerrado con backend comun local en el Mac mini
+
+- Decision: EPIC 1 queda cerrado operativamente usando el Mac mini de referencia como backend comun local del equipo y manteniendo la SQLite solo en esa maquina.
+- Motivo: la carga real del catalogo ya fue ejecutada, la API devuelve datos reales y no hace falta compartir la base por Git para seguir con el MVP.
+- Impacto: el equipo trabaja contra el backend comun LAN, `movies` queda validada con `417` peliculas y `movie_providers` con `1129` filas, y el siguiente foco pasa a EPIC 2.
+- Responsable o acuerdo del equipo: cierre operativo de EPIC 1.
+
 ### 2026-04-01 · EPIC 2 se abre como contrato antes de implementacion
 
 - Decision: EPIC 2 se trabajara primero como contrato de perfil estable y onboarding con skip antes de pasar a codigo.

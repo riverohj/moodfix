@@ -81,6 +81,12 @@ Cada actualizacion debe incluir:
 - Que queda: validar en equipo la estrategia de base compartida para EPIC 1 y cerrar las decisiones concretas de EPIC 2.
 - Bloqueos o riesgos: EPIC 2 puede desordenarse rapido si mezcla onboarding estable con preguntas de sesion o con aprendizaje avanzado.
 
+### 2026-04-01
+
+- Que se hizo: se ejecuto la carga real de EPIC 1 en el Mac mini de referencia con `TMDB_READ_ACCESS_TOKEN`, se validaron `GET /api/db/status` y `GET /api/movies`, el backend comun LAN quedo operativo con la SQLite local viviendo solo en esa maquina y con esto EPIC 1 queda cerrado.
+- Que queda: abrir y cerrar en equipo el contrato operativo de EPIC 2 para perfil estable y onboarding con skip.
+- Bloqueos o riesgos: la URL LAN actual depende de la IP local del Mac mini y convendra reservarla en el router para evitar cambios futuros.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.
