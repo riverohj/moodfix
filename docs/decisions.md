@@ -128,6 +128,13 @@ Cada entrada debe incluir:
 - Impacto: `popularity` se mantiene como señal util, pero se complementa con `vote_average` y criterios de variedad.
 - Responsable o acuerdo del equipo: refinamiento tecnico de EPIC 1.
 
+### 2026-04-01 · Carga inicial ampliada y providers filtrados
+
+- Decision: la carga inicial actual pasa a objetivo de `500` peliculas y conserva solo peliculas con providers permitidos en la lista cerrada del proyecto.
+- Motivo: el equipo quiere una demo mas robusta y un catalogo local mas util para filtros reales de disponibilidad.
+- Impacto: la ingestión filtra providers a plataformas objetivo y descarta peliculas que no tengan ninguno de esos providers en los paises elegidos.
+- Responsable o acuerdo del equipo: refinamiento tecnico de EPIC 1.
+
 ### 2026-04-01 · Conteo de providers debe reflejar inserciones reales
 
 - Decision: cualquier script de ingestión que inserte en `movie_providers` debe contar solo filas realmente insertadas, no intentos ignorados por duplicados.
@@ -141,6 +148,13 @@ Cada entrada debe incluir:
 - Motivo: el equipo necesita demostrar que el catalogo ya puede consultarse desde la app sin depender de TMDb para cada recomendacion.
 - Impacto: EPIC 1 ya cubre no solo la carga local sino tambien una primera lectura util del catalogo desde backend.
 - Responsable o acuerdo del equipo: cierre tecnico de EPIC 1.
+
+### 2026-04-01 · EPIC 2 se abre como contrato antes de implementacion
+
+- Decision: EPIC 2 se trabajara primero como contrato de perfil estable y onboarding con skip antes de pasar a codigo.
+- Motivo: el equipo ya tiene cerradas las variables en EPIC 0 y ahora necesita convertirlas en flujo real sin reinterpretaciones.
+- Impacto: primero se cerraran preguntas, orden, payload y persistencia minima; despues se implementara.
+- Responsable o acuerdo del equipo: continuidad ordenada del MVP.
 
 ## Regla de uso
 

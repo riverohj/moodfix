@@ -73,7 +73,13 @@ Cada actualizacion debe incluir:
 
 - Que se hizo: se integro `feat/lourdes` en `main`, se corrigio el conteo real de inserciones en `movie_providers` y se anadio `GET /api/movies` con paginacion basica para consultar el catalogo local desde la API.
 - Que queda: ejecutar una carga real del catalogo, validar cantidad y calidad de peliculas/providers y decidir si EPIC 1 queda cerrado.
-- Bloqueos o riesgos: la estrategia mixta de carga ya esta cerrada en documentacion, pero el script actual todavia necesita incorporarla si el equipo quiere reducir mejor el sesgo del catalogo.
+- Bloqueos o riesgos: al ampliar la carga a 500 peliculas y filtrar providers, conviene validar tiempos de ejecución y calidad final del catalogo.
+
+### 2026-04-01
+
+- Que se hizo: se dejo una checklist de cierre de EPIC 1 y se abrio el contrato base de EPIC 2 para perfil estable y onboarding con skip.
+- Que queda: validar en equipo la estrategia de base compartida para EPIC 1 y cerrar las decisiones concretas de EPIC 2.
+- Bloqueos o riesgos: EPIC 2 puede desordenarse rapido si mezcla onboarding estable con preguntas de sesion o con aprendizaje avanzado.
 
 ## Regla de uso
 

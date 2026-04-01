@@ -50,14 +50,22 @@ Notas de implementacion:
 
 - TMDb es fuente de datos, no logica de recomendacion
 - no hace falta refresh automatico en esta fase
-- conviene fijar un tamano inicial de catalogo de unas `200-300` peliculas utiles para demo
+- el tamano actual objetivo de la carga inicial es `500` peliculas utiles para demo
 - la implementacion actual contra TMDb usa `TMDB_API_KEY`
 - `TMDB_READ_ACCESS_TOKEN` queda como alternativa documentada
 - conviene separar endpoints minimos de ingestión de endpoints de apoyo o validacion
 - la carga inicial no debe apoyarse solo en `popularity.desc`; conviene combinar popularidad, peliculas bien valoradas y variedad de generos
+- la carga actual filtra providers a una lista cerrada de plataformas objetivo
 - la ingestión inicial ya esta integrada en `main`
 - existe un endpoint minimo `GET /api/movies` para consultar el catalogo local
 - la siguiente pieza critica es validar la carga inicial y decidir si EPIC 1 puede darse por cerrado
+
+Checklist de cierre:
+
+- ejecutar una ingestión real con credenciales validas
+- revisar `GET /api/movies`
+- validar cantidad y calidad del catalogo
+- decidir si habra una base de referencia comun para el equipo
 
 ### EPIC 2 · Perfil estable del usuario y onboarding con skip
 
@@ -65,7 +73,22 @@ Objetivo:
 Persistir las señales estables minimas del usuario con el menor roce posible.
 
 Estado:
-Pendiente
+Abierto para contrato
+
+Alcance esperado:
+
+- flujo de onboarding estable con skip
+- payload minimo de perfil estable
+- persistencia minima de perfil
+- posibilidad de editar el perfil mas adelante
+- mensaje claro cuando el usuario decide no completar el perfil
+
+Notas de implementacion:
+
+- EPIC 2 debe respetar lo ya cerrado en `epic-0-profile-signals.md`
+- ningun campo del onboarding es obligatorio
+- no debe mezclarse con preguntas de sesion
+- primero conviene cerrar contrato y shape de datos antes de implementar UI o backend
 
 ### EPIC 3 · Flujos de sesion: Sorprendeme y Preguntame
 

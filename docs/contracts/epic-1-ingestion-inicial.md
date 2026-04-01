@@ -6,7 +6,7 @@ Este documento deja cerrado el contrato de ingestión inicial del catalogo local
 
 ## Objetivo
 
-Construir una primera carga local de peliculas suficiente para demo y pruebas del motor, sin depender de TMDb en cada recomendacion.
+Construir una primera carga local ampliada de peliculas suficiente para demo y pruebas del motor, sin depender de TMDb en cada recomendacion.
 
 ## Flujo minimo de ingestión
 
@@ -35,11 +35,24 @@ Construir una primera carga local de peliculas suficiente para demo y pruebas de
 
 ## Criterios minimos del catalogo inicial
 
-- tamano objetivo: `200-300` peliculas
+- tamano objetivo actual: `500` peliculas
 - solo peliculas, no series
 - `include_adult=false`
 - `include_video=false`
 - no depender solo de una fuente demasiado mainstream
+- no conservar peliculas que no tengan al menos un provider permitido en los paises elegidos
+
+## Providers permitidos en la carga actual
+
+- Netflix
+- Movistar Plus+
+- HBO Max
+- Disney Plus
+- Amazon Prime Video
+- Filmin
+- Apple TV
+- SkyShowtime
+- Rakuten TV
 
 ## Estrategia recomendada para reducir sesgo del catalogo
 
@@ -79,6 +92,7 @@ Esto no sustituye `popularity`: la complementa.
 - no deben insertarse duplicados en `movie_providers`
 - si el script informa de filas insertadas en `movie_providers`, ese contador debe reflejar solo inserciones reales y no intentos ignorados por duplicado
 - si una pelicula no tiene providers para una region, no debe inventarse disponibilidad
+- si una pelicula no tiene ninguno de los providers permitidos, debe descartarse de la carga actual
 - si `plataformas = []` en el perfil del usuario, el motor no filtrara por plataforma aunque la tabla de providers exista
 
 ## Estrategia de recarga
@@ -95,7 +109,7 @@ En esta fase no estamos construyendo todavia el motor. Estamos trayendo un prime
 
 La ingestión inicial se considera lograda cuando:
 
-- existe una carga local de unas `200-300` peliculas
+- existe una carga local de hasta `500` peliculas validas
 - `movies` contiene la metadata minima acordada
-- `movie_providers` contiene disponibilidad por region
+- `movie_providers` contiene disponibilidad por region y solo para providers permitidos
 - el equipo puede consultar el catalogo local sin llamar a TMDb para cada recomendacion

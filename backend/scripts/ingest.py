@@ -2,12 +2,12 @@
 """
 EPIC 1 — Ingestion inicial del catalogo de peliculas
 =====================================================
-Popula la base de datos SQLite local con 200-300 peliculas de TMDb,
-incluyendo disponibilidad de proveedores para ES, MX y AR.
+Popula la base de datos SQLite local con una carga inicial ampliada,
+incluyendo solo proveedores permitidos para las regiones indicadas.
 
 Uso:
     python backend/scripts/ingest.py
-    python backend/scripts/ingest.py --limit 300 --countries ES MX AR
+    python backend/scripts/ingest.py --limit 500 --countries ES
 
 Requisitos:
     pip install requests python-dotenv
@@ -39,10 +39,34 @@ load_dotenv(ROOT_DIR / ".env")
 TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
 TMDB_BASE = "https://api.themoviedb.org/3"
 
-DEFAULT_COUNTRIES = ["ES", "MX", "AR"]
-DEFAULT_LIMIT = 250
+DEFAULT_COUNTRIES = ["ES"]
+DEFAULT_LIMIT = 500
 MIN_VOTE_COUNT = 100
 MIN_RUNTIME = 60
+MAX_PAGES_PER_QUERY = 20
+
+MOOD_GENRE_IDS = [28, 53, 9648, 80, 18, 10749, 35, 10751, 12, 99]
+
+ALLOWED_PROVIDER_ALIASES = {
+    "netflix": "Netflix",
+    "movistarplus": "Movistar Plus+",
+    "movistarplus+": "Movistar Plus+",
+    "hbo": "HBO Max",
+    "hbomax": "HBO Max",
+    "max": "HBO Max",
+    "disney+": "Disney Plus",
+    "disneyplus": "Disney Plus",
+    "amazonprimevideo": "Amazon Prime Video",
+    "primevideo": "Amazon Prime Video",
+    "amazonprime": "Amazon Prime Video",
+    "filmin": "Filmin",
+    "appletv": "Apple TV",
+    "appletv+": "Apple TV",
+    "appletvplus": "Apple TV",
+    "skyshowtime": "SkyShowtime",
+    "rakutentv": "Rakuten TV",
+    "rakuten": "Rakuten TV",
+}
 
 
 # ── DB path (misma logica que db.py) ──────────────────────────────────────────
@@ -82,35 +106,98 @@ def tmdb_get(endpoint: str, params: dict = None, retries: int = 3) -> dict:
     return {}
 
 
+def normalize_provider_name(name: str | None) -> str:
+    if not name:
+        return ""
+    normalized = "".join(ch for ch in name.lower() if ch.isalnum() or ch == "+")
+    return ALLOWED_PROVIDER_ALIASES.get(normalized, "")
+
+
 # ── Fetch funciones ───────────────────────────────────────────────────────────
-def fetch_movie_ids(limit: int) -> list:
-    """Pagina discover/movie para obtener hasta `limit` IDs."""
-    movie_ids = []
-    page = 1
-
-    while len(movie_ids) < limit:
-        data = tmdb_get("discover/movie", {
-            "sort_by": "popularity.desc",
-            "vote_count.gte": MIN_VOTE_COUNT,
-            "with_runtime.gte": MIN_RUNTIME,
-            "page": page,
-        })
-
-        results = data.get("results", [])
-        if not results:
+def extend_movie_ids(movie_ids: list[int], seen_ids: set[int], results: list[dict], limit: int) -> None:
+    for movie in results:
+        movie_id = movie.get("id")
+        if not movie_id or movie_id in seen_ids:
+            continue
+        seen_ids.add(movie_id)
+        movie_ids.append(movie_id)
+        if len(movie_ids) >= limit:
             break
 
-        for m in results:
-            if len(movie_ids) >= limit:
+
+def fetch_movie_ids(limit: int) -> list[int]:
+    """Construye una lista mixta de IDs para reducir sesgo de catalogo."""
+    movie_ids: list[int] = []
+    seen_ids: set[int] = set()
+
+    query_batches = [
+        {
+            "label": "popularidad",
+            "params": {
+                "sort_by": "popularity.desc",
+                "vote_count.gte": MIN_VOTE_COUNT,
+                "with_runtime.gte": MIN_RUNTIME,
+            },
+            "target": max(int(limit * 0.4), 1),
+        },
+        {
+            "label": "bien_valoradas",
+            "params": {
+                "sort_by": "vote_average.desc",
+                "vote_count.gte": 500,
+                "vote_average.gte": 7.0,
+                "with_runtime.gte": MIN_RUNTIME,
+            },
+            "target": max(int(limit * 0.3), 1),
+        },
+    ]
+
+    remaining = max(limit - sum(batch["target"] for batch in query_batches), 0)
+    genre_target = max(remaining // max(len(MOOD_GENRE_IDS), 1), 1) if remaining else 0
+
+    for genre_id in MOOD_GENRE_IDS:
+        query_batches.append(
+            {
+                "label": f"genero_{genre_id}",
+                "params": {
+                    "sort_by": "popularity.desc",
+                    "vote_count.gte": MIN_VOTE_COUNT,
+                    "with_runtime.gte": MIN_RUNTIME,
+                    "with_genres": genre_id,
+                },
+                "target": genre_target,
+            }
+        )
+
+    for batch in query_batches:
+        if len(movie_ids) >= limit:
+            break
+
+        target = min(batch["target"], limit - len(movie_ids))
+        if target <= 0:
+            continue
+
+        page = 1
+        collected_for_batch = 0
+
+        while collected_for_batch < target and page <= MAX_PAGES_PER_QUERY and len(movie_ids) < limit:
+            params = dict(batch["params"])
+            params["page"] = page
+            data = tmdb_get("discover/movie", params)
+            results = data.get("results", [])
+            if not results:
                 break
-            movie_ids.append(m["id"])
 
-        total_pages = data.get("total_pages", 1)
-        if page >= min(total_pages, 50):  # max 50 paginas por llamada
-            break
-        page += 1
+            before = len(movie_ids)
+            extend_movie_ids(movie_ids, seen_ids, results, limit)
+            collected_for_batch += len(movie_ids) - before
 
-    return movie_ids
+            total_pages = data.get("total_pages", 1)
+            if page >= min(total_pages, MAX_PAGES_PER_QUERY):
+                break
+            page += 1
+
+    return movie_ids[:limit]
 
 
 def fetch_detail(tmdb_id: int) -> dict:
@@ -119,7 +206,7 @@ def fetch_detail(tmdb_id: int) -> dict:
 
 
 def fetch_providers(tmdb_id: int, countries: list) -> list:
-    """Proveedores de streaming para los paises dados."""
+    """Proveedores permitidos para los paises dados."""
     data = tmdb_get(f"movie/{tmdb_id}/watch/providers")
     results = data.get("results", {})
 
@@ -132,10 +219,13 @@ def fetch_providers(tmdb_id: int, countries: list) -> list:
             if not isinstance(providers, list):
                 continue
             for p in providers:
+                canonical_name = normalize_provider_name(p.get("provider_name"))
+                if not canonical_name:
+                    continue
                 rows.append({
                     "country_code": country_code,
                     "provider_id": p.get("provider_id"),
-                    "provider_name": p.get("provider_name"),
+                    "provider_name": canonical_name,
                     "provider_type": provider_type,
                 })
     return rows
@@ -229,9 +319,11 @@ def run(limit: int, countries: list) -> None:
 
     db_path = get_db_path()
     db_path.parent.mkdir(parents=True, exist_ok=True)
+    normalized_countries = [country.upper() for country in countries]
 
     print(f"Base de datos : {db_path}")
-    print(f"Objetivo      : {limit} peliculas | Paises: {', '.join(countries)}")
+    print(f"Objetivo      : {limit} peliculas | Paises: {', '.join(normalized_countries)}")
+    print(f"Providers     : {', '.join(sorted(set(ALLOWED_PROVIDER_ALIASES.values())))}")
     print()
 
     # Inicializar tablas (reutiliza init_db de Juan)
@@ -243,7 +335,7 @@ def run(limit: int, countries: list) -> None:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
 
-    print("Buscando IDs en TMDb discover...")
+    print("Buscando IDs en TMDb con estrategia mixta...")
     movie_ids = fetch_movie_ids(limit)
     print(f"   {len(movie_ids)} candidatos encontrados")
     print()
@@ -258,6 +350,11 @@ def run(limit: int, countries: list) -> None:
             skipped += 1
             continue
 
+        providers = fetch_providers(tmdb_id, normalized_countries)
+        if not providers:
+            skipped += 1
+            continue
+
         with conn:
             movie_db_id = upsert_movie(conn, detail)
 
@@ -265,7 +362,6 @@ def run(limit: int, countries: list) -> None:
             skipped += 1
             continue
 
-        providers = fetch_providers(tmdb_id, countries)
         with conn:
             n = insert_providers(conn, movie_db_id, providers)
 
