@@ -1,8 +1,20 @@
+import os
+
 from app import create_app
 
 
 app = create_app()
 
 
+def env_flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    host = os.getenv("API_HOST", "0.0.0.0")
+    port = int(os.getenv("API_PORT", "5001"))
+    debug = env_flag("FLASK_DEBUG", default=False)
+    app.run(host=host, port=port, debug=debug, use_reloader=debug)
