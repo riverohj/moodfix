@@ -29,6 +29,7 @@ EPIC 0 ya cerro que variables de perfil existen. EPIC 2 debe convertir esas defi
 - explicaciones generadas por IA
 - aprendizaje avanzado o personalizacion compleja
 - persistencia de perfil estable para usuario guest
+- handoff de respuestas guest del MUT o de sesion antes del login
 
 ## Variables estables que deben cubrirse
 
@@ -70,6 +71,7 @@ EPIC 0 ya cerro que variables de perfil existen. EPIC 2 debe convertir esas defi
 
 El frontend debera poder enviar un payload estable de perfil con claves tecnicas ya cerradas en EPIC 0.
 Estos endpoints de perfil requieren usuario autenticado y no exponen un perfil `local` guest en MVP.
+Si el usuario responde preguntas de sesion antes del login y se autentica justo antes del resultado, ese handoff debe resolverse en la capa de sesiones de un epic posterior.
 
 Ejemplo conceptual:
 
@@ -82,6 +84,14 @@ Ejemplo conceptual:
   "no_rotundos": [27]
 }
 ```
+
+## Semantica API de perfil
+
+- `GET /api/profile` devuelve el perfil estable del usuario autenticado
+- `PUT /api/profile` reemplaza el perfil estable y resetea a defaults los campos omitidos
+- `PATCH /api/profile` actualiza solo los campos enviados y mantiene el resto
+- `POST /api/profile/skip` marca `onboarding_skipped = true` sobre el perfil autenticado
+- para un onboarding por pasos, lo mas natural en frontend es usar `PATCH` durante la captura y `POST /api/profile/skip` cuando el usuario decide saltarlo
 
 ## Decisiones que habra que cerrar en EPIC 2
 
@@ -100,3 +110,4 @@ EPIC 2 podra darse por bien encaminado cuando:
 - el equipo sepa que datos guarda el perfil y con que nombres
 - quede claro que el usuario puede saltarse preguntas sin romper el flujo
 - frontend y backend compartan el mismo shape de datos del perfil
+- quede clara la semantica de lectura y escritura del perfil desde frontend

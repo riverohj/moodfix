@@ -6,9 +6,9 @@ Este documento es el cuaderno de ruta del proyecto. Su funcion es decir en que p
 
 ## Estado del proyecto
 
-- Estado general: EPIC 0 y EPIC 1 cerrados; EPIC 2 abierto para contrato
+- Estado general: EPIC 0 y EPIC 1 cerrados; EPIC 2 en implementacion y PR
 - Fecha objetivo del MVP: 24 de abril
-- Estado actual: catalogo local validado en el Mac mini de referencia, backend comun LAN operativo y siguiente foco en cerrar contrato de EPIC 2
+- Estado actual: catalogo local validado en el Mac mini de referencia, backend comun LAN operativo, Lourdes maquetando onboarding y backend de auth/perfil en rama de PR
 
 ## Bloques de trabajo
 
@@ -67,7 +67,7 @@ Objetivo:
 Persistir las señales estables minimas del usuario con el menor roce posible.
 
 Estado:
-Abierto para contrato
+En implementacion y PR
 
 Alcance esperado:
 
@@ -82,7 +82,10 @@ Notas de implementacion:
 - EPIC 2 debe respetar lo ya cerrado en `epic-0-profile-signals.md`
 - ningun campo del onboarding es obligatorio
 - no debe mezclarse con preguntas de sesion
-- primero conviene cerrar contrato y shape de datos antes de implementar UI o backend
+- `GET /api/profile` requiere usuario autenticado
+- `PUT /api/profile` reemplaza el perfil y `PATCH /api/profile` mergea cambios
+- `POST /api/profile/skip` permite cerrar onboarding sin completar todos los campos
+- el handoff guest -> autenticado de preguntas de sesion queda fuera de EPIC 2 y pasa a EPIC 3
 
 ### EPIC 3 · Flujos de sesion: Sorprendeme y Preguntame
 
@@ -91,6 +94,12 @@ Capturar bien la intencion de la sesion y llevar al usuario hasta resultados.
 
 Estado:
 Pendiente
+
+Notas de implementacion:
+
+- EPIC 3 debe cerrar como se conserva el payload de sesion cuando el usuario responde como guest y se autentica justo antes del resultado
+- ese handoff no debe resolverse usando `user_profiles`; pertenece a la capa de `sessions`
+- para MVP puede bastar con conservar temporalmente el payload en frontend hasta completar login y reenviarlo despues autenticado
 
 ### EPIC 4 · Mood Radar v1
 

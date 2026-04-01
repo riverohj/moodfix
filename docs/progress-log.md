@@ -87,6 +87,12 @@ Cada actualizacion debe incluir:
 - Que queda: abrir y cerrar en equipo el contrato operativo de EPIC 2 para perfil estable y onboarding con skip.
 - Bloqueos o riesgos: la URL LAN actual depende de la IP local del Mac mini y convendra reservarla en el router para evitar cambios futuros.
 
+### 2026-04-01
+
+- Que se hizo: se alineo la documentacion de EPIC 2 con la implementacion real del backend, dejando el perfil estable como auth-only, documentando la semantica `PUT` reemplaza / `PATCH` mergea y separando el handoff guest del MUT como trabajo de `sessions` para EPIC 3.
+- Que queda: abrir el PR de la rama `epic-2-2.1-user_prifile_model`, validar el flujo con Lourdes desde frontend y decidir el orden final de preguntas visibles del onboarding.
+- Bloqueos o riesgos: si frontend mezcla onboarding estable con preguntas de sesion antes de cerrar EPIC 3, puede reaparecer la confusion entre `user_profiles` y `sessions`.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.
