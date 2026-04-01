@@ -20,6 +20,7 @@ EPIC 0 ya cerro que variables de perfil existen. EPIC 2 debe convertir esas defi
 - persistir en store o base de datos las señales estables minimas
 - permitir volver a editar el perfil mas adelante
 - dejar claro que el producto funciona aunque el perfil este incompleto
+- dejar claro que el perfil estable empieza despues de autenticacion
 
 ## Que no entra
 
@@ -27,6 +28,7 @@ EPIC 0 ya cerro que variables de perfil existen. EPIC 2 debe convertir esas defi
 - logica del motor de recomendacion final
 - explicaciones generadas por IA
 - aprendizaje avanzado o personalizacion compleja
+- persistencia de perfil estable para usuario guest
 
 ## Variables estables que deben cubrirse
 
@@ -45,6 +47,8 @@ EPIC 0 ya cerro que variables de perfil existen. EPIC 2 debe convertir esas defi
 - el usuario puede hacer skip sin bloquearse
 - si el perfil esta incompleto, el producto debe advertir que la recomendacion sera menos precisa
 - cuanto mas simple sea la captura inicial, mejor
+- el perfil estable y su onboarding viven detras de login
+- antes del login solo existen preguntas de sesion o moods
 
 ## Preguntas que previsiblemente habra que resolver
 
@@ -65,6 +69,7 @@ EPIC 0 ya cerro que variables de perfil existen. EPIC 2 debe convertir esas defi
 ## Contrato minimo de datos
 
 El frontend debera poder enviar un payload estable de perfil con claves tecnicas ya cerradas en EPIC 0.
+Estos endpoints de perfil requieren usuario autenticado y no exponen un perfil `local` guest en MVP.
 
 Ejemplo conceptual:
 

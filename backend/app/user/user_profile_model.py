@@ -8,7 +8,6 @@ from .auth_model import get_user_by_id
 from ..db import get_db_path
 
 
-DEFAULT_PROFILE_KEY = "local"
 PROFILE_FIELDS = (
     "pais",
     "plataformas",
@@ -102,60 +101,45 @@ def _decode_row(row: sqlite3.Row | None) -> dict[str, Any] | None:
     return profile
 
 
-def _get_profile_row(
-    connection: sqlite3.Connection,
-    profile_key: str = DEFAULT_PROFILE_KEY,
-    user_id: int | None = None,
-) -> sqlite3.Row | None:
-    if user_id is not None:
-        return connection.execute(
-            "SELECT * FROM user_profiles WHERE user_id = ?",
-            (user_id,),
-        ).fetchone()
+def _profile_key_for_user(user_id: int) -> str:
+    return f"user:{user_id}"
 
+
+def _get_profile_row(connection: sqlite3.Connection, user_id: int) -> sqlite3.Row | None:
     return connection.execute(
-        "SELECT * FROM user_profiles WHERE profile_key = ?",
-        (profile_key,),
+        "SELECT * FROM user_profiles WHERE user_id = ?",
+        (user_id,),
     ).fetchone()
 
 
-def get_or_create_profile(
-    profile_key: str = DEFAULT_PROFILE_KEY,
-    user_id: int | None = None,
-) -> dict[str, Any]:
-    if user_id is not None and get_user_by_id(user_id) is None:
+def get_or_create_profile(*, user_id: int) -> dict[str, Any]:
+    if get_user_by_id(user_id) is None:
         raise ValueError("Usuario no encontrado para crear su perfil.")
 
     db_path = get_db_path()
 
     with sqlite3.connect(db_path) as connection:
         connection.row_factory = sqlite3.Row
-        row = _get_profile_row(connection, profile_key=profile_key, user_id=user_id)
+        row = _get_profile_row(connection, user_id=user_id)
 
         if row is None:
-            if user_id is not None:
-                connection.execute(
-                    "INSERT INTO user_profiles (profile_key, user_id) VALUES (?, ?)",
-                    (f"user:{user_id}", user_id),
-                )
-            else:
-                connection.execute(
-                    "INSERT INTO user_profiles (profile_key) VALUES (?)",
-                    (profile_key,),
-                )
+            connection.execute(
+                "INSERT INTO user_profiles (profile_key, user_id) VALUES (?, ?)",
+                (_profile_key_for_user(user_id), user_id),
+            )
             connection.commit()
-            row = _get_profile_row(connection, profile_key=profile_key, user_id=user_id)
+            row = _get_profile_row(connection, user_id=user_id)
 
     return _decode_row(row)
 
 
 def save_profile(
     payload: dict[str, Any],
-    profile_key: str = DEFAULT_PROFILE_KEY,
-    user_id: int | None = None,
+    *,
+    user_id: int,
     merge: bool = True,
 ) -> dict[str, Any]:
-    existing = get_or_create_profile(profile_key=profile_key, user_id=user_id)
+    existing = get_or_create_profile(user_id=user_id)
     merged: dict[str, Any] = (
         {
             field: existing.get(field)
@@ -180,10 +164,10 @@ def save_profile(
             UPDATE user_profiles
             SET {assignments},
                 updated_at = CURRENT_TIMESTAMP
-            WHERE {"user_id = ?" if user_id is not None else "profile_key = ?"}
+            WHERE user_id = ?
             """,
-            (*values, user_id if user_id is not None else profile_key),
+            (*values, user_id),
         )
         connection.commit()
 
-    return get_or_create_profile(profile_key=profile_key, user_id=user_id)
+    return get_or_create_profile(user_id=user_id)

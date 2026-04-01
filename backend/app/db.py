@@ -83,7 +83,7 @@ def init_db() -> None:
 
             CREATE TABLE IF NOT EXISTS user_profiles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                profile_key TEXT NOT NULL UNIQUE DEFAULT 'local',
+                profile_key TEXT NOT NULL UNIQUE,
                 user_id INTEGER UNIQUE,
                 pais TEXT,
                 plataformas TEXT NOT NULL DEFAULT '[]',
