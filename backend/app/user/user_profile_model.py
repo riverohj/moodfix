@@ -9,15 +9,7 @@ from ..db import get_db_path
 
 
 DEFAULT_PROFILE_KEY = "local"
-LIST_FIELDS = (
-    "plataformas",
-    "idiomas_comodos",
-    "no_rotundos",
-    "historial",
-    "ver_luego",
-    "titulos_descartados",
-)
-ALLOWED_FIELDS = {
+PROFILE_FIELDS = (
     "pais",
     "plataformas",
     "idiomas_comodos",
@@ -28,7 +20,31 @@ ALLOWED_FIELDS = {
     "titulos_descartados",
     "onboarding_completed",
     "onboarding_skipped",
-}
+)
+LIST_FIELDS = (
+    "plataformas",
+    "idiomas_comodos",
+    "no_rotundos",
+    "historial",
+    "ver_luego",
+    "titulos_descartados",
+)
+ALLOWED_FIELDS = set(PROFILE_FIELDS)
+
+
+def _default_profile_payload() -> dict[str, Any]:
+    return {
+        "pais": None,
+        "plataformas": [],
+        "idiomas_comodos": [],
+        "tolerancia_subtitulos": None,
+        "no_rotundos": [],
+        "historial": [],
+        "ver_luego": [],
+        "titulos_descartados": [],
+        "onboarding_completed": False,
+        "onboarding_skipped": False,
+    }
 
 
 def _serialize_list(value: Any) -> str:
@@ -137,20 +153,25 @@ def save_profile(
     payload: dict[str, Any],
     profile_key: str = DEFAULT_PROFILE_KEY,
     user_id: int | None = None,
+    merge: bool = True,
 ) -> dict[str, Any]:
-    normalized = normalize_profile_payload(payload)
     existing = get_or_create_profile(profile_key=profile_key, user_id=user_id)
-
-    merged: dict[str, Any] = {
-        field: existing.get(field)
-        for field in ALLOWED_FIELDS
-        if field in existing
-    }
+    merged: dict[str, Any] = (
+        {
+            field: existing.get(field)
+            for field in PROFILE_FIELDS
+            if field in existing
+        }
+        if merge
+        else _default_profile_payload()
+    )
     merged.update(payload)
     normalized = normalize_profile_payload(merged)
 
-    assignments = ", ".join(f"{field} = ?" for field in normalized)
-    values = [normalized[field] for field in normalized]
+    fields = [field for field in PROFILE_FIELDS if field in normalized]
+    assert set(fields).issubset(ALLOWED_FIELDS)
+    assignments = ", ".join(f"{field} = ?" for field in fields)
+    values = [normalized[field] for field in fields]
 
     db_path = get_db_path()
     with sqlite3.connect(db_path) as connection:

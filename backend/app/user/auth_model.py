@@ -5,7 +5,7 @@ import hashlib
 import hmac
 import secrets
 import sqlite3
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from flask import request
@@ -17,6 +17,14 @@ TOKEN_TTL_HOURS = 2
 PBKDF2_ITERATIONS = 120_000
 
 
+class RequestValidationError(ValueError):
+    """Errores de payload o validacion del request."""
+
+
+class AuthError(ValueError):
+    """Errores de autenticacion o autorizacion."""
+
+
 def _get_connection() -> sqlite3.Connection:
     connection = sqlite3.connect(get_db_path())
     connection.row_factory = sqlite3.Row
@@ -24,11 +32,11 @@ def _get_connection() -> sqlite3.Connection:
 
 
 def _utc_now() -> datetime:
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 def _serialize_datetime(value: datetime) -> str:
-    return value.astimezone(UTC).isoformat()
+    return value.astimezone(timezone.utc).isoformat()
 
 
 def _parse_datetime(value: str) -> datetime:
@@ -59,13 +67,13 @@ def _decode_salt(salt: str) -> bytes:
 
 def _clean_email(email: Any) -> str:
     if not isinstance(email, str) or not email.strip():
-        raise ValueError("`email` es obligatorio.")
+        raise RequestValidationError("`email` es obligatorio.")
     return email.strip().lower()
 
 
 def _validate_password(password: Any) -> str:
     if not isinstance(password, str) or len(password) < 8:
-        raise ValueError("`password` debe tener al menos 8 caracteres.")
+        raise RequestValidationError("`password` debe tener al menos 8 caracteres.")
     return password
 
 
@@ -98,7 +106,7 @@ def register_user(email: Any, password: Any) -> dict[str, Any]:
             (clean_email,),
         ).fetchone()
         if existing is not None:
-            raise ValueError("Ya existe una cuenta con ese email.")
+            raise RequestValidationError("Ya existe una cuenta con ese email.")
 
         cursor = connection.execute(
             """
@@ -122,12 +130,12 @@ def authenticate_user(email: Any, password: Any) -> dict[str, Any]:
         ).fetchone()
 
     if row is None:
-        raise ValueError("Credenciales no validas.")
+        raise AuthError("Credenciales no validas.")
 
     expected_hash = row["password_hash"]
     provided_hash = _hash_password(valid_password, _decode_salt(row["password_salt"]))
     if not hmac.compare_digest(expected_hash, provided_hash):
-        raise ValueError("Credenciales no validas.")
+        raise AuthError("Credenciales no validas.")
 
     return _decode_user(row)
 
@@ -180,7 +188,7 @@ def get_authenticated_user_from_request(required: bool = True) -> dict[str, Any]
     token = get_token_from_request()
     if token is None:
         if required:
-            raise ValueError("Falta un token Bearer valido.")
+            raise AuthError("Falta un token Bearer valido.")
         return None
 
     token_hash = _hash_token(token)
@@ -202,10 +210,10 @@ def get_authenticated_user_from_request(required: bool = True) -> dict[str, Any]
         ).fetchone()
 
     if row is None:
-        raise ValueError("Token no valido.")
+        raise AuthError("Token no valido.")
     if row["revoked_at"] is not None:
-        raise ValueError("Token revocado.")
+        raise AuthError("Token revocado.")
     if _parse_datetime(row["expires_at"]) <= _utc_now():
-        raise ValueError("Token expirado.")
+        raise AuthError("Token expirado.")
 
     return _decode_user(row)
