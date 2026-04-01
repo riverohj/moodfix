@@ -34,6 +34,9 @@ pip install -r requirements.txt
 python run.py
 ```
 
+Por defecto el backend arranca en modo estable, sin `debug` ni `reloader`.
+Si alguien necesita debug local en su propia maquina, puede activar `FLASK_DEBUG=1`.
+
 ### Frontend
 
 ```bash

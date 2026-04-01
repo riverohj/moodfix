@@ -65,7 +65,7 @@ Cada actualizacion debe incluir:
 
 ### 2026-04-01
 
-- Que se hizo: se actualizo la documentacion de EPIC 1 para alinearla con la implementacion actual por `TMDB_API_KEY`, se documento la diferencia con Bearer token y se cerro una estrategia mixta de carga inicial para reducir sesgo.
+- Que se hizo: se actualizo la documentacion de EPIC 1 para alinear la implementacion principal con `TMDB_READ_ACCESS_TOKEN` como formato unico de autenticacion y se cerro una estrategia mixta de carga inicial para reducir sesgo.
 - Que queda: integrar el script de ingestión en `main`, corregir el conteo de `movie_providers` para reflejar solo inserciones reales y exponer un endpoint minimo de consulta del catalogo.
 - Bloqueos o riesgos: mientras el script viva en una rama separada, la correccion del contador y la estrategia de carga no quedan integradas en el flujo principal del equipo.
 
@@ -80,6 +80,12 @@ Cada actualizacion debe incluir:
 - Que se hizo: se dejo una checklist de cierre de EPIC 1 y se abrio el contrato base de EPIC 2 para perfil estable y onboarding con skip.
 - Que queda: validar en equipo la estrategia de base compartida para EPIC 1 y cerrar las decisiones concretas de EPIC 2.
 - Bloqueos o riesgos: EPIC 2 puede desordenarse rapido si mezcla onboarding estable con preguntas de sesion o con aprendizaje avanzado.
+
+### 2026-04-01
+
+- Que se hizo: se ejecuto la carga real de EPIC 1 en el Mac mini de referencia con `TMDB_READ_ACCESS_TOKEN`, se validaron `GET /api/db/status` y `GET /api/movies`, el backend comun LAN quedo operativo con la SQLite local viviendo solo en esa maquina y con esto EPIC 1 queda cerrado.
+- Que queda: abrir y cerrar en equipo el contrato operativo de EPIC 2 para perfil estable y onboarding con skip.
+- Bloqueos o riesgos: la URL LAN actual depende de la IP local del Mac mini y convendra reservarla en el router para evitar cambios futuros.
 
 ## Regla de uso
 

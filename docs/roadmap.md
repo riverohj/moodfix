@@ -6,9 +6,9 @@ Este documento es el cuaderno de ruta del proyecto. Su funcion es decir en que p
 
 ## Estado del proyecto
 
-- Estado general: EPIC 0 cerrado y EPIC 1 en arranque tecnico
+- Estado general: EPIC 0 y EPIC 1 cerrados; EPIC 2 abierto para contrato
 - Fecha objetivo del MVP: 24 de abril
-- Estado actual: boilerplate listo, contrato de EPIC 0 consolidado y primeras decisiones tecnicas de EPIC 1 en marcha
+- Estado actual: catalogo local validado en el Mac mini de referencia, backend comun LAN operativo y siguiente foco en cerrar contrato de EPIC 2
 
 ## Bloques de trabajo
 
@@ -26,7 +26,7 @@ Objetivo:
 Construir un catalogo local minimo de peliculas con los datos necesarios para que Mood Radar recomiende sin depender de TMDb en cada decision.
 
 Estado:
-En curso
+Cerrado
 
 Alcance esperado:
 
@@ -51,21 +51,15 @@ Notas de implementacion:
 - TMDb es fuente de datos, no logica de recomendacion
 - no hace falta refresh automatico en esta fase
 - el tamano actual objetivo de la carga inicial es `500` peliculas utiles para demo
-- la implementacion actual contra TMDb usa `TMDB_API_KEY`
-- `TMDB_READ_ACCESS_TOKEN` queda como alternativa documentada
+- la implementacion actual contra TMDb usa `TMDB_READ_ACCESS_TOKEN`
 - conviene separar endpoints minimos de ingestión de endpoints de apoyo o validacion
 - la carga inicial no debe apoyarse solo en `popularity.desc`; conviene combinar popularidad, peliculas bien valoradas y variedad de generos
 - la carga actual filtra providers a una lista cerrada de plataformas objetivo
 - la ingestión inicial ya esta integrada en `main`
 - existe un endpoint minimo `GET /api/movies` para consultar el catalogo local
-- la siguiente pieza critica es validar la carga inicial y decidir si EPIC 1 puede darse por cerrado
-
-Checklist de cierre:
-
-- ejecutar una ingestión real con credenciales validas
-- revisar `GET /api/movies`
-- validar cantidad y calidad del catalogo
-- decidir si habra una base de referencia comun para el equipo
+- la carga real ya fue ejecutada en el Mac mini de referencia con `--limit 500 --countries ES`
+- el catalogo validado para demo queda en `417` peliculas y `1129` filas en `movie_providers`
+- el backend comun local sirve la base desde la LAN y la SQLite vive solo en ese Mac mini
 
 ### EPIC 2 · Perfil estable del usuario y onboarding con skip
 

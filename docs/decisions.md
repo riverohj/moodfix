@@ -88,8 +88,8 @@ Cada entrada debe incluir:
 
 ### 2026-03-30 · Credenciales TMDb definidas para EPIC 1
 
-- Decision: EPIC 1 trabajara con dos credenciales documentadas para TMDb, usando `TMDB_API_KEY` como mecanismo principal en la implementacion actual y dejando `TMDB_READ_ACCESS_TOKEN` como alternativa documentada.
-- Motivo: el equipo necesita una forma clara y consistente de autenticarse contra TMDb al arrancar la integracion, y el script real de ingestión usa API key.
+- Decision: EPIC 1 trabajara solo con `TMDB_READ_ACCESS_TOKEN` como formato de autenticacion dentro del proyecto.
+- Motivo: el equipo necesita una forma clara y consistente de autenticarse contra TMDb al arrancar la integracion, y el bearer token evita errores al reutilizar tokens v4 como si fueran API key v3.
 - Impacto: las credenciales deben vivir en variables de entorno y no deben quedar expuestas en frontend, logs, capturas ni documentos con valores reales.
 - Responsable o acuerdo del equipo: arranque tecnico de EPIC 1.
 
@@ -148,6 +148,13 @@ Cada entrada debe incluir:
 - Motivo: el equipo necesita demostrar que el catalogo ya puede consultarse desde la app sin depender de TMDb para cada recomendacion.
 - Impacto: EPIC 1 ya cubre no solo la carga local sino tambien una primera lectura util del catalogo desde backend.
 - Responsable o acuerdo del equipo: cierre tecnico de EPIC 1.
+
+### 2026-04-01 · EPIC 1 queda cerrado con backend comun local en el Mac mini
+
+- Decision: EPIC 1 queda cerrado operativamente usando el Mac mini de referencia como backend comun local del equipo y manteniendo la SQLite solo en esa maquina.
+- Motivo: la carga real del catalogo ya fue ejecutada, la API devuelve datos reales y no hace falta compartir la base por Git para seguir con el MVP.
+- Impacto: el equipo trabaja contra el backend comun LAN, `movies` queda validada con `417` peliculas y `movie_providers` con `1129` filas, y el siguiente foco pasa a EPIC 2.
+- Responsable o acuerdo del equipo: cierre operativo de EPIC 1.
 
 ### 2026-04-01 · EPIC 2 se abre como contrato antes de implementacion
 
