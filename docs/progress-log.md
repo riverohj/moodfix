@@ -69,6 +69,12 @@ Cada actualizacion debe incluir:
 - Que queda: integrar el script de ingestión en `main`, corregir el conteo de `movie_providers` para reflejar solo inserciones reales y exponer un endpoint minimo de consulta del catalogo.
 - Bloqueos o riesgos: mientras el script viva en una rama separada, la correccion del contador y la estrategia de carga no quedan integradas en el flujo principal del equipo.
 
+### 2026-04-01
+
+- Que se hizo: se integro `feat/lourdes` en `main`, se corrigio el conteo real de inserciones en `movie_providers` y se anadio `GET /api/movies` con paginacion basica para consultar el catalogo local desde la API.
+- Que queda: ejecutar una carga real del catalogo, validar cantidad y calidad de peliculas/providers y decidir si EPIC 1 queda cerrado.
+- Bloqueos o riesgos: la estrategia mixta de carga ya esta cerrada en documentacion, pero el script actual todavia necesita incorporarla si el equipo quiere reducir mejor el sesgo del catalogo.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

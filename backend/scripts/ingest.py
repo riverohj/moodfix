@@ -200,7 +200,7 @@ def insert_providers(conn: sqlite3.Connection, movie_db_id: int, providers: list
         if not p.get("provider_id") or not p.get("provider_name"):
             continue
         try:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 INSERT OR IGNORE INTO movie_providers
                     (movie_id, country_code, provider_id, provider_name, provider_type)
@@ -214,7 +214,8 @@ def insert_providers(conn: sqlite3.Connection, movie_db_id: int, providers: list
                     p["provider_type"],
                 ),
             )
-            count += 1
+            if cursor.rowcount == 1:
+                count += 1
         except sqlite3.Error:
             pass
     return count

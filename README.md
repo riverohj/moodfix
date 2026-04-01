@@ -63,6 +63,10 @@ Endpoint de comprobacion de base de datos:
 
 `http://localhost:5001/api/db/status`
 
+Endpoint minimo de consulta de catalogo:
+
+`http://localhost:5001/api/movies?page=1&limit=20`
+
 ## Siguientes pasos
 
 1. Crear el repositorio remoto en GitHub.

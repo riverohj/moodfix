@@ -135,6 +135,13 @@ Cada entrada debe incluir:
 - Impacto: al integrar el script de ingestión, el contador de providers debe basarse en inserciones reales.
 - Responsable o acuerdo del equipo: calidad de datos de EPIC 1.
 
+### 2026-04-01 · Consulta minima del catalogo expuesta por la API
+
+- Decision: la API del backend expone `GET /api/movies` con paginacion basica para verificar el catalogo local.
+- Motivo: el equipo necesita demostrar que el catalogo ya puede consultarse desde la app sin depender de TMDb para cada recomendacion.
+- Impacto: EPIC 1 ya cubre no solo la carga local sino tambien una primera lectura util del catalogo desde backend.
+- Responsable o acuerdo del equipo: cierre tecnico de EPIC 1.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.

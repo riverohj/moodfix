@@ -55,7 +55,9 @@ Notas de implementacion:
 - `TMDB_READ_ACCESS_TOKEN` queda como alternativa documentada
 - conviene separar endpoints minimos de ingestión de endpoints de apoyo o validacion
 - la carga inicial no debe apoyarse solo en `popularity.desc`; conviene combinar popularidad, peliculas bien valoradas y variedad de generos
-- la siguiente pieza critica es cerrar e implementar la ingestión inicial del catalogo
+- la ingestión inicial ya esta integrada en `main`
+- existe un endpoint minimo `GET /api/movies` para consultar el catalogo local
+- la siguiente pieza critica es validar la carga inicial y decidir si EPIC 1 puede darse por cerrado
 
 ### EPIC 2 · Perfil estable del usuario y onboarding con skip
 
