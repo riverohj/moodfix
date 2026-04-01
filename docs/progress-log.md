@@ -65,7 +65,7 @@ Cada actualizacion debe incluir:
 
 ### 2026-04-01
 
-- Que se hizo: se actualizo la documentacion de EPIC 1 para alinearla con la implementacion actual por `TMDB_API_KEY`, se documento la diferencia con Bearer token y se cerro una estrategia mixta de carga inicial para reducir sesgo.
+- Que se hizo: se actualizo la documentacion de EPIC 1 para alinear la implementacion principal con `TMDB_READ_ACCESS_TOKEN` como formato unico de autenticacion y se cerro una estrategia mixta de carga inicial para reducir sesgo.
 - Que queda: integrar el script de ingestión en `main`, corregir el conteo de `movie_providers` para reflejar solo inserciones reales y exponer un endpoint minimo de consulta del catalogo.
 - Bloqueos o riesgos: mientras el script viva en una rama separada, la correccion del contador y la estrategia de carga no quedan integradas en el flujo principal del equipo.
 

@@ -6,7 +6,7 @@ Este documento resume lo minimo que debe verificarse antes de dar EPIC 1 por cer
 
 ## Checklist
 
-- existe una `TMDB_API_KEY` valida en el entorno donde se va a ejecutar la ingestión
+- existe una `TMDB_READ_ACCESS_TOKEN` valida en el entorno donde se va a ejecutar la ingestión
 - la ingestión puede ejecutarse con el comando acordado
 - la carga local alcanza un volumen razonable para demo
 - `movies` contiene peliculas reales con metadata util

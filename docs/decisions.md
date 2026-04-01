@@ -88,8 +88,8 @@ Cada entrada debe incluir:
 
 ### 2026-03-30 · Credenciales TMDb definidas para EPIC 1
 
-- Decision: EPIC 1 trabajara con dos credenciales documentadas para TMDb, usando `TMDB_API_KEY` como mecanismo principal en la implementacion actual y dejando `TMDB_READ_ACCESS_TOKEN` como alternativa documentada.
-- Motivo: el equipo necesita una forma clara y consistente de autenticarse contra TMDb al arrancar la integracion, y el script real de ingestión usa API key.
+- Decision: EPIC 1 trabajara solo con `TMDB_READ_ACCESS_TOKEN` como formato de autenticacion dentro del proyecto.
+- Motivo: el equipo necesita una forma clara y consistente de autenticarse contra TMDb al arrancar la integracion, y el bearer token evita errores al reutilizar tokens v4 como si fueran API key v3.
 - Impacto: las credenciales deben vivir en variables de entorno y no deben quedar expuestas en frontend, logs, capturas ni documentos con valores reales.
 - Responsable o acuerdo del equipo: arranque tecnico de EPIC 1.
 

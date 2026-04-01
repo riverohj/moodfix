@@ -11,7 +11,7 @@ Uso:
 
 Requisitos:
     pip install requests python-dotenv
-    Configura TMDB_API_KEY en tu archivo .env
+    Configura TMDB_READ_ACCESS_TOKEN en tu archivo .env
 """
 
 import argparse
@@ -37,7 +37,7 @@ except ImportError:
 ROOT_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(ROOT_DIR / ".env")
 
-TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
+TMDB_READ_ACCESS_TOKEN = os.getenv("TMDB_READ_ACCESS_TOKEN", "").strip()
 TMDB_BASE = "https://api.themoviedb.org/3"
 
 DEFAULT_COUNTRIES = ["ES"]
@@ -83,14 +83,16 @@ def get_db_path() -> Path:
 
 # ── TMDb helpers ──────────────────────────────────────────────────────────────
 def tmdb_get(endpoint: str, params: Optional[Dict] = None, retries: int = 3) -> Dict:
-    if params is None:
-        params = {}
-    params["api_key"] = TMDB_API_KEY
+    params = dict(params or {})
     url = f"{TMDB_BASE}/{endpoint}"
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {TMDB_READ_ACCESS_TOKEN}",
+    }
 
     for attempt in range(retries):
         try:
-            resp = requests.get(url, params=params, timeout=10)
+            resp = requests.get(url, params=params, headers=headers, timeout=10)
             if resp.status_code == 429:
                 wait = int(resp.headers.get("Retry-After", 10))
                 print(f"  Rate limited. Esperando {wait}s...")
@@ -314,8 +316,8 @@ def insert_providers(conn: sqlite3.Connection, movie_db_id: int, providers: List
 
 # ── Runner principal ──────────────────────────────────────────────────────────
 def run(limit: int, countries: List[str]) -> None:
-    if not TMDB_API_KEY:
-        print("TMDB_API_KEY no esta configurada. Añadela a tu archivo .env")
+    if not TMDB_READ_ACCESS_TOKEN:
+        print("TMDB_READ_ACCESS_TOKEN no esta configurado. Añadelo a tu archivo .env")
         sys.exit(1)
 
     db_path = get_db_path()
@@ -324,6 +326,7 @@ def run(limit: int, countries: List[str]) -> None:
 
     print(f"Base de datos : {db_path}")
     print(f"Objetivo      : {limit} peliculas | Paises: {', '.join(normalized_countries)}")
+    print("Auth TMDb     : bearer via TMDB_READ_ACCESS_TOKEN")
     print(f"Providers     : {', '.join(sorted(set(ALLOWED_PROVIDER_ALIASES.values())))}")
     print()
 

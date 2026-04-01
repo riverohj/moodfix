@@ -51,8 +51,7 @@ Notas de implementacion:
 - TMDb es fuente de datos, no logica de recomendacion
 - no hace falta refresh automatico en esta fase
 - el tamano actual objetivo de la carga inicial es `500` peliculas utiles para demo
-- la implementacion actual contra TMDb usa `TMDB_API_KEY`
-- `TMDB_READ_ACCESS_TOKEN` queda como alternativa documentada
+- la implementacion actual contra TMDb usa `TMDB_READ_ACCESS_TOKEN`
 - conviene separar endpoints minimos de ingestión de endpoints de apoyo o validacion
 - la carga inicial no debe apoyarse solo en `popularity.desc`; conviene combinar popularidad, peliculas bien valoradas y variedad de generos
 - la carga actual filtra providers a una lista cerrada de plataformas objetivo

@@ -18,21 +18,29 @@ En este epic usamos TMDb solo para traer y validar datos. No usamos TMDb para re
 ## Base de autenticacion
 
 - Base URL API v3: `https://api.themoviedb.org/3`
-- Metodo actual del proyecto: query param `api_key=TMDB_API_KEY`
-- Metodo alternativo documentado: header `Authorization: Bearer TMDB_READ_ACCESS_TOKEN`
+- Metodo usado por el proyecto: header `Authorization: Bearer TMDB_READ_ACCESS_TOKEN`
 
 ### Diferencia sencilla entre ambos formatos
 
 - `API key`: se envia en la URL y simplifica scripts pequenos y pruebas rapidas
 - `Bearer token`: se envia en el header `Authorization` y suele usarse mas en integraciones backend formales
 
-Para EPIC 1, la implementacion actual del proyecto usa `TMDB_API_KEY`, asi que este contrato sigue esa fuente de verdad.
+Para EPIC 1, la implementacion actual del proyecto usa Bearer token, asi que este contrato sigue esa fuente de verdad.
 
-### Ejemplo base con API key
+### Diferencia practica para MoodFix
+
+- con `api_key=...` la credencial queda acoplada a la URL de cada ejemplo y cada request
+- con Bearer la credencial vive en el header HTTP y la URL queda limpia
+- Bearer encaja mejor con integraciones backend y reduce confusion entre API key v3 y read token de TMDb
+- para el MVP no cambia los endpoints que usamos; cambia solo la forma de autenticar cada llamada
+- decision operativa: ejemplos, scripts y ejecucion principal del proyecto van solo con Bearer
+
+### Ejemplo base con Bearer token
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/genre/movie/list?api_key=TMDB_API_KEY&language=es-ES' \
+  --url 'https://api.themoviedb.org/3/genre/movie/list?language=es-ES' \
+  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
   --header 'accept: application/json'
 ```
 
@@ -131,7 +139,8 @@ La idea no es sustituir `popularity`, sino complementarla.
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/genre/movie/list?api_key=TMDB_API_KEY&language=es-ES' \
+  --url 'https://api.themoviedb.org/3/genre/movie/list?language=es-ES' \
+  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
   --header 'accept: application/json'
 ```
 
@@ -139,7 +148,8 @@ curl --request GET \
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/discover/movie?api_key=TMDB_API_KEY&language=es-ES&page=1&sort_by=popularity.desc&include_adult=false&include_video=false&vote_count.gte=100' \
+  --url 'https://api.themoviedb.org/3/discover/movie?language=es-ES&page=1&sort_by=popularity.desc&include_adult=false&include_video=false&vote_count.gte=100' \
+  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
   --header 'accept: application/json'
 ```
 
@@ -147,7 +157,8 @@ curl --request GET \
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/movie/550?api_key=TMDB_API_KEY&language=es-ES' \
+  --url 'https://api.themoviedb.org/3/movie/550?language=es-ES' \
+  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
   --header 'accept: application/json'
 ```
 
@@ -155,7 +166,8 @@ curl --request GET \
 
 ```bash
 curl --request GET \
-  --url 'https://api.themoviedb.org/3/movie/550/watch/providers?api_key=TMDB_API_KEY' \
+  --url 'https://api.themoviedb.org/3/movie/550/watch/providers' \
+  --header 'Authorization: Bearer TMDB_READ_ACCESS_TOKEN' \
   --header 'accept: application/json'
 ```
 
