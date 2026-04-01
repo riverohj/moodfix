@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 
 from .auth_model import (
     AuthError,
@@ -12,24 +12,16 @@ from .auth_model import (
     register_user,
     revoke_token,
 )
+from .request_utils import get_json_payload
 
 
 auth_api = Blueprint("auth_api", __name__)
 
 
-def _get_json_payload() -> dict:
-    payload = request.get_json(silent=True)
-    if payload is None:
-        return {}
-    if not isinstance(payload, dict):
-        raise RequestValidationError("El body JSON debe ser un objeto.")
-    return payload
-
-
 @auth_api.post("/auth/register")
 def register():
     try:
-        payload = _get_json_payload()
+        payload = get_json_payload()
         user = register_user(payload.get("email"), payload.get("password"))
         token = create_auth_token(user["id"])
     except RequestValidationError as error:
@@ -41,7 +33,7 @@ def register():
 @auth_api.post("/auth/login")
 def login():
     try:
-        payload = _get_json_payload()
+        payload = get_json_payload()
         user = authenticate_user(payload.get("email"), payload.get("password"))
         token = create_auth_token(user["id"])
     except RequestValidationError as error:
