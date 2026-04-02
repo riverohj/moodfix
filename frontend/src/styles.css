@@ -1,33 +1,63 @@
+/* --- PALETA DE COLORES OFICIAL ---
+   1. Negro Carbón: #0D0D0D (Fondo base)
+   2. Rojo Sangre:  #E50914 (Glows, Detalles y Activos)
+   3. Gris Oscuro:  #1F1F1F (Tarjetas)
+   4. Blanco Hueso: #F5F5F5 (Títulos)
+   5. Gris Plata:   #A0A0A0 (Textos secundarios)
+--- */
+
 :root {
-  font-family: Arial, sans-serif;
-  color: #14213d;
-  background: #f6f5f1;
+  font-family: 'Inter', Arial, sans-serif;
+  color: #F5F5F5;
+  background-color: #0D0D0D;
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* --- SOLUCIÓN: EL FONDO SIEMPRE EN EL BODY --- */
 body {
   margin: 0;
+  padding: 0;
+  background-color: #0D0D0D; 
+  /* Los círculos rojos ahora están en la capa más profunda (el body) */
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(229, 9, 20, 0.45) 0%, transparent 55%), 
+    radial-gradient(circle at 80% 70%, rgba(229, 9, 20, 0.35) 0%, transparent 55%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
+/* --- CONTENEDOR DE LA APP (TRANSPARENTE) --- */
 .app-shell {
   min-height: 100vh;
   padding: 48px 20px;
-  background:
-    radial-gradient(circle at top left, rgba(242, 201, 76, 0.25), transparent 30%),
-    linear-gradient(180deg, #f9f7f2 0%, #ece8df 100%);
+  background: transparent !important; /* Para que deje ver el fondo del body */
 }
 
+/* --- TARJETAS Y HERO (EFECTO CRISTAL OSCURO) --- */
 .hero,
 .card {
   max-width: 760px;
   margin: 0 auto 24px;
-  padding: 28px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 14px 40px rgba(20, 33, 61, 0.08);
+  padding: 32px;
+  border-radius: 24px;
+  /* Gris Oscuro traslúcido para que "respire" el rojo del fondo */
+  background: rgba(31, 31, 31, 0.88); 
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+}
+
+/* --- TEXTOS Y TÍTULOS --- */
+h1,
+h2 {
+  margin-top: 0;
+  color: #F5F5F5; 
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .eyebrow {
@@ -35,21 +65,57 @@ body {
   font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #9c6644;
-}
-
-h1,
-h2 {
-  margin-top: 0;
+  letter-spacing: 0.12em;
+  color: #E50914; 
 }
 
 .lead {
   line-height: 1.6;
+  color: #A0A0A0; 
+  font-size: 1.1rem;
 }
 
 ul {
   padding-left: 20px;
   line-height: 1.8;
+  color: #A0A0A0; 
 }
 
+/* --- BOTONES (ESTILO ROJO CAPSULE) --- */
+button, .btn, .btn-primary {
+  background-color: #E50914; 
+  color: #F5F5F5;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+}
+
+button:hover, .btn:hover {
+  transform: translateY(-2px);
+  background-color: #ff1a26; 
+  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.5);
+}
+
+/* Estilo para links tipo botón (como el Skip) */
+.skip-btn {
+  color: #E50914;
+  text-decoration: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 10px 20px;
+  border: 1px solid rgba(229, 9, 20, 0.4);
+  border-radius: 50px;
+  transition: 0.3s;
+}
+
+.skip-btn:hover {
+  background: rgba(229, 9, 20, 0.1);
+  border-color: #E50914;
+}
