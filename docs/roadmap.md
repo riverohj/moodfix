@@ -8,7 +8,7 @@ Este documento es el cuaderno de ruta del proyecto. Su funcion es decir en que p
 
 - Estado general: EPIC 0 y EPIC 1 cerrados; EPIC 2 en implementacion y PR
 - Fecha objetivo del MVP: 24 de abril
-- Estado actual: catalogo local validado en el Mac mini de referencia, backend comun LAN operativo, Lourdes maquetando onboarding y backend de auth/perfil en rama de PR
+- Estado actual: catalogo local validado en el Mac mini de referencia, backend comun LAN operativo y onboarding de EPIC 2 en integracion real contra auth y profile
 
 ## Bloques de trabajo
 
@@ -85,6 +85,7 @@ Notas de implementacion:
 - `GET /api/profile` requiere usuario autenticado
 - `PUT /api/profile` reemplaza el perfil y `PATCH /api/profile` mergea cambios
 - `POST /api/profile/skip` permite cerrar onboarding sin completar todos los campos
+- frontend debe enviar valores tecnicos compatibles con backend: pais ISO, `provider_id`, codigos de idioma y `genre_id`
 - el handoff guest -> autenticado de preguntas de sesion queda fuera de EPIC 2 y pasa a EPIC 3
 
 ### EPIC 3 · Flujos de sesion: Sorprendeme y Preguntame

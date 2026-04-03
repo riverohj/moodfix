@@ -51,21 +51,21 @@ EPIC 0 ya cerro que variables de perfil existen. EPIC 2 debe convertir esas defi
 - el perfil estable y su onboarding viven detras de login
 - antes del login solo existen preguntas de sesion o moods
 
-## Preguntas que previsiblemente habra que resolver
+## Orden actual del onboarding MVP
 
 ### Bloque 1 · Disponibilidad real
 
-- pais
-- plataformas
+1. pais
+2. plataformas
 
 ### Bloque 2 · Barrera de idioma
 
-- idiomas comodos
-- tolerancia a subtitulos
+3. idiomas comodos
+4. tolerancia a subtitulos
 
 ### Bloque 3 · Limites personales
 
-- no rotundos
+5. no rotundos
 
 ## Contrato minimo de datos
 
@@ -92,6 +92,20 @@ Ejemplo conceptual:
 - `PATCH /api/profile` actualiza solo los campos enviados y mantiene el resto
 - `POST /api/profile/skip` marca `onboarding_skipped = true` sobre el perfil autenticado
 - para un onboarding por pasos, lo mas natural en frontend es usar `PATCH` durante la captura y `POST /api/profile/skip` cuando el usuario decide saltarlo
+
+## Valores tecnicos que envia frontend
+
+- `pais`: codigo `ISO 3166-1 alpha-2`, por ejemplo `ES`
+- `plataformas`: lista de `provider_id` de TMDb, por ejemplo `8`, `119`, `337`
+- `idiomas_comodos`: lista de codigos de idioma, por ejemplo `es`, `en`
+- `tolerancia_subtitulos`: `si` o `no`
+- `no_rotundos`: lista de `genre_id` de TMDb, por ejemplo `27`
+
+## Congelacion MVP actual
+
+- el onboarding visible de EPIC 2 queda congelado con `pais`, `plataformas`, `idiomas_comodos`, `tolerancia_subtitulos` y `no_rotundos`
+- `historial`, `ver_luego` y `titulos_descartados` permanecen en la estructura del perfil, pero no forman parte del onboarding MVP
+- peliculas favoritas, autocomplete contra TMDb y logica de cluster quedan fuera de EPIC 2
 
 ## Decisiones que habra que cerrar en EPIC 2
 

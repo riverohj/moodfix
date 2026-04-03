@@ -93,6 +93,12 @@ Cada actualizacion debe incluir:
 - Que queda: abrir el PR de la rama `epic-2-2.1-user_prifile_model`, validar el flujo con Lourdes desde frontend y decidir el orden final de preguntas visibles del onboarding.
 - Bloqueos o riesgos: si frontend mezcla onboarding estable con preguntas de sesion antes de cerrar EPIC 3, puede reaparecer la confusion entre `user_profiles` y `sessions`.
 
+### 2026-04-03
+
+- Que se hizo: se empezo la integracion real del frontend de EPIC 2 sobre la rama de auth y perfil, manteniendo `App` como entrada normal, conectando onboarding a `GET /api/profile`, `PATCH /api/profile` y `POST /api/profile/skip`, y alineando los valores del formulario con el contrato tecnico de backend.
+- Que queda: validar la integracion visual con Lourdes, revisar el PR frontend con backend ya disponible y cerrar el flujo extremo a extremo de registro o login, onboarding y re-edicion.
+- Bloqueos o riesgos: si frontend y backend usan labels visibles en vez de `provider_id`, `genre_id`, codigos ISO o codigos de idioma, el onboarding puede parecer correcto en UI pero persistir datos incompatibles con el motor.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.
