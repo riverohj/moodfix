@@ -1,15 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
-  HARD_NO_OPTIONS,
-  LANGUAGE_OPTIONS,
   ONBOARDING_STEPS,
-  PLATFORM_OPTIONS,
   PROFILE_FIELD_LABELS,
   emptyProfileDraft,
   firstIncompleteStepIndex,
   optionLabelByValue,
 } from "./config/onboarding";
+import Onboarding from "./components/Onboarding";
 import {
   getApiBaseUrl,
   getAuthenticatedUser,
@@ -48,154 +46,6 @@ function formatSelection(step, value) {
   }
 
   return value ?? "Sin definir";
-}
-
-function StepSearchField({ step, draft, onSelect }) {
-  const [query, setQuery] = useState("");
-  const selectedValues = Array.isArray(draft[step.id]) ? draft[step.id] : [];
-
-  useEffect(() => {
-    setQuery("");
-  }, [step.id]);
-
-  const filteredOptions = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) {
-      return step.options;
-    }
-    return step.options.filter((option) =>
-      option.label.toLowerCase().includes(normalizedQuery),
-    );
-  }, [query, step.options]);
-
-  if (step.type === "single-search") {
-    return (
-      <div className="search-step">
-        <input
-          className="search-input"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Busca una opcion"
-        />
-        <div className="search-results">
-          {filteredOptions.map((option) => (
-            <button
-              key={option.value}
-              className={`option-chip search-result ${
-                draft[step.id] === option.value ? "selected" : ""
-              }`}
-              type="button"
-              onClick={() => onSelect(step.id, option.value)}
-            >
-              <span>{option.label}</span>
-              <span className="option-meta">{option.value}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="search-step">
-      <input
-        className="search-input"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Busca uno o varios idiomas"
-      />
-      <div className="search-results">
-        {filteredOptions.map((option) => (
-          <button
-            key={option.value}
-            className={`option-chip search-result ${
-              selectedValues.includes(option.value) ? "selected" : ""
-            }`}
-            type="button"
-            onClick={() =>
-              onSelect(
-                step.id,
-                selectedValues.includes(option.value)
-                  ? selectedValues.filter((value) => value !== option.value)
-                  : [...selectedValues, option.value],
-              )
-            }
-          >
-            <span>{option.label}</span>
-            <span className="option-meta">{option.value}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StepGridField({ step, draft, onSelect }) {
-  const selectedValues = Array.isArray(draft[step.id]) ? draft[step.id] : [];
-  return (
-    <div className="options-grid">
-      {step.options.map((option) => {
-        const selected = selectedValues.includes(option.value);
-        return (
-          <button
-            key={option.value}
-            className={`option-card ${selected ? "selected" : ""}`}
-            type="button"
-            onClick={() =>
-              onSelect(
-                step.id,
-                selected
-                  ? selectedValues.filter((value) => value !== option.value)
-                  : [...selectedValues, option.value],
-              )
-            }
-          >
-            <span>{option.label}</span>
-            <span className="option-meta">{option.value}</span>
-          </button>
-        );
-      })}
-      <button
-        className={`option-card option-card-clear ${
-          selectedValues.length === 0 ? "selected" : ""
-        }`}
-        type="button"
-        onClick={() => onSelect(step.id, [])}
-      >
-        Sin restricciones
-      </button>
-    </div>
-  );
-}
-
-function StepSingleChoiceField({ step, draft, onSelect }) {
-  return (
-    <div className="single-choice">
-      {step.options.map((option) => (
-        <button
-          key={option.value}
-          className={`option-row ${draft[step.id] === option.value ? "selected" : ""}`}
-          type="button"
-          onClick={() => onSelect(step.id, option.value)}
-        >
-          <span>{option.label}</span>
-          <span className="option-meta">{option.value}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function OnboardingStep({ step, draft, onSelect }) {
-  if (step.type === "single-search" || step.type === "multi-search") {
-    return <StepSearchField step={step} draft={draft} onSelect={onSelect} />;
-  }
-
-  if (step.type === "multi-grid") {
-    return <StepGridField step={step} draft={draft} onSelect={onSelect} />;
-  }
-
-  return <StepSingleChoiceField step={step} draft={draft} onSelect={onSelect} />;
 }
 
 export default function App() {
@@ -308,11 +158,11 @@ export default function App() {
 
     const payload = {
       [currentStep.id]: draft[currentStep.id],
+      onboarding_skipped: false,
     };
 
     if (markCompleted) {
       payload.onboarding_completed = true;
-      payload.onboarding_skipped = false;
     }
 
     setSavingStep(true);
@@ -490,55 +340,17 @@ export default function App() {
               </div>
             </section>
           ) : (
-            <section className="onboarding-card">
-              <div className="step-meta">
-                <span className="step-pill">
-                  Paso {stepIndex + 1} de {ONBOARDING_STEPS.length}
-                </span>
-                {profile?.onboarding_skipped ? (
-                  <span className="step-pill muted">Perfil reabierto tras skip</span>
-                ) : null}
-              </div>
-
-              <h3>{currentStep.title}</h3>
-              <p className="step-description">{currentStep.description}</p>
-
-              <OnboardingStep step={currentStep} draft={draft} onSelect={updateDraft} />
-
-              <div className="step-actions">
-                <button
-                  className="ghost-button"
-                  disabled={savingStep || stepIndex === 0}
-                  type="button"
-                  onClick={() => setStepIndex((currentValue) => Math.max(currentValue - 1, 0))}
-                >
-                  Anterior
-                </button>
-
-                <div className="step-actions-right">
-                  <button
-                    className="ghost-button"
-                    disabled={savingStep}
-                    type="button"
-                    onClick={handleSkip}
-                  >
-                    Skip
-                  </button>
-                  <button
-                    className="primary-button"
-                    disabled={savingStep}
-                    type="button"
-                    onClick={() => saveCurrentStep(isLastStep)}
-                  >
-                    {savingStep
-                      ? "Guardando..."
-                      : isLastStep
-                        ? "Finalizar onboarding"
-                        : "Guardar y seguir"}
-                  </button>
-                </div>
-              </div>
-            </section>
+            <Onboarding
+              draft={draft}
+              isLastStep={isLastStep}
+              onAdvance={() => saveCurrentStep(isLastStep)}
+              onFieldChange={updateDraft}
+              onPrevious={() => setStepIndex((currentValue) => Math.max(currentValue - 1, 0))}
+              onSkip={handleSkip}
+              profile={profile}
+              savingStep={savingStep}
+              stepIndex={stepIndex}
+            />
           )}
         </section>
       )}
