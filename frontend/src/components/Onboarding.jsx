@@ -68,9 +68,15 @@ const Onboarding = () => {
       complice: "Tus líneas rojas. Estos géneros no asomarán por tu pantalla.",
       tipo: "pills_grid",
       opciones: [
-        "Terror extremo", "Gore", "Maltrato animal", 
-        "Musicales", "Cine Bélico", "Drama lacrimógeno", 
-        "Reality Shows", "Cine de Autor", "Documentales",
+        "Terror extremo", 
+        "Gore", 
+        "Musicales", 
+        "Cine Bélico", 
+        "Drama lacrimógeno", 
+        "Reality Shows", 
+        "Cine de Autor", 
+        "Documentales",
+        "Cine Clásico", 
         "Ninguno, soy valiente"
       ]
     }
@@ -177,7 +183,6 @@ const Onboarding = () => {
                     const next = current.includes(p.id) ? current.filter(x => x !== p.id) : [...current, p.id];
                     setSelections({ ...selections, plataformas: next });
                   }}>
-                    {/* MODIFICACIÓN: Se añade la clase .platform-logo-img a la etiqueta img */}
                     <div className="platform-img-wrapper"><img src={p.img} alt={p.name} className="platform-logo-img" /></div>
                     <span className="platform-name">{p.name}</span>
                   </div>
