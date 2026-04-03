@@ -87,11 +87,13 @@ Notas de implementacion:
 - `POST /api/profile/skip` permite cerrar onboarding sin completar todos los campos
 - frontend debe enviar valores tecnicos compatibles con backend: pais ISO, `provider_id`, codigos de idioma y `genre_id`
 - el handoff guest -> autenticado de preguntas de sesion queda fuera de EPIC 2 y pasa a EPIC 3
+- la shell posterior al onboarding, incluyendo navbar, footer y cajon de navegacion, no forma parte de EPIC 2
+- historico, favoritos y cualquier memoria interna basada en esos datos para mejorar el prompt del top 3 se mueven a EPIC 3
 
 ### EPIC 3 · Flujos de sesion: Sorprendeme y Preguntame
 
 Objetivo:
-Capturar bien la intencion de la sesion y llevar al usuario hasta resultados.
+Capturar bien la intencion de la sesion, llevar al usuario hasta resultados y empezar a dar forma a la experiencia posterior al onboarding.
 
 Estado:
 Pendiente
@@ -101,6 +103,8 @@ Notas de implementacion:
 - EPIC 3 debe cerrar como se conserva el payload de sesion cuando el usuario responde como guest y se autentica justo antes del resultado
 - ese handoff no debe resolverse usando `user_profiles`; pertenece a la capa de `sessions`
 - para MVP puede bastar con conservar temporalmente el payload en frontend hasta completar login y reenviarlo despues autenticado
+- la pantalla posterior al onboarding, junto con navbar, footer o cajon de navegacion, pasa a EPIC 3
+- la primera version de historico y favoritos, y la memoria interna derivada de esos datos para ayudar al top 3, pasan a EPIC 3
 
 ### EPIC 4 · Mood Radar v1
 

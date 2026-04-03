@@ -99,6 +99,12 @@ Cada actualizacion debe incluir:
 - Que queda: validar la integracion visual con Lourdes, revisar el PR frontend con backend ya disponible y cerrar el flujo extremo a extremo de registro o login, onboarding y re-edicion.
 - Bloqueos o riesgos: si frontend y backend usan labels visibles en vez de `provider_id`, `genre_id`, codigos ISO o codigos de idioma, el onboarding puede parecer correcto en UI pero persistir datos incompatibles con el motor.
 
+### 2026-04-03
+
+- Que se hizo: se acoto de forma mas estricta el alcance de EPIC 2 para que cubra solo auth, perfil estable, onboarding con skip y persistencia minima; se movio a EPIC 3 la shell posterior al onboarding, junto con navbar, footer o cajon, la pantalla de historico, la pantalla de favoritos y la memoria interna basada en esos datos para enriquecer la respuesta final del top 3.
+- Que queda: documentar la salida minima del onboarding en frontend, cerrar el flujo extremo a extremo y decidir si esa salida minima sera una confirmacion simple o una transicion temporal antes de la shell de EPIC 3.
+- Bloqueos o riesgos: si el equipo vuelve a mezclar en EPIC 2 historico, favoritos o memoria para el prompt, el cierre del onboarding se volvera difuso y costara mas separar responsabilidades entre epics.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

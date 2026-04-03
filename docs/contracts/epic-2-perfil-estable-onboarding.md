@@ -21,6 +21,7 @@ EPIC 0 ya cerro que variables de perfil existen. EPIC 2 debe convertir esas defi
 - permitir volver a editar el perfil mas adelante
 - dejar claro que el producto funciona aunque el perfil este incompleto
 - dejar claro que el perfil estable empieza despues de autenticacion
+- permitir una salida simple del onboarding cuando el usuario termina o hace skip, sin exigir aun una pantalla completa de producto
 
 ## Que no entra
 
@@ -30,6 +31,10 @@ EPIC 0 ya cerro que variables de perfil existen. EPIC 2 debe convertir esas defi
 - aprendizaje avanzado o personalizacion compleja
 - persistencia de perfil estable para usuario guest
 - handoff de respuestas guest del MUT o de sesion antes del login
+- shell completa de producto tras onboarding, incluyendo navbar, footer o cajon de navegacion
+- pantalla de historico
+- pantalla de favoritos o `ver_luego`
+- uso de `historial`, `ver_luego` o favoritos como memoria interna para enriquecer el prompt que devuelve el top 3
 
 ## Variables estables que deben cubrirse
 
@@ -106,6 +111,8 @@ Ejemplo conceptual:
 - el onboarding visible de EPIC 2 queda congelado con `pais`, `plataformas`, `idiomas_comodos`, `tolerancia_subtitulos` y `no_rotundos`
 - `historial`, `ver_luego` y `titulos_descartados` permanecen en la estructura del perfil, pero no forman parte del onboarding MVP
 - peliculas favoritas, autocomplete contra TMDb y logica de cluster quedan fuera de EPIC 2
+- la pantalla posterior al onboarding no tiene por que ser todavia la home final del producto; basta una salida minima y consistente del flujo
+- navbar, footer, cajon de navegacion, historico, favoritos y la memoria interna basada en estos datos pasan a EPIC 3
 
 ## Decisiones que habra que cerrar en EPIC 2
 
@@ -114,7 +121,7 @@ Ejemplo conceptual:
 - donde se persiste el perfil en el MVP
 - como se edita el perfil una vez creado
 - que mensaje exacto se muestra cuando el usuario hace skip
-- si `historial`, `ver_luego` y `titulos_descartados` entran ya en implementacion o se dejan solo como estructura preparada
+- cual es la salida minima tras completar o saltar el onboarding mientras la shell completa queda fuera de alcance
 
 ## Definicion de hecho provisional
 
@@ -125,3 +132,4 @@ EPIC 2 podra darse por bien encaminado cuando:
 - quede claro que el usuario puede saltarse preguntas sin romper el flujo
 - frontend y backend compartan el mismo shape de datos del perfil
 - quede clara la semantica de lectura y escritura del perfil desde frontend
+- quede documentado que historico, favoritos y memoria para mejorar el top 3 no se resuelven en EPIC 2
