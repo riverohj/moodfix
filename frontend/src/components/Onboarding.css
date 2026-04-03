@@ -91,6 +91,7 @@
 .nav-arrow:hover {
   background: rgba(139, 0, 0, 0.6);
   border-color: rgba(229, 9, 20, 0.8);
+  transform: translateY(-50%) !important; /* Bloqueo extra */
 }
 
 .nav-arrow:hover .arrow-text { 
@@ -100,6 +101,7 @@
 .nav-arrow:active {
   background: #E50914 !important;
   box-shadow: 0 0 25px rgba(229, 9, 20, 0.5);
+  transform: translateY(-50%) !important; /* Bloqueo extra */
 }
 
 .nav-arrow.left { left: -110px; }
@@ -137,19 +139,34 @@
 }
 
 .platform-img-wrapper {
-  width: 100%;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
+  width: 100% !important;
+  /* Aumentamos la altura para que el logo se vea grande */
+  height: 75px !important; 
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 8px !important;
+  /* Quitamos cualquier padding que achique la imagen */
+  padding: 0 !important; 
+  overflow: hidden !important;
+  border-radius: 12px !important; /* Bordes redondeados en el contenedor */
 }
 
-.platform-img-wrapper img {
-  max-width: 85%;
-  max-height: 100%;
-  object-fit: contain;
-  /* Eliminado: filter: brightness(0) invert(1) para recuperar colores */
+/* MODIFICACIÓN: Nueva regla para unificar tamaño y bordes redondeados de las imágenes JPG/PNG descargadas */
+.platform-logo-img {
+  width: 100% !important;
+  height: 100% !important;
+  /* 'cover' es lo único que garantiza que todas midan lo mismo */
+  object-fit: cover !important; 
+  /* Esto ayuda a que no se vea borroso al escalar */
+  image-rendering: high-quality !important; 
+  display: block !important;
+}
+
+.platform-card {
+  /* Ajustamos el padding del card para que el logo respire */
+  padding: 12px !important;
+  min-height: 130px !important;
 }
 
 /* Logos específicos que necesitan fondo sutil para resaltar su color */
@@ -343,6 +360,69 @@
   to { opacity: 1; }
 }
 
+
+
+/* EL GRID DE LAS 9 OPCIONES (3x3) */
+.no-rotundos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+/* El botón de valiente ocupando el espacio de abajo sin estropearse */
+.btn-valiente {
+  grid-column: span 3;
+  margin-top: 10px;
+}
+
+/* FIX PARA EL BORROSO: Quitamos filtros pesados en el hover de estos botones */
+.option-btn:hover {
+  filter: none !important; 
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.option-btn.selected {
+  background: #E50914 !important;
+  border-color: #E50914;
+  box-shadow: none !important; /* Evita que el resplandor lo emborrone */
+}
+
+/* MODAL Y SKIP - RESTAURADOS AL ORIGINAL */
+.skip-btn {
+  background: transparent;
+  border: 1px solid #E50914;
+  color: #E50914;
+  padding: 10px 35px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.skip-btn:hover { color: #888; border-color: #333; }
+
+.modal-content-custom h2 { color: #fff; font-size: 1.7rem; margin-bottom: 15px; }
+.modal-content-custom p { color: #888; line-height: 1.6; margin-bottom: 35px; }
+.modal-btn-back {
+  background: #E50914;
+  border: none;
+  color: #fff;
+  padding: 18px;
+  border-radius: 100px;
+  cursor: pointer;
+  font-weight: 800;
+}
+.modal-btn-skip-anyway {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #666;
+  padding: 14px;
+  border-radius: 100px;
+  cursor: pointer;
+}
+
 /* ============================================================
    RESPONSIVE - TEXTOS SIEMPRE VISIBLES
    ============================================================ */
@@ -362,13 +442,29 @@
     position: absolute;
     top: auto;
     bottom: 20px;
-    transform: none;
+    transform: none !important;
     background: rgba(30, 0, 0, 0.6);
     backdrop-filter: blur(10px);
+  }
+
+  .nav-arrow:hover {
+    transform: none !important; /* Bloqueo total de movimiento */
+  }
+
+  .nav-arrow:active {
+    /* Mismo feedback de "hundido" sin desplazarse */
+    transform: scale(0.98) !important; 
   }
   .nav-arrow.left { left: 10px; }
   .nav-arrow.right { right: 10px; }
   .arrow-text { font-size: 0.65rem; }
+
+  .nav-arrow.right.btn-finish {
+    transform: none !important;
+  }
+  .nav-arrow.right.btn-finish:active {
+    transform: scale(0.98) !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -388,4 +484,9 @@
   }
 
   .modal-content-custom { width: 95%; padding: 30px 20px; }
+}
+
+@media (max-width: 600px) {
+  .no-rotundos-grid { grid-template-columns: repeat(2, 1fr); }
+  .btn-valiente { grid-column: span 2; }
 }
