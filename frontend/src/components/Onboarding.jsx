@@ -30,20 +30,21 @@ const platformLogos = {
 };
 
 function AutocompleteField({ step, draftValue, onSelect }) {
-  const [query, setQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showOptions, setShowOptions] = useState(false);
+  const selectedValues = Array.isArray(draftValue) ? draftValue : [];
 
   useEffect(() => {
     if (step.type === "single-search") {
-      setQuery(draftValue ? optionLabelByValue(step.options, draftValue) : "");
+      setSearchTerm(draftValue ? optionLabelByValue(step.options, draftValue) : "");
     } else {
-      setQuery("");
+      setSearchTerm("");
     }
     setShowOptions(false);
-  }, [draftValue, step.id, step.options, step.type]);
+  }, [draftValue, step.options, step.type]);
 
   const filteredOptions = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+    const normalizedQuery = searchTerm.trim().toLowerCase();
     if (!normalizedQuery) {
       return step.options;
     }
@@ -51,93 +52,75 @@ function AutocompleteField({ step, draftValue, onSelect }) {
     return step.options.filter((option) =>
       option.label.toLowerCase().includes(normalizedQuery),
     );
-  }, [query, step.options]);
+  }, [searchTerm, step.options]);
 
-  if (step.type === "single-search") {
-    return (
-      <div className="lourdes-autocomplete-wrapper">
-        <input
-          className="lourdes-onboarding-input"
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setShowOptions(true);
-          }}
-          onFocus={() => setShowOptions(true)}
-          placeholder="Escribe aqui..."
-          value={query}
-        />
-        {showOptions && query.trim() ? (
-          <div className="lourdes-autocomplete-dropdown">
-            {filteredOptions.map((option) => (
-              <button
-                key={option.value}
-                className="lourdes-autocomplete-item"
-                type="button"
-                onClick={() => {
-                  onSelect(step.id, option.value);
-                  setQuery(option.label);
-                  setShowOptions(false);
-                }}
-              >
-                <span>{option.label}</span>
-                <small>{option.value}</small>
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    );
+  function handleSelect(option) {
+    if (step.type === "multi-search") {
+      const nextValues = selectedValues.includes(option.value)
+        ? selectedValues.filter((value) => value !== option.value)
+        : [...selectedValues, option.value];
+      onSelect(step.id, nextValues);
+      setSearchTerm("");
+      return;
+    }
+
+    onSelect(step.id, option.value);
+    setSearchTerm(option.label);
+    setShowOptions(false);
   }
 
-  const selectedValues = Array.isArray(draftValue) ? draftValue : [];
-
   return (
-    <div className="lourdes-autocomplete-wrapper">
+    <div className="autocomplete-wrapper">
       <input
-        className="lourdes-onboarding-input"
+        className="onboarding-input"
         onChange={(event) => {
-          setQuery(event.target.value);
+          setSearchTerm(event.target.value);
           setShowOptions(true);
         }}
         onFocus={() => setShowOptions(true)}
-        placeholder="Busca uno o varios idiomas..."
-        value={query}
+        placeholder={step.placeholder}
+        value={searchTerm}
       />
-      <div className="lourdes-chip-list">
-        {selectedValues.length > 0 ? (
-          selectedValues.map((value) => (
-            <span className="lourdes-chip" key={value}>
+
+      {step.type === "multi-search" && selectedValues.length > 0 ? (
+        <div className="options-grid" style={{ marginTop: 16 }}>
+          {selectedValues.map((value) => (
+            <button
+              className="option-btn selected"
+              key={value}
+              type="button"
+              onClick={() =>
+                onSelect(
+                  step.id,
+                  selectedValues.filter((currentValue) => currentValue !== value),
+                )
+              }
+            >
               {optionLabelByValue(LANGUAGE_OPTIONS, value)}
-            </span>
-          ))
-        ) : (
-          <span className="lourdes-chip-placeholder">Sin idiomas seleccionados todavia</span>
-        )}
-      </div>
-      {showOptions ? (
-        <div className="lourdes-autocomplete-dropdown">
-          {filteredOptions.map((option) => {
-            const selected = selectedValues.includes(option.value);
-            return (
-              <button
-                key={option.value}
-                className={`lourdes-autocomplete-item ${selected ? "selected" : ""}`}
-                type="button"
-                onClick={() => {
-                  onSelect(
-                    step.id,
-                    selected
-                      ? selectedValues.filter((value) => value !== option.value)
-                      : [...selectedValues, option.value],
-                  );
-                  setQuery("");
-                }}
-              >
-                <span>{option.label}</span>
-                <small>{option.value}</small>
-              </button>
-            );
-          })}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {showOptions && searchTerm.trim() ? (
+        <div className="autocomplete-dropdown">
+          {filteredOptions.map((option) => (
+            <div
+              className="autocomplete-item"
+              key={option.value}
+              onClick={() => handleSelect(option)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleSelect(option);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              {option.label}
+            </div>
+          ))}
         </div>
       ) : null}
     </div>
@@ -146,33 +129,31 @@ function AutocompleteField({ step, draftValue, onSelect }) {
 
 function PlatformsField({ draftValue, onSelect }) {
   const selectedValues = Array.isArray(draftValue) ? draftValue : [];
+
   return (
-    <div className="lourdes-platforms-container">
+    <div className="platforms-container">
       {PLATFORM_OPTIONS.map((platform) => {
         const selected = selectedValues.includes(platform.value);
         return (
           <button
+            className={`platform-card ${selected ? "selected" : ""}`}
             key={platform.value}
-            className={`lourdes-platform-card ${selected ? "selected" : ""}`}
             type="button"
-            onClick={() =>
-              onSelect(
-                "plataformas",
-                selected
-                  ? selectedValues.filter((value) => value !== platform.value)
-                  : [...selectedValues, platform.value],
-              )
-            }
+            onClick={() => {
+              const nextValues = selected
+                ? selectedValues.filter((value) => value !== platform.value)
+                : [...selectedValues, platform.value];
+              onSelect("plataformas", nextValues);
+            }}
           >
-            <div className="lourdes-platform-img-wrapper">
+            <div className="platform-img-wrapper">
               <img
                 alt={platform.label}
-                className="lourdes-platform-logo-img"
+                className="platform-logo-img"
                 src={platformLogos[platform.value]}
               />
             </div>
-            <span className="lourdes-platform-name">{platform.label}</span>
-            <small className="lourdes-option-meta">{platform.value}</small>
+            <span className="platform-name">{platform.label}</span>
           </button>
         );
       })}
@@ -182,16 +163,15 @@ function PlatformsField({ draftValue, onSelect }) {
 
 function SingleChoiceField({ step, draftValue, onSelect }) {
   return (
-    <div className="lourdes-vertical-options">
+    <div className="vertical-options">
       {step.options.map((option) => (
         <button
+          className={`option-btn-long ${draftValue === option.value ? "selected" : ""}`}
           key={option.value}
-          className={`lourdes-option-btn-long ${draftValue === option.value ? "selected" : ""}`}
           type="button"
           onClick={() => onSelect(step.id, option.value)}
         >
-          <span>{option.label}</span>
-          <small className="lourdes-option-meta">{option.value}</small>
+          {option.label}
         </button>
       ))}
     </div>
@@ -200,37 +180,32 @@ function SingleChoiceField({ step, draftValue, onSelect }) {
 
 function HardNoField({ step, draftValue, onSelect }) {
   const selectedValues = Array.isArray(draftValue) ? draftValue : [];
+
   return (
-    <div className="lourdes-no-rotundos-layout">
-      <div className="lourdes-no-rotundos-grid">
-        {step.options.map((option) => {
-          const selected = selectedValues.includes(option.value);
-          return (
-            <button
-              key={option.value}
-              className={`lourdes-option-btn ${selected ? "selected" : ""}`}
-              type="button"
-              onClick={() =>
-                onSelect(
-                  step.id,
-                  selected
-                    ? selectedValues.filter((value) => value !== option.value)
-                    : [...selectedValues, option.value],
-                )
-              }
-            >
-              <span>{option.label}</span>
-              <small className="lourdes-option-meta">{option.value}</small>
-            </button>
-          );
-        })}
+    <div className="no-rotundos-layout">
+      <div className="no-rotundos-grid">
+        {step.options.map((option) => (
+          <button
+            className={`option-btn ${selectedValues.includes(option.value) ? "selected" : ""}`}
+            key={option.value}
+            type="button"
+            onClick={() => {
+              const nextValues = selectedValues.includes(option.value)
+                ? selectedValues.filter((value) => value !== option.value)
+                : [...selectedValues, option.value];
+              onSelect(step.id, nextValues);
+            }}
+          >
+            {option.label}
+          </button>
+        ))}
       </div>
       <button
-        className={`lourdes-option-btn lourdes-btn-clear ${selectedValues.length === 0 ? "selected" : ""}`}
+        className={`option-btn btn-valiente ${selectedValues.length === 0 ? "selected" : ""}`}
         type="button"
         onClick={() => onSelect(step.id, [])}
       >
-        Ninguno, por ahora
+        Ninguno, soy valiente
       </button>
     </div>
   );
@@ -243,34 +218,32 @@ export default function Onboarding({
   onFieldChange,
   onPrevious,
   onSkip,
-  profile,
   savingStep,
   stepIndex,
 }) {
   const currentStep = ONBOARDING_STEPS[stepIndex];
-  const currentValue = draft[currentStep.id];
   const [showSkipModal, setShowSkipModal] = useState(false);
 
   return (
-    <div className="lourdes-onboarding-wrapper">
+    <div className="onboarding-wrapper">
       {showSkipModal ? (
-        <div className="lourdes-modal-overlay-fixed">
-          <div className="lourdes-modal-content-custom">
-            <h2>Seguro que quieres saltar?</h2>
+        <div className="modal-overlay-fixed">
+          <div className="modal-content-custom">
+            <h2>¿Seguro que quieres saltar? 🛑</h2>
             <p>
-              Si no completas el perfil ahora, las recomendaciones saldran con menos
-              precision. Podras volver mas tarde y editarlo sin perder la cuenta.
+              Si no completas el perfil ahora, tus recomendaciones serán más genéricas.
+              Pero no te preocupes, siempre podrás completarlo más tarde.
             </p>
-            <div className="lourdes-modal-actions-custom">
+            <div className="modal-actions-custom">
               <button
-                className="lourdes-modal-btn-back"
+                className="modal-btn-back"
                 type="button"
                 onClick={() => setShowSkipModal(false)}
               >
-                Volver al test
+                VOLVER AL TEST
               </button>
               <button
-                className="lourdes-modal-btn-skip-anyway"
+                className="modal-btn-skip-anyway"
                 disabled={savingStep}
                 type="button"
                 onClick={async () => {
@@ -278,85 +251,77 @@ export default function Onboarding({
                   setShowSkipModal(false);
                 }}
               >
-                Saltar de todos modos
+                SALTAR POR AHORA
               </button>
             </div>
           </div>
         </div>
       ) : null}
 
-      <div className="lourdes-onboarding-container">
+      <div className="onboarding-container">
         <button
-          className={`lourdes-nav-arrow left ${stepIndex === 0 ? "hidden" : ""}`}
+          className={`nav-arrow left ${stepIndex === 0 ? "hidden" : ""}`}
+          disabled={stepIndex === 0}
           type="button"
           onClick={onPrevious}
         >
-          <span className="lourdes-arrow-icon">&lt;</span>
-          <span className="lourdes-arrow-text">Anterior</span>
+          <span className="arrow-icon">&lt;</span>
+          <span className="arrow-text">ANTERIOR</span>
         </button>
 
-        <div className="lourdes-onboarding-card">
-          <div className="lourdes-card-header">
-            <div className="lourdes-step-eyebrow">
-              Paso {stepIndex + 1} de {ONBOARDING_STEPS.length}
-              {profile?.onboarding_skipped ? " · perfil reabierto" : ""}
-            </div>
-            <h1 className="lourdes-onboarding-title">{currentStep.title}</h1>
-            <p className="lourdes-complice-box">{currentStep.description}</p>
+        <div className="onboarding-card">
+          <div className="card-header">
+            <h1 className="onboarding-title">{currentStep.title}</h1>
+            <p className="complice-box">{currentStep.description}</p>
           </div>
 
-          <div className="lourdes-responses-zone">
+          <div className="responses-zone">
             {currentStep.type === "single-search" || currentStep.type === "multi-search" ? (
               <AutocompleteField
-                draftValue={currentValue}
+                draftValue={draft[currentStep.id]}
                 onSelect={onFieldChange}
                 step={currentStep}
               />
             ) : null}
 
             {currentStep.id === "plataformas" ? (
-              <PlatformsField draftValue={currentValue} onSelect={onFieldChange} />
+              <PlatformsField draftValue={draft[currentStep.id]} onSelect={onFieldChange} />
             ) : null}
 
             {currentStep.type === "single-choice" ? (
               <SingleChoiceField
-                draftValue={currentValue}
+                draftValue={draft[currentStep.id]}
                 onSelect={onFieldChange}
                 step={currentStep}
               />
             ) : null}
 
             {currentStep.id === "no_rotundos" ? (
-              <HardNoField draftValue={currentValue} onSelect={onFieldChange} step={currentStep} />
+              <HardNoField
+                draftValue={draft[currentStep.id]}
+                onSelect={onFieldChange}
+                step={currentStep}
+              />
             ) : null}
           </div>
 
-          <div className="lourdes-selection-note">
-            <span>Valor tecnico actual:</span>
-            <code>{JSON.stringify(currentValue)}</code>
-          </div>
-
-          <div className="lourdes-skip-footer">
-            <button
-              className="lourdes-skip-btn"
-              type="button"
-              onClick={() => setShowSkipModal(true)}
-            >
-              Skip
+          <div className="skip-footer">
+            <button className="skip-btn" type="button" onClick={() => setShowSkipModal(true)}>
+              SKIP
             </button>
           </div>
         </div>
 
         <button
-          className={`lourdes-nav-arrow right ${isLastStep ? "btn-finish" : ""}`}
+          className={`nav-arrow right ${isLastStep ? "btn-finish" : ""}`}
           disabled={savingStep}
           type="button"
           onClick={onAdvance}
         >
-          <span className="lourdes-arrow-text">
-            {savingStep ? "Guardando..." : isLastStep ? "Finalizar" : "Siguiente"}
+          <span className="arrow-text">
+            {savingStep ? "GUARDANDO" : isLastStep ? "FINALIZAR" : "SIGUIENTE"}
           </span>
-          <span className="lourdes-arrow-icon">{isLastStep ? "✓" : ">"}</span>
+          <span className="arrow-icon">{isLastStep ? "✓" : ">"}</span>
         </button>
       </div>
     </div>

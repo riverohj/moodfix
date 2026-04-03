@@ -9,7 +9,6 @@ import {
 } from "./config/onboarding";
 import Onboarding from "./components/Onboarding";
 import {
-  getApiBaseUrl,
   getAuthenticatedUser,
   getProfile,
   loginUser,
@@ -61,6 +60,7 @@ export default function App() {
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [savingStep, setSavingStep] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -91,6 +91,7 @@ export default function App() {
       setProfile(profilePayload.item);
       setDraft(mergeProfileIntoDraft(profilePayload.item));
       setStepIndex(firstIncompleteStepIndex(profilePayload.item));
+      setShowProfilePanel(false);
       window.localStorage.setItem(AUTH_TOKEN_KEY, nextToken);
     } catch (sessionError) {
       window.localStorage.removeItem(AUTH_TOKEN_KEY);
@@ -113,7 +114,7 @@ export default function App() {
         authMode === "register"
           ? await registerUser(email, password)
           : await loginUser(email, password);
-      setMessage(authMode === "register" ? "Cuenta creada. Vamos al onboarding." : "Sesion iniciada.");
+      setMessage(authMode === "register" ? "Cuenta creada. Vamos al onboarding." : "Sesión iniciada.");
       await bootstrapSession(payload.auth.access_token);
     } catch (authError) {
       setError(authError.message);
@@ -128,7 +129,7 @@ export default function App() {
         await logoutUser(token);
       }
     } catch {
-      // Si el token ya no es valido, limpiamos el estado igualmente.
+      // Si el token ya no es válido, limpiamos el estado igualmente.
     } finally {
       window.localStorage.removeItem(AUTH_TOKEN_KEY);
       setToken(null);
@@ -138,7 +139,8 @@ export default function App() {
       setEmail("");
       setPassword("");
       setEditing(false);
-      setMessage("Sesion cerrada.");
+      setShowProfilePanel(false);
+      setMessage("Sesión cerrada.");
       setError("");
     }
   }
@@ -172,11 +174,12 @@ export default function App() {
       const response = await patchProfile(token, payload);
       setProfile(response.item);
       setDraft(mergeProfileIntoDraft(response.item));
-      setMessage(markCompleted ? "Perfil guardado. Onboarding completado." : "Paso guardado.");
+      setMessage(markCompleted ? "Perfil guardado. Ya puedes seguir." : "Paso guardado.");
       if (!markCompleted) {
         setStepIndex((currentValue) => Math.min(currentValue + 1, ONBOARDING_STEPS.length - 1));
       } else {
         setEditing(false);
+        setShowProfilePanel(false);
       }
     } catch (saveError) {
       setError(saveError.message);
@@ -197,7 +200,8 @@ export default function App() {
       setProfile(response.item);
       setDraft(mergeProfileIntoDraft(response.item));
       setEditing(false);
-      setMessage("Onboarding omitido. Siempre podras completarlo mas tarde.");
+      setShowProfilePanel(false);
+      setMessage("Has saltado este paso por ahora. Podrás completarlo más tarde.");
     } catch (skipError) {
       setError(skipError.message);
     } finally {
@@ -207,7 +211,20 @@ export default function App() {
 
   function startEditing() {
     setEditing(true);
+    setShowProfilePanel(false);
     setStepIndex(firstIncompleteStepIndex(draft));
+    setMessage("");
+    setError("");
+  }
+
+  function openProfilePanel() {
+    setShowProfilePanel(true);
+    setMessage("");
+    setError("");
+  }
+
+  function closeProfilePanel() {
+    setShowProfilePanel(false);
     setMessage("");
     setError("");
   }
@@ -217,8 +234,8 @@ export default function App() {
       <main className="app-shell">
         <section className="panel panel-centered">
           <p className="eyebrow">MoodFix</p>
-          <h1>Cargando sesion y perfil...</h1>
-          <p className="lead">Conectando con {getApiBaseUrl()}</p>
+          <h1>Cargando sesión y perfil...</h1>
+          <p className="lead">Estamos preparando tu experiencia.</p>
         </section>
       </main>
     );
@@ -226,31 +243,17 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <section className="panel hero-panel">
-        <p className="eyebrow">MoodFix</p>
-        <h1>Perfil estable y onboarding conectados al backend</h1>
-        <p className="lead">
-          Este flujo ya trabaja contra la API real de auth y profile. Los valores del
-          formulario siguen el contrato tecnico del proyecto.
-        </p>
-        <div className="status-row">
-          <span className="status-pill">API: {getApiBaseUrl()}</span>
-          <span className="status-pill">Pais: ISO alpha-2</span>
-          <span className="status-pill">Plataformas: provider_id</span>
-          <span className="status-pill">No rotundos: genre_id</span>
-        </div>
-      </section>
-
       {error ? <div className="feedback feedback-error">{error}</div> : null}
       {message ? <div className="feedback feedback-success">{message}</div> : null}
 
       {!token ? (
         <section className="panel auth-layout">
           <div className="auth-copy">
-            <h2>Entrar antes del onboarding</h2>
+            <p className="eyebrow">MoodFix</p>
+            <h2>Antes de empezar, entra en tu cuenta</h2>
             <p>
-              EPIC 2 deja el perfil estable detras de autenticacion. Primero
-              registramos o iniciamos sesion y despues persistimos el onboarding.
+              Queremos guardar tus preferencias para que las recomendaciones tengan continuidad
+              cada vez que vuelvas.
             </p>
           </div>
 
@@ -305,39 +308,66 @@ export default function App() {
           </form>
         </section>
       ) : (
-        <section className="panel onboarding-layout">
-          <header className="profile-header">
-            <div>
-              <p className="eyebrow">Usuario autenticado</p>
-              <h2>{user?.email}</h2>
-            </div>
-            <button className="ghost-button" type="button" onClick={handleLogout}>
-              Cerrar sesion
-            </button>
-          </header>
-
+        <section className="onboarding-flow-shell">
           {!editing && onboardingDone ? (
-            <section className="summary-card">
-              <h3>Perfil estable listo</h3>
-              <p>
-                El onboarding ya esta guardado. Puedes reabrirlo para editar cualquier
-                campo o seguir usando este estado como base del motor.
-              </p>
+            <section className="panel onboarding-layout">
+              <header className="profile-header profile-header-plain">
+                <div>
+                  <p className="eyebrow">MoodFix</p>
+                  <h2>{user?.email}</h2>
+                </div>
+                <div className="header-actions">
+                  {showProfilePanel ? (
+                    <button className="ghost-button" type="button" onClick={closeProfilePanel}>
+                      Volver
+                    </button>
+                  ) : (
+                    <button className="ghost-button" type="button" onClick={openProfilePanel}>
+                      Ver perfil
+                    </button>
+                  )}
+                  <button className="ghost-button" type="button" onClick={handleLogout}>
+                    Cerrar sesión
+                  </button>
+                </div>
+              </header>
+              {showProfilePanel ? (
+                <section className="summary-card">
+                  <h3>Tu perfil estable</h3>
+                  <p>
+                    Aquí puedes revisar lo que has guardado y volver a editarlo cuando quieras.
+                  </p>
 
-              <dl className="summary-grid">
-                {ONBOARDING_STEPS.map((step) => (
-                  <div key={step.id}>
-                    <dt>{PROFILE_FIELD_LABELS[step.id]}</dt>
-                    <dd>{formatSelection(step, profile?.[step.id]) || "Sin definir"}</dd>
+                  <dl className="summary-grid">
+                    {ONBOARDING_STEPS.map((step) => (
+                      <div key={step.id}>
+                        <dt>{PROFILE_FIELD_LABELS[step.id]}</dt>
+                        <dd>{formatSelection(step, profile?.[step.id]) || "Sin definir"}</dd>
+                      </div>
+                    ))}
+                  </dl>
+
+                  <div className="summary-actions">
+                    <button className="primary-button" type="button" onClick={startEditing}>
+                      Editar perfil
+                    </button>
                   </div>
-                ))}
-              </dl>
-
-              <div className="summary-actions">
-                <button className="primary-button" type="button" onClick={startEditing}>
-                  Editar perfil
-                </button>
-              </div>
+                </section>
+              ) : (
+                <section className="summary-card post-onboarding-card">
+                  <h3>{profile?.onboarding_skipped ? "Seguimos cuando quieras" : "Ya está listo"}</h3>
+                  <p>
+                    {profile?.onboarding_skipped
+                      ? "Has decidido saltarte este paso por ahora. Más adelante podrás completar tu perfil desde “Ver perfil”."
+                      : "Ya hemos guardado tus preferencias básicas. Si quieres revisarlas o cambiarlas, las tienes en “Ver perfil”."}
+                  </p>
+                  <div className="post-onboarding-actions">
+                    <button className="primary-button" type="button" onClick={openProfilePanel}>
+                      Ver perfil
+                    </button>
+                  </div>
+                </section>
+              )}
             </section>
           ) : (
             <Onboarding

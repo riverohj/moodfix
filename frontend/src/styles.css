@@ -1,9 +1,6 @@
 :root {
   color: #f5efe3;
-  background:
-    radial-gradient(circle at top, rgba(246, 189, 96, 0.12), transparent 25%),
-    radial-gradient(circle at bottom left, rgba(155, 34, 38, 0.2), transparent 32%),
-    linear-gradient(180deg, #120f11 0%, #1b1718 42%, #211a1c 100%);
+  background: #200406;
   font-family: "Avenir Next", "Segoe UI", sans-serif;
 }
 
@@ -15,6 +12,42 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background:
+    radial-gradient(circle at 22% 24%, rgba(210, 10, 20, 0.34), transparent 24%),
+    radial-gradient(circle at 80% 78%, rgba(178, 15, 22, 0.28), transparent 24%),
+    radial-gradient(circle at 58% 58%, rgba(122, 7, 13, 0.22), transparent 30%),
+    linear-gradient(180deg, #2a0507 0%, #591015 48%, #430b0f 100%);
+  color: #f5efe3;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: auto;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.55;
+  z-index: -1;
+}
+
+body::before {
+  width: 40vw;
+  height: 40vw;
+  left: 4vw;
+  top: 18vh;
+  background:
+    radial-gradient(circle, rgba(255, 34, 34, 0.24) 0%, rgba(123, 0, 0, 0.2) 38%, transparent 72%);
+}
+
+body::after {
+  width: 42vw;
+  height: 42vw;
+  right: 2vw;
+  bottom: 6vh;
+  background:
+    radial-gradient(circle, rgba(255, 49, 49, 0.2) 0%, rgba(133, 0, 0, 0.18) 42%, transparent 72%);
 }
 
 button,
@@ -27,11 +60,40 @@ button {
 }
 
 .app-shell {
+  position: relative;
   min-height: 100vh;
   padding: 28px 18px 48px;
+  overflow: hidden;
+}
+
+.app-shell::before,
+.app-shell::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(120px);
+  z-index: 0;
+}
+
+.app-shell::before {
+  width: 26rem;
+  height: 26rem;
+  left: 10%;
+  top: 18%;
+  background: rgba(255, 20, 20, 0.12);
+}
+
+.app-shell::after {
+  width: 28rem;
+  height: 28rem;
+  right: 8%;
+  bottom: 10%;
+  background: rgba(255, 30, 30, 0.12);
 }
 
 .panel {
+  position: relative;
   width: min(1100px, 100%);
   margin: 0 auto 22px;
   border: 1px solid rgba(245, 239, 227, 0.08);
@@ -137,6 +199,13 @@ h3 {
   padding: 28px;
 }
 
+.onboarding-flow-shell {
+  position: relative;
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  z-index: 1;
+}
+
 .auth-layout {
   grid-template-columns: 1fr minmax(320px, 420px);
   align-items: start;
@@ -235,6 +304,18 @@ h3 {
   gap: 12px;
   align-items: center;
   justify-content: space-between;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.profile-header-plain {
+  width: min(1100px, 100%);
+  margin: 0 auto 18px;
+  padding: 0 10px;
 }
 
 .step-meta {
@@ -337,6 +418,20 @@ h3 {
   line-height: 1.5;
 }
 
+.post-onboarding-card {
+  text-align: center;
+}
+
+.post-onboarding-card p {
+  margin: 0 auto;
+}
+
+.post-onboarding-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
 @media (max-width: 860px) {
   .auth-layout {
     grid-template-columns: 1fr;
@@ -346,6 +441,11 @@ h3 {
   .step-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
   }
 
   .step-actions-right {
