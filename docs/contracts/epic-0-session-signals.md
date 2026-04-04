@@ -111,6 +111,14 @@ Este documento define las señales situacionales de la sesion. Su funcion es cer
 - Recoge `preferencia_epoca`
 - Debe generar un payload de sesion consistente y reutilizable
 
+## Handoff guest -> autenticado
+
+- si un usuario responde preguntas de sesion sin login y se autentica justo antes del resultado, esas respuestas no deben perderse
+- este handoff pertenece a la capa de `sessions`, no al perfil estable ni a `user_profiles`
+- para MVP puede resolverse guardando temporalmente el payload en frontend hasta login y reenviandolo despues autenticado
+- si mas adelante se quiere robustecer, puede resolverse con una `guest session` persistida en backend y vinculada al usuario tras autenticacion
+- esta decision operativa debe cerrarse en implementacion de EPIC 3 y no en EPIC 2
+
 ## Estado
 
 Las senales de sesion quedan cerradas para MVP. La validacion con ejemplos reales del catalogo se hara ya en fase de implementacion y prueba, no como parte del contrato.

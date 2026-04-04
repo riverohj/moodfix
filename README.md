@@ -10,7 +10,7 @@ Este repositorio arranca con un boilerplate full stack sencillo:
 
 ## Objetivo de esta base
 
-Esta primera version no implementa todavia el producto. Solo deja preparado el entorno tecnico y organizativo para que un equipo de 4 personas pueda trabajar en paralelo con orden y rapidez.
+La base ya no es solo boilerplate. A dia de hoy incluye catalogo local validado, backend comun para el equipo y la integracion en curso del onboarding estable con auth y perfil.
 
 ## Estructura
 
@@ -45,6 +45,13 @@ npm install
 npm run dev
 ```
 
+Si necesitas apuntar el frontend a otro backend, usa `VITE_API_BASE_URL`.
+Por defecto la app trabaja contra:
+
+```bash
+VITE_API_BASE_URL=http://localhost:5001/api
+```
+
 ## Convenciones de trabajo
 
 - Ramas cortas por tarea: `feat/...`, `fix/...`, `docs/...`, `chore/...`
@@ -72,7 +79,7 @@ Endpoint minimo de consulta de catalogo:
 
 ## Siguientes pasos
 
-1. Crear el repositorio remoto en GitHub.
-2. Invitar al resto del equipo.
-3. Instalar dependencias y comprobar que frontend y backend arrancan.
-4. Cerrar la taxonomia inicial del MVP antes de tocar la logica de producto.
+1. Mergear EPIC 2 backend auth y perfil en `main`.
+2. Validar la integracion real del onboarding frontend contra la API.
+3. Cerrar EPIC 2 con flujo completo de registro o login, onboarding y re-edicion.
+4. Pasar despues a EPIC 3 para preguntas de sesion y handoff guest -> autenticado.

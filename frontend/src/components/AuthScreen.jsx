@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import "./AuthScreen.css";
 
@@ -7,50 +7,26 @@ function LockIcon({ accent = false }) {
     <svg
       aria-hidden="true"
       className={`auth-svg-icon ${accent ? "auth-svg-icon-accent" : ""}`}
-      viewBox="0 0 24 24"
       fill="none"
+      viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
       <rect
-        x="5"
-        y="10"
-        width="14"
         height="10"
         rx="2.5"
         stroke="currentColor"
         strokeWidth="1.7"
+        width="14"
+        x="5"
+        y="10"
       />
       <path
         d="M8 10V7.5C8 5.57 9.57 4 11.5 4H12.5C14.43 4 16 5.57 16 7.5V10"
         stroke="currentColor"
-        strokeWidth="1.7"
         strokeLinecap="round"
-      />
-      <path d="M12 14V16.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function UserIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="auth-svg-icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12Z"
-        stroke="currentColor"
         strokeWidth="1.7"
       />
-      <path
-        d="M5 19C6.46 16.61 9 15.2 12 15.2C15 15.2 17.54 16.61 19 19"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
+      <path d="M12 14V16.5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.7" />
     </svg>
   );
 }
@@ -60,38 +36,53 @@ function MailIcon() {
     <svg
       aria-hidden="true"
       className="auth-svg-icon"
-      viewBox="0 0 24 24"
       fill="none"
+      viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect x="4" y="6" width="16" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.7" />
+      <rect height="12" rx="2.5" stroke="currentColor" strokeWidth="1.7" width="16" x="4" y="6" />
       <path
         d="M5.5 7.5L12 12.5L18.5 7.5"
         stroke="currentColor"
-        strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
+        strokeWidth="1.7"
       />
     </svg>
   );
 }
 
-export default function AuthScreen() {
+export default function AuthScreen({
+  loginError,
+  loginMessage,
+  signupError,
+  signupMessage,
+  onLogin,
+  onRegister,
+  submitting,
+}) {
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
   });
-
   const [signupForm, setSignupForm] = useState({
-    username: "",
     email: "",
     password: "",
     confirmPassword: "",
     acceptedTerms: false,
   });
+  const [localError, setLocalError] = useState("");
+
+  const visibleSignupError = localError || signupError;
+  const signupPasswordsMatch = useMemo(
+    () =>
+      signupForm.confirmPassword.length === 0 || signupForm.password === signupForm.confirmPassword,
+    [signupForm.confirmPassword, signupForm.password],
+  );
 
   function handleLoginChange(event) {
     const { name, value } = event.target;
+    setLocalError("");
     setLoginForm((current) => ({
       ...current,
       [name]: value,
@@ -99,70 +90,82 @@ export default function AuthScreen() {
   }
 
   function handleSignupChange(event) {
-    const { name, value, type, checked } = event.target;
+    const { checked, name, type, value } = event.target;
+    setLocalError("");
     setSignupForm((current) => ({
       ...current,
       [name]: type === "checkbox" ? checked : value,
     }));
   }
 
-  function handleLoginSubmit(event) {
+  async function handleLoginSubmit(event) {
     event.preventDefault();
-    console.log("Login form:", loginForm);
+    setLocalError("");
+    await onLogin(loginForm.email, loginForm.password);
   }
 
-  function handleSignupSubmit(event) {
+  async function handleSignupSubmit(event) {
     event.preventDefault();
-    console.log("Signup form:", signupForm);
+
+    if (signupForm.password !== signupForm.confirmPassword) {
+      setLocalError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    setLocalError("");
+    await onRegister(signupForm.email, signupForm.password);
   }
 
   return (
-    <main className="auth-screen">
+    <section className="auth-screen">
       <div className="auth-noise" />
 
       <div className="auth-layout">
         <section className="auth-card">
-          <h2 className="auth-title">Inicia sesion</h2>
+          <h2 className="auth-title">Inicia sesión</h2>
+
+          {loginMessage ? <div className="auth-feedback auth-feedback-success">{loginMessage}</div> : null}
+          {loginError ? <div className="auth-feedback auth-feedback-error">{loginError}</div> : null}
 
           <form className="auth-form" onSubmit={handleLoginSubmit}>
             <label className="auth-field">
               <span>Email</span>
               <div className="auth-input-shell">
-                <span className="auth-input-icon" aria-hidden="true">
+                <span aria-hidden="true" className="auth-input-icon">
                   <MailIcon />
                 </span>
                 <input
                   autoComplete="email"
                   name="email"
+                  onChange={handleLoginChange}
+                  placeholder="superman@moodfix.com"
                   required
                   type="email"
-                  placeholder="palomitas_fans@cinematch.es"
                   value={loginForm.email}
-                  onChange={handleLoginChange}
                 />
               </div>
             </label>
 
             <label className="auth-field">
-              <span>Contrasena</span>
+              <span>Contraseña</span>
               <div className="auth-input-shell">
-                <span className="auth-input-icon" aria-hidden="true">
+                <span aria-hidden="true" className="auth-input-icon">
                   <LockIcon />
                 </span>
                 <input
                   autoComplete="current-password"
                   name="password"
+                  onChange={handleLoginChange}
+                  placeholder="●●●●●●"
                   required
                   type="password"
-                  placeholder="●●●●●●"
                   value={loginForm.password}
-                  onChange={handleLoginChange}
                 />
               </div>
             </label>
 
-            <button className="auth-button" type="submit">
-              Iniciar Sesion
+            <button className="auth-button" disabled={submitting} type="submit">
+              {submitting ? "Cargando..." : "Iniciar sesión"}
             </button>
           </form>
         </section>
@@ -170,103 +173,94 @@ export default function AuthScreen() {
         <section className="auth-card">
           <h2 className="auth-title">Crea tu cuenta</h2>
 
+          {signupMessage ? <div className="auth-feedback auth-feedback-success">{signupMessage}</div> : null}
+          {visibleSignupError ? <div className="auth-feedback auth-feedback-error">{visibleSignupError}</div> : null}
+
           <form className="auth-form" onSubmit={handleSignupSubmit}>
+            <label className="auth-field">
+              <span>Email</span>
+              <div className="auth-input-shell">
+                <span aria-hidden="true" className="auth-input-icon">
+                  <MailIcon />
+                </span>
+                <input
+                  autoComplete="email"
+                  name="email"
+                  onChange={handleSignupChange}
+                  placeholder="mi_correo@moodfix.com"
+                  required
+                  type="email"
+                  value={signupForm.email}
+                />
+              </div>
+            </label>
+
             <div className="auth-form-grid">
               <label className="auth-field">
-                <span>Nombre de Usuario</span>
+                <span>Contraseña</span>
                 <div className="auth-input-shell">
-                  <span className="auth-input-icon" aria-hidden="true">
-                    <UserIcon />
-                  </span>
-                  <input
-                    autoComplete="username"
-                    name="username"
-                    required
-                    type="text"
-                    placeholder="Nombre_Cinefilo"
-                    value={signupForm.username}
-                    onChange={handleSignupChange}
-                  />
-                </div>
-              </label>
-
-              <label className="auth-field">
-                <span>Email</span>
-                <div className="auth-input-shell">
-                  <span className="auth-input-icon" aria-hidden="true">
-                    <MailIcon />
-                  </span>
-                  <input
-                    autoComplete="email"
-                    name="email"
-                    required
-                    type="email"
-                    placeholder="mi_correo@cinematch.es"
-                    value={signupForm.email}
-                    onChange={handleSignupChange}
-                  />
-                </div>
-              </label>
-
-              <label className="auth-field">
-                <span>Contrasena</span>
-                <div className="auth-input-shell">
-                  <span className="auth-input-icon auth-input-icon-green" aria-hidden="true">
+                  <span aria-hidden="true" className="auth-input-icon auth-input-icon-green">
                     <LockIcon accent />
                   </span>
                   <input
                     autoComplete="new-password"
+                    minLength={8}
                     name="password"
+                    onChange={handleSignupChange}
+                    placeholder="●●●●●●"
                     required
                     type="password"
-                    placeholder="●●●●●●"
                     value={signupForm.password}
-                    onChange={handleSignupChange}
                   />
                 </div>
               </label>
 
               <label className="auth-field">
-                <span>Confirma Contrasena</span>
+                <span>Confirma contraseña</span>
                 <div className="auth-input-shell">
-                  <span className="auth-input-icon auth-input-icon-green" aria-hidden="true">
+                  <span aria-hidden="true" className="auth-input-icon auth-input-icon-green">
                     <LockIcon accent />
                   </span>
                   <input
                     autoComplete="new-password"
+                    minLength={8}
                     name="confirmPassword"
+                    onChange={handleSignupChange}
+                    placeholder="●●●●●●"
                     required
                     type="password"
-                    placeholder="●●●●●●"
                     value={signupForm.confirmPassword}
-                    onChange={handleSignupChange}
                   />
                 </div>
               </label>
             </div>
 
+            {!signupPasswordsMatch ? (
+              <div className="auth-inline-error">Las contraseñas no coinciden.</div>
+            ) : null}
+
             <label className="auth-checkbox">
               <input
-                name="acceptedTerms"
-                type="checkbox"
-                required
                 checked={signupForm.acceptedTerms}
+                name="acceptedTerms"
                 onChange={handleSignupChange}
+                required
+                type="checkbox"
               />
               <span>
                 Acepto los{" "}
                 <button className="auth-link-button" type="button">
-                  Terminos y Condiciones
+                  Términos y Condiciones
                 </button>
               </span>
             </label>
 
-            <button className="auth-button" type="submit">
-              Registrarme
+            <button className="auth-button" disabled={submitting || !signupPasswordsMatch} type="submit">
+              {submitting ? "Cargando..." : "Registrarme"}
             </button>
           </form>
         </section>
       </div>
-    </main>
+    </section>
   );
 }
