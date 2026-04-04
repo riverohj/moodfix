@@ -1,21 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 
-import "./Onboarding.css";
+import "../css/AppShell.css";
+import "../css/OnboardingScreen.css";
 import {
   LANGUAGE_OPTIONS,
   ONBOARDING_STEPS,
   PLATFORM_OPTIONS,
   optionLabelByValue,
-} from "../config/onboarding";
-import netflixLogo from "../assets/platform/logo_netflix.jpg";
-import movistarLogo from "../assets/platform/logotipo_movistarplus.jpg";
-import hbomaxLogo from "../assets/platform/hbo_max_logo.jpg";
-import disneyLogo from "../assets/platform/logo_disney.png";
-import primevideoLogo from "../assets/platform/prime_video_logo.png";
-import filminLogo from "../assets/platform/logo_filmin.jpg";
-import appleLogo from "../assets/platform/Apple_TV_Plus_29.png";
-import skyLogo from "../assets/platform/sky_logo.png";
-import rakutenLogo from "../assets/platform/logo_rakuten.jpg";
+} from "../src/config/onboarding";
+import netflixLogo from "../src/assets/platform/logo_netflix.jpg";
+import movistarLogo from "../src/assets/platform/logotipo_movistarplus.jpg";
+import hbomaxLogo from "../src/assets/platform/hbo_max_logo.jpg";
+import disneyLogo from "../src/assets/platform/logo_disney.png";
+import primevideoLogo from "../src/assets/platform/prime_video_logo.png";
+import filminLogo from "../src/assets/platform/logo_filmin.jpg";
+import appleLogo from "../src/assets/platform/Apple_TV_Plus_29.png";
+import skyLogo from "../src/assets/platform/sky_logo.png";
+import rakutenLogo from "../src/assets/platform/logo_rakuten.jpg";
 
 const platformLogos = {
   8: netflixLogo,
@@ -49,9 +50,7 @@ function AutocompleteField({ step, draftValue, onSelect }) {
       return step.options;
     }
 
-    return step.options.filter((option) =>
-      option.label.toLowerCase().includes(normalizedQuery),
-    );
+    return step.options.filter((option) => option.label.toLowerCase().includes(normalizedQuery));
   }, [searchTerm, step.options]);
 
   function handleSelect(option) {
@@ -83,7 +82,7 @@ function AutocompleteField({ step, draftValue, onSelect }) {
       />
 
       {step.type === "multi-search" && selectedValues.length > 0 ? (
-        <div className="options-grid" style={{ marginTop: 16 }}>
+        <div className="options-grid onboarding-selected-options">
           {selectedValues.map((value) => (
             <button
               className="option-btn selected"
@@ -200,6 +199,7 @@ function HardNoField({ step, draftValue, onSelect }) {
           </button>
         ))}
       </div>
+
       <button
         className={`option-btn btn-valiente ${selectedValues.length === 0 ? "selected" : ""}`}
         type="button"
@@ -220,110 +220,117 @@ export default function Onboarding({
   onSkip,
   savingStep,
   stepIndex,
+  error,
+  message,
 }) {
   const currentStep = ONBOARDING_STEPS[stepIndex];
   const [showSkipModal, setShowSkipModal] = useState(false);
 
   return (
-    <div className="onboarding-wrapper">
-      {showSkipModal ? (
-        <div className="modal-overlay-fixed">
-          <div className="modal-content-custom">
-            <h2>¿Seguro que quieres saltar? 🛑</h2>
-            <p>
-              Si no completas el perfil ahora, tus recomendaciones serán más genéricas.
-              Pero no te preocupes, siempre podrás completarlo más tarde.
-            </p>
-            <div className="modal-actions-custom">
-              <button
-                className="modal-btn-back"
-                type="button"
-                onClick={() => setShowSkipModal(false)}
-              >
-                VOLVER AL TEST
-              </button>
-              <button
-                className="modal-btn-skip-anyway"
-                disabled={savingStep}
-                type="button"
-                onClick={async () => {
-                  await onSkip();
-                  setShowSkipModal(false);
-                }}
-              >
-                SALTAR POR AHORA
+    <main className="app-shell">
+      {error ? <div className="feedback feedback-error">{error}</div> : null}
+      {message ? <div className="feedback feedback-success">{message}</div> : null}
+
+      <div className="onboarding-wrapper">
+        {showSkipModal ? (
+          <div className="modal-overlay-fixed">
+            <div className="modal-content-custom">
+              <h2>¿Seguro que quieres saltar? 🛑</h2>
+              <p>
+                Si no completas el perfil ahora, tus recomendaciones serán más genéricas. Pero no
+                te preocupes, siempre podrás completarlo más tarde.
+              </p>
+              <div className="modal-actions-custom">
+                <button
+                  className="modal-btn-back"
+                  type="button"
+                  onClick={() => setShowSkipModal(false)}
+                >
+                  VOLVER AL TEST
+                </button>
+                <button
+                  className="modal-btn-skip-anyway"
+                  disabled={savingStep}
+                  type="button"
+                  onClick={async () => {
+                    await onSkip();
+                    setShowSkipModal(false);
+                  }}
+                >
+                  SALTAR POR AHORA
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="onboarding-container">
+          <button
+            className={`nav-arrow left ${stepIndex === 0 ? "hidden" : ""}`}
+            disabled={stepIndex === 0}
+            type="button"
+            onClick={onPrevious}
+          >
+            <span className="arrow-icon">&lt;</span>
+            <span className="arrow-text">ANTERIOR</span>
+          </button>
+
+          <div className="onboarding-card">
+            <div className="card-header">
+              <h1 className="onboarding-title">{currentStep.title}</h1>
+              <p className="complice-box">{currentStep.description}</p>
+            </div>
+
+            <div className="responses-zone">
+              {currentStep.type === "single-search" || currentStep.type === "multi-search" ? (
+                <AutocompleteField
+                  draftValue={draft[currentStep.id]}
+                  onSelect={onFieldChange}
+                  step={currentStep}
+                />
+              ) : null}
+
+              {currentStep.id === "plataformas" ? (
+                <PlatformsField draftValue={draft[currentStep.id]} onSelect={onFieldChange} />
+              ) : null}
+
+              {currentStep.type === "single-choice" ? (
+                <SingleChoiceField
+                  draftValue={draft[currentStep.id]}
+                  onSelect={onFieldChange}
+                  step={currentStep}
+                />
+              ) : null}
+
+              {currentStep.id === "no_rotundos" ? (
+                <HardNoField
+                  draftValue={draft[currentStep.id]}
+                  onSelect={onFieldChange}
+                  step={currentStep}
+                />
+              ) : null}
+            </div>
+
+            <div className="skip-footer">
+              <button className="skip-btn" type="button" onClick={() => setShowSkipModal(true)}>
+                SKIP
               </button>
             </div>
           </div>
+
+          <button
+            className={`nav-arrow right ${isLastStep ? "btn-finish" : ""}`}
+            disabled={savingStep}
+            type="button"
+            onClick={onAdvance}
+          >
+            <span className="arrow-text">
+              {savingStep ? "GUARDANDO" : isLastStep ? "FINALIZAR" : "SIGUIENTE"}
+            </span>
+            <span className="arrow-icon">{isLastStep ? "✓" : ">"}</span>
+          </button>
         </div>
-      ) : null}
-
-      <div className="onboarding-container">
-        <button
-          className={`nav-arrow left ${stepIndex === 0 ? "hidden" : ""}`}
-          disabled={stepIndex === 0}
-          type="button"
-          onClick={onPrevious}
-        >
-          <span className="arrow-icon">&lt;</span>
-          <span className="arrow-text">ANTERIOR</span>
-        </button>
-
-        <div className="onboarding-card">
-          <div className="card-header">
-            <h1 className="onboarding-title">{currentStep.title}</h1>
-            <p className="complice-box">{currentStep.description}</p>
-          </div>
-
-          <div className="responses-zone">
-            {currentStep.type === "single-search" || currentStep.type === "multi-search" ? (
-              <AutocompleteField
-                draftValue={draft[currentStep.id]}
-                onSelect={onFieldChange}
-                step={currentStep}
-              />
-            ) : null}
-
-            {currentStep.id === "plataformas" ? (
-              <PlatformsField draftValue={draft[currentStep.id]} onSelect={onFieldChange} />
-            ) : null}
-
-            {currentStep.type === "single-choice" ? (
-              <SingleChoiceField
-                draftValue={draft[currentStep.id]}
-                onSelect={onFieldChange}
-                step={currentStep}
-              />
-            ) : null}
-
-            {currentStep.id === "no_rotundos" ? (
-              <HardNoField
-                draftValue={draft[currentStep.id]}
-                onSelect={onFieldChange}
-                step={currentStep}
-              />
-            ) : null}
-          </div>
-
-          <div className="skip-footer">
-            <button className="skip-btn" type="button" onClick={() => setShowSkipModal(true)}>
-              SKIP
-            </button>
-          </div>
-        </div>
-
-        <button
-          className={`nav-arrow right ${isLastStep ? "btn-finish" : ""}`}
-          disabled={savingStep}
-          type="button"
-          onClick={onAdvance}
-        >
-          <span className="arrow-text">
-            {savingStep ? "GUARDANDO" : isLastStep ? "FINALIZAR" : "SIGUIENTE"}
-          </span>
-          <span className="arrow-icon">{isLastStep ? "✓" : ">"}</span>
-        </button>
       </div>
-    </div>
+    </main>
   );
 }

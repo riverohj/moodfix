@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Navbar({
   isAuthenticated = false,
   onLogin,
@@ -11,7 +13,7 @@ export default function Navbar({
         </div>
 
         <nav aria-label="Principal" className="site-nav">
-          {isAuthenticated ? <a href="/favoritos">Favoritos</a> : null}
+          {isAuthenticated ? <Link to="/favoritos">Favoritos</Link> : null}
         </nav>
 
         <div className="site-auth-actions">
