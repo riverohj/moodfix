@@ -61,10 +61,21 @@ export default function App() {
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [authFeedback, setAuthFeedback] = useState({
+    login: { error: "", message: "" },
+    signup: { error: "", message: "" },
+  });
 
   const currentStep = ONBOARDING_STEPS[stepIndex];
   const isLastStep = stepIndex === ONBOARDING_STEPS.length - 1;
   const onboardingDone = profileLooksCompleted(profile);
+
+  function resetAuthFeedback() {
+    setAuthFeedback({
+      login: { error: "", message: "" },
+      signup: { error: "", message: "" },
+    });
+  }
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem(AUTH_TOKEN_KEY);
@@ -106,12 +117,20 @@ export default function App() {
   async function handleLoginSubmit(email, password) {
     try {
       setAuthSubmitting(true);
+      resetAuthFeedback();
       setError("");
+      setMessage("");
       const payload = await loginUser(email, password);
-      setMessage("Sesión iniciada.");
+      setAuthFeedback({
+        login: { error: "", message: "Sesión iniciada." },
+        signup: { error: "", message: "" },
+      });
       await bootstrapSession(payload.auth.access_token);
     } catch (authError) {
-      setError(authError.message);
+      setAuthFeedback({
+        login: { error: authError.message, message: "" },
+        signup: { error: "", message: "" },
+      });
     } finally {
       setAuthSubmitting(false);
     }
@@ -120,12 +139,20 @@ export default function App() {
   async function handleRegisterSubmit(email, password) {
     try {
       setAuthSubmitting(true);
+      resetAuthFeedback();
       setError("");
+      setMessage("");
       const payload = await registerUser(email, password);
-      setMessage("Cuenta creada. Vamos al onboarding.");
+      setAuthFeedback({
+        login: { error: "", message: "" },
+        signup: { error: "", message: "Cuenta creada. Vamos al onboarding." },
+      });
       await bootstrapSession(payload.auth.access_token);
     } catch (authError) {
-      setError(authError.message);
+      setAuthFeedback({
+        login: { error: "", message: "" },
+        signup: { error: authError.message, message: "" },
+      });
     } finally {
       setAuthSubmitting(false);
     }
@@ -146,6 +173,10 @@ export default function App() {
       setDraft(emptyProfileDraft());
       setEditing(false);
       setShowProfilePanel(false);
+      setAuthFeedback({
+        login: { error: "", message: "Sesión cerrada." },
+        signup: { error: "", message: "" },
+      });
       setMessage("Sesión cerrada.");
       setError("");
     }
@@ -254,8 +285,10 @@ export default function App() {
 
       {!token ? (
         <AuthScreen
-          error={error}
-          message={message}
+          loginError={authFeedback.login.error}
+          loginMessage={authFeedback.login.message}
+          signupError={authFeedback.signup.error}
+          signupMessage={authFeedback.signup.message}
           onLogin={handleLoginSubmit}
           onRegister={handleRegisterSubmit}
           submitting={authSubmitting}
