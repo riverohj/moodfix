@@ -7,6 +7,7 @@ import {
   firstIncompleteStepIndex,
   optionLabelByValue,
 } from "./config/onboarding";
+import AuthScreen from "./components/AuthScreen";
 import Onboarding from "./components/Onboarding";
 import {
   getAuthenticatedUser,
@@ -48,9 +49,6 @@ function formatSelection(step, value) {
 }
 
 export default function App() {
-  const [authMode, setAuthMode] = useState("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -105,16 +103,26 @@ export default function App() {
     }
   }
 
-  async function handleAuthSubmit(event) {
-    event.preventDefault();
+  async function handleLoginSubmit(email, password) {
     try {
       setAuthSubmitting(true);
       setError("");
-      const payload =
-        authMode === "register"
-          ? await registerUser(email, password)
-          : await loginUser(email, password);
-      setMessage(authMode === "register" ? "Cuenta creada. Vamos al onboarding." : "Sesión iniciada.");
+      const payload = await loginUser(email, password);
+      setMessage("Sesión iniciada.");
+      await bootstrapSession(payload.auth.access_token);
+    } catch (authError) {
+      setError(authError.message);
+    } finally {
+      setAuthSubmitting(false);
+    }
+  }
+
+  async function handleRegisterSubmit(email, password) {
+    try {
+      setAuthSubmitting(true);
+      setError("");
+      const payload = await registerUser(email, password);
+      setMessage("Cuenta creada. Vamos al onboarding.");
       await bootstrapSession(payload.auth.access_token);
     } catch (authError) {
       setError(authError.message);
@@ -136,8 +144,6 @@ export default function App() {
       setUser(null);
       setProfile(null);
       setDraft(emptyProfileDraft());
-      setEmail("");
-      setPassword("");
       setEditing(false);
       setShowProfilePanel(false);
       setMessage("Sesión cerrada.");
@@ -243,70 +249,17 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      {error ? <div className="feedback feedback-error">{error}</div> : null}
-      {message ? <div className="feedback feedback-success">{message}</div> : null}
+      {token && error ? <div className="feedback feedback-error">{error}</div> : null}
+      {token && message ? <div className="feedback feedback-success">{message}</div> : null}
 
       {!token ? (
-        <section className="panel auth-layout">
-          <div className="auth-copy">
-            <p className="eyebrow">MoodFix</p>
-            <h2>Antes de empezar, entra en tu cuenta</h2>
-            <p>
-              Queremos guardar tus preferencias para que las recomendaciones tengan continuidad
-              cada vez que vuelvas.
-            </p>
-          </div>
-
-          <form className="auth-card" onSubmit={handleAuthSubmit}>
-            <div className="auth-tabs">
-              <button
-                className={authMode === "login" ? "active" : ""}
-                type="button"
-                onClick={() => setAuthMode("login")}
-              >
-                Login
-              </button>
-              <button
-                className={authMode === "register" ? "active" : ""}
-                type="button"
-                onClick={() => setAuthMode("register")}
-              >
-                Registro
-              </button>
-            </div>
-
-            <label className="field">
-              <span>Email</span>
-              <input
-                autoComplete="email"
-                onChange={(event) => setEmail(event.target.value)}
-                required
-                type="email"
-                value={email}
-              />
-            </label>
-
-            <label className="field">
-              <span>Password</span>
-              <input
-                autoComplete={authMode === "register" ? "new-password" : "current-password"}
-                minLength={8}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                type="password"
-                value={password}
-              />
-            </label>
-
-            <button className="primary-button" disabled={authSubmitting} type="submit">
-              {authSubmitting
-                ? "Enviando..."
-                : authMode === "register"
-                  ? "Crear cuenta y continuar"
-                  : "Entrar y continuar"}
-            </button>
-          </form>
-        </section>
+        <AuthScreen
+          error={error}
+          message={message}
+          onLogin={handleLoginSubmit}
+          onRegister={handleRegisterSubmit}
+          submitting={authSubmitting}
+        />
       ) : (
         <section className="onboarding-flow-shell">
           {!editing && onboardingDone ? (
