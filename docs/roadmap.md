@@ -82,13 +82,16 @@ Notas de implementacion:
 - EPIC 2 debe respetar lo ya cerrado en `epic-0-profile-signals.md`
 - ningun campo del onboarding es obligatorio
 - no debe mezclarse con preguntas de sesion
+- la UI de `login/signup` debe vivir sobre el flujo real de auth y no en una maqueta aislada
 - `GET /api/profile` requiere usuario autenticado
 - `PUT /api/profile` reemplaza el perfil y `PATCH /api/profile` mergea cambios
 - `POST /api/profile/skip` permite cerrar onboarding sin completar todos los campos
 - frontend debe enviar valores tecnicos compatibles con backend: pais ISO, `provider_id`, codigos de idioma y `genre_id`
+- al completar o saltar el onboarding, EPIC 2 solo exige una salida minima consistente y una forma simple de reabrir el perfil
 - el handoff guest -> autenticado de preguntas de sesion queda fuera de EPIC 2 y pasa a EPIC 3
 - la shell posterior al onboarding, incluyendo navbar, footer y cajon de navegacion, no forma parte de EPIC 2
 - historico, favoritos y cualquier memoria interna basada en esos datos para mejorar el prompt del top 3 se mueven a EPIC 3
+- cualquier rama vieja de auth o maquetas aisladas debe retirarse para evitar PRs sobre una base obsoleta
 
 ### EPIC 3 · Flujos de sesion: Sorprendeme y Preguntame
 

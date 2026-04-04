@@ -105,6 +105,14 @@ Cada actualizacion debe incluir:
 - Que queda: documentar la salida minima del onboarding en frontend, cerrar el flujo extremo a extremo y decidir si esa salida minima sera una confirmacion simple o una transicion temporal antes de la shell de EPIC 3.
 - Bloqueos o riesgos: si el equipo vuelve a mezclar en EPIC 2 historico, favoritos o memoria para el prompt, el cierre del onboarding se volvera difuso y costara mas separar responsabilidades entre epics.
 
+### 2026-04-04
+
+- Que se hizo: se integro la UI de auth sobre el flujo real de EPIC 2, manteniendo `login/signup` conectados al backend, se dejo una salida minima tras completar o saltar el onboarding, y se habilito una re-edicion simple del perfil desde header.
+- Que se hizo: se paso un smoke funcional extremo a extremo sobre frontend y backend locales, validando `register`, `login`, `GET /api/profile`, `PATCH /api/profile`, `POST /api/profile/skip`, persistencia, logout/login y re-edicion.
+- Que se hizo: se retiro la rama remota vieja `epic-2-1-LOGINSINGUP` para evitar que el equipo abra PRs desde una maqueta aislada de auth en vez de usar la rama operativa actual.
+- Que queda: coordinar los PRs del equipo sobre `epic-2-2.1-user_prifile_model`, decidir si hace falta mas pulido visual en auth y cerrar EPIC 2 cuando el equipo de frontend confirme el flujo final.
+- Bloqueos o riesgos: si alguien vuelve a sacar trabajo desde una rama vieja o mezcla shell, historico o favoritos dentro de EPIC 2, se reabrira una confusion de alcance que ya esta resuelta en los contratos.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

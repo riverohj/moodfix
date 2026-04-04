@@ -114,14 +114,20 @@ Ejemplo conceptual:
 - la pantalla posterior al onboarding no tiene por que ser todavia la home final del producto; basta una salida minima y consistente del flujo
 - navbar, footer, cajon de navegacion, historico, favoritos y la memoria interna basada en estos datos pasan a EPIC 3
 
+## Estado operativo actual
+
+- la UI de `login/signup` ya esta integrada sobre el flujo real de auth de EPIC 2
+- al completar o saltar el onboarding, el usuario sale a una vista minima temporal y puede reabrir su perfil desde header
+- la re-edicion del perfil existe dentro de EPIC 2, sin depender todavia de la shell completa de EPIC 3
+- la rama aislada de auth que se abrio solo como maqueta visual fue retirada para evitar que el equipo abra PRs sobre una base vieja
+
 ## Decisiones que habra que cerrar en EPIC 2
 
 - en que orden exacto aparece cada pregunta
 - si el onboarding se muestra al principio o se puede abrir despues
 - donde se persiste el perfil en el MVP
 - como se edita el perfil una vez creado
-- que mensaje exacto se muestra cuando el usuario hace skip
-- cual es la salida minima tras completar o saltar el onboarding mientras la shell completa queda fuera de alcance
+- si hace falta pulir mas el copy final del flujo de skip y de la salida minima
 
 ## Definicion de hecho provisional
 
@@ -132,4 +138,6 @@ EPIC 2 podra darse por bien encaminado cuando:
 - quede claro que el usuario puede saltarse preguntas sin romper el flujo
 - frontend y backend compartan el mismo shape de datos del perfil
 - quede clara la semantica de lectura y escritura del perfil desde frontend
+- exista una entrada de auth visual conectada al backend real
+- exista una salida minima consistente tras completar o saltar el onboarding
 - quede documentado que historico, favoritos y memoria para mejorar el top 3 no se resuelven en EPIC 2
