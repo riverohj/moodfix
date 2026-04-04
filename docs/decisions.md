@@ -163,6 +163,27 @@ Cada entrada debe incluir:
 - Impacto: primero se cerraran preguntas, orden, payload y persistencia minima; despues se implementara.
 - Responsable o acuerdo del equipo: continuidad ordenada del MVP.
 
+### 2026-04-04 · Shell de frontend comun con layout y routing basico
+
+- Decision: el frontend adopta un `Layout` comun con navbar y footer persistentes, y centraliza la navegacion en `frontend/src/routes.jsx` usando `react-router-dom`.
+- Motivo: el equipo necesita una base limpia para crecer por paginas sin duplicar estructura comun y dejando claro donde vive el routing de la app.
+- Impacto: la home queda servida en `/` dentro del layout, la pantalla de autenticacion vive en `/auth`, y `main.jsx` renderiza directamente el router como punto de entrada unico del frontend.
+- Responsable o acuerdo del equipo: implementacion actual del frontend para EPIC 3.1.
+
+### 2026-04-04 · Estado de autenticacion se mantiene provisional en frontend
+
+- Decision: mientras no exista una implementacion fuente de autenticacion en backend, el estado `isAuthenticated` se mantiene como bandera provisional en el router del frontend y el navbar solo expone `Login` o `Logout` segun ese valor.
+- Motivo: el producto debe permitir navegacion como invitado y avanzar en la interfaz comun sin bloquearse por una capa de auth que todavia no esta integrada en codigo versionado.
+- Impacto: la navegacion hacia `/auth` funciona como flujo visual, pero login, logout y registro siguen siendo UI sin persistencia ni validacion contra API; el equipo no debe asumir sesion real hasta cerrar ese contrato.
+- Responsable o acuerdo del equipo: decision temporal aceptada para desacoplar construccion de interfaz y futura integracion de autenticacion.
+
+### 2026-04-04 · Navbar reducido a acciones esenciales segun sesion
+
+- Decision: el navbar elimina `Inicio` y `Explorar`, y mantiene `Favoritos` solo cuando el usuario esta logueado.
+- Motivo: esas opciones no aportan valor en el estado actual del flujo y `Favoritos` solo tiene sentido como espacio ligado a una sesion de usuario.
+- Impacto: la navegacion publica queda centrada en el acceso al login, mientras la opcion de favoritos pasa a depender explicitamente del estado de autenticacion.
+- Responsable o acuerdo del equipo: ajuste de interfaz aplicado en EPIC 3.1.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.

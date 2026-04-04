@@ -2,7 +2,7 @@ import "../css/home.css";
 
 export default function Home() {
   return (
-    <main className="home-page">
+    <section className="home-page">
       <section className="home-card">
         <div className="home-copy">
           <h1>Demasiadas opciones?</h1>
@@ -17,6 +17,6 @@ export default function Home() {
           Encuentra tu Pelicula
         </button>
       </section>
-    </main>
+    </section>
   );
 }
