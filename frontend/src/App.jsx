@@ -9,6 +9,7 @@ import {
 } from "./config/onboarding";
 import AuthScreen from "./components/AuthScreen";
 import Onboarding from "./components/Onboarding";
+import SessionScreen from "./components/SessionScreen";
 import {
   getAuthenticatedUser,
   getProfile,
@@ -307,19 +308,7 @@ export default function App() {
                   </div>
                 </section>
               ) : (
-                <section className="summary-card post-onboarding-card">
-                  <h3>{profile?.onboarding_skipped ? "Seguimos cuando quieras" : "Ya está listo"}</h3>
-                  <p>
-                    {profile?.onboarding_skipped
-                      ? "Has decidido saltarte este paso por ahora. Más adelante podrás completar tu perfil desde “Ver perfil”."
-                      : "Ya hemos guardado tus preferencias básicas. Si quieres revisarlas o cambiarlas, las tienes en “Ver perfil”."}
-                  </p>
-                  <div className="post-onboarding-actions">
-                    <button className="primary-button" type="button" onClick={openProfilePanel}>
-                      Ver perfil
-                    </button>
-                  </div>
-                </section>
+                <SessionScreen />
               )}
             </section>
           ) : (
