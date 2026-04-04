@@ -163,6 +163,20 @@ Cada entrada debe incluir:
 - Impacto: primero se cerraran preguntas, orden, payload y persistencia minima; despues se implementara.
 - Responsable o acuerdo del equipo: continuidad ordenada del MVP.
 
+### 2026-04-01 · Perfil estable auth-only para EPIC 2
+
+- Decision: el perfil estable del usuario queda detras de autenticacion y no expone un perfil guest `local` en el MVP.
+- Motivo: `user_profiles` representa memoria estable del usuario, mientras que las preguntas guest del MUT pertenecen a senales de sesion y no al perfil.
+- Impacto: `GET /api/profile` requiere login, `PUT` reemplaza el perfil, `PATCH` actualiza campos parciales y `POST /api/profile/skip` marca el onboarding como omitido.
+- Responsable o acuerdo del equipo: alineacion entre contrato de EPIC 2 y backend de auth/perfil.
+
+### 2026-04-01 · Handoff guest del MUT se resuelve en sessions y EPIC 3
+
+- Decision: si un usuario responde preguntas de sesion sin login y se autentica justo antes del resultado, ese payload no se guarda en `user_profiles` y debe resolverse en la capa de `sessions`.
+- Motivo: el MUT y `Preguntame` recogen intencion puntual de sesion, no memoria estable de perfil.
+- Impacto: EPIC 2 no implementa migracion `local -> user`; EPIC 3 debe cerrar el handoff guest -> autenticado, al menos con persistencia temporal en frontend para MVP.
+- Responsable o acuerdo del equipo: separacion explicita entre perfil estable y senales de sesion.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.

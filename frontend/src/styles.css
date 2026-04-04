@@ -1,121 +1,398 @@
-/* --- PALETA DE COLORES OFICIAL ---
-   1. Negro Carbón: #0D0D0D (Fondo base)
-   2. Rojo Sangre:  #E50914 (Glows, Detalles y Activos)
-   3. Gris Oscuro:  #1F1F1F (Tarjetas)
-   4. Blanco Hueso: #F5F5F5 (Títulos)
-   5. Gris Plata:   #A0A0A0 (Textos secundarios)
---- */
-
 :root {
-  font-family: 'Inter', Arial, sans-serif;
-  color: #F5F5F5;
-  background-color: #0D0D0D;
+  color: #f5efe3;
+  background: #200406;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* --- SOLUCIÓN: EL FONDO SIEMPRE EN EL BODY --- */
 body {
   margin: 0;
-  padding: 0;
-  background-color: #0D0D0D; 
-  /* Los círculos rojos ahora están en la capa más profunda (el body) */
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(229, 9, 20, 0.45) 0%, transparent 55%), 
-    radial-gradient(circle at 80% 70%, rgba(229, 9, 20, 0.35) 0%, transparent 55%);
-  background-attachment: fixed;
+  min-width: 320px;
   min-height: 100vh;
+  background:
+    radial-gradient(circle at 22% 24%, rgba(210, 10, 20, 0.34), transparent 24%),
+    radial-gradient(circle at 80% 78%, rgba(178, 15, 22, 0.28), transparent 24%),
+    radial-gradient(circle at 58% 58%, rgba(122, 7, 13, 0.22), transparent 30%),
+    linear-gradient(180deg, #2a0507 0%, #591015 48%, #430b0f 100%);
+  color: #f5efe3;
 }
 
-/* --- CONTENEDOR DE LA APP (TRANSPARENTE) --- */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: auto;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.55;
+  z-index: -1;
+}
+
+body::before {
+  width: 40vw;
+  height: 40vw;
+  left: 4vw;
+  top: 18vh;
+  background:
+    radial-gradient(circle, rgba(255, 34, 34, 0.24) 0%, rgba(123, 0, 0, 0.2) 38%, transparent 72%);
+}
+
+body::after {
+  width: 42vw;
+  height: 42vw;
+  right: 2vw;
+  bottom: 6vh;
+  background:
+    radial-gradient(circle, rgba(255, 49, 49, 0.2) 0%, rgba(133, 0, 0, 0.18) 42%, transparent 72%);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
 .app-shell {
+  position: relative;
   min-height: 100vh;
-  padding: 48px 20px;
-  background: transparent !important; /* Para que deje ver el fondo del body */
+  padding: 28px 18px 48px;
+  overflow: hidden;
 }
 
-/* --- TARJETAS Y HERO (EFECTO CRISTAL OSCURO) --- */
-.hero,
-.card {
-  max-width: 760px;
-  margin: 0 auto 24px;
-  padding: 32px;
-  border-radius: 24px;
-  /* Gris Oscuro traslúcido para que "respire" el rojo del fondo */
-  background: rgba(31, 31, 31, 0.88); 
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+.app-shell::before,
+.app-shell::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(120px);
+  z-index: 0;
 }
 
-/* --- TEXTOS Y TÍTULOS --- */
-h1,
-h2 {
-  margin-top: 0;
-  color: #F5F5F5; 
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+.app-shell::before {
+  width: 26rem;
+  height: 26rem;
+  left: 10%;
+  top: 18%;
+  background: rgba(255, 20, 20, 0.12);
+}
+
+.app-shell::after {
+  width: 28rem;
+  height: 28rem;
+  right: 8%;
+  bottom: 10%;
+  background: rgba(255, 30, 30, 0.12);
+}
+
+.panel {
+  position: relative;
+  width: min(1100px, 100%);
+  margin: 0 auto 22px;
+  border: 1px solid rgba(245, 239, 227, 0.08);
+  border-radius: 30px;
+  background: rgba(20, 16, 17, 0.82);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(18px);
+}
+
+.hero-panel {
+  padding: 30px;
+}
+
+.panel-centered {
+  padding: 56px 32px;
+  text-align: center;
 }
 
 .eyebrow {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f6bd60;
+}
+
+h1,
+h2,
+h3 {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 14px;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.02;
+}
+
+h2 {
+  margin-bottom: 10px;
+  font-size: 1.65rem;
+}
+
+h3 {
+  margin-bottom: 12px;
+  font-size: 1.9rem;
+}
+
+.lead,
+.step-description,
+.summary-card p,
+.auth-copy p {
+  max-width: 66ch;
+  line-height: 1.65;
+  color: rgba(245, 239, 227, 0.8);
+}
+
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.status-pill,
+.step-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f3ede2;
+  font-size: 0.88rem;
+}
+
+.step-pill.muted {
+  color: #d9c4b1;
+  background: rgba(246, 189, 96, 0.08);
+}
+
+.feedback {
+  width: min(1100px, 100%);
+  margin: 0 auto 18px;
+  padding: 14px 18px;
+  border-radius: 18px;
+}
+
+.feedback-success {
+  background: rgba(43, 116, 86, 0.22);
+  border: 1px solid rgba(122, 219, 171, 0.18);
+}
+
+.feedback-error {
+  background: rgba(155, 34, 38, 0.22);
+  border: 1px solid rgba(255, 122, 122, 0.18);
+}
+
+.auth-layout,
+.onboarding-layout {
+  display: grid;
+  gap: 24px;
+  padding: 28px;
+}
+
+.onboarding-flow-shell {
+  position: relative;
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  z-index: 1;
+}
+
+.auth-layout {
+  grid-template-columns: 1fr minmax(320px, 420px);
+  align-items: start;
+}
+
+.auth-card,
+.summary-card,
+.onboarding-card {
+  border-radius: 24px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.auth-tabs button {
+  flex: 1;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(245, 239, 227, 0.72);
+}
+
+.auth-tabs button.active {
+  background: linear-gradient(135deg, #f6bd60, #f28482);
+  color: #1b1718;
+  font-weight: 700;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.field span {
+  font-size: 0.92rem;
+  color: rgba(245, 239, 227, 0.82);
+}
+
+.field input,
+.search-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff8ef;
+}
+
+.field input:focus,
+.search-input:focus {
+  outline: none;
+  border-color: rgba(246, 189, 96, 0.8);
+}
+
+.primary-button,
+.ghost-button {
+  border-radius: 16px;
+  padding: 14px 18px;
+  border: 1px solid transparent;
+}
+
+.primary-button {
+  background: linear-gradient(135deg, #f6bd60, #f28482);
+  color: #1a1517;
+  font-weight: 800;
+}
+
+.primary-button:disabled,
+.ghost-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ghost-button {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #f5efe3;
+}
+
+.profile-header,
+.step-meta,
+.step-actions,
+.summary-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.profile-header-plain {
+  width: min(1100px, 100%);
+  margin: 0 auto 18px;
+  padding: 0 10px;
+}
+
+.step-meta {
+  margin-bottom: 16px;
+}
+
+.step-actions {
+  margin-top: 28px;
+  align-items: flex-end;
+}
+
+.step-actions-right {
+  display: flex;
+  gap: 12px;
+}
+
+.search-step {
+  display: grid;
+  gap: 14px;
+}
+
+.search-results,
+.summary-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.search-result-card,
+.summary-grid > div {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.search-result-card h4,
+.summary-grid dt {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.summary-grid dt {
+  color: rgba(245, 239, 227, 0.58);
   font-size: 0.85rem;
-  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #E50914; 
+  letter-spacing: 0.08em;
 }
 
-.lead {
-  line-height: 1.6;
-  color: #A0A0A0; 
-  font-size: 1.1rem;
+.summary-grid dd {
+  margin: 0;
+  color: #fff8ef;
+  font-size: 1rem;
 }
 
-ul {
-  padding-left: 20px;
-  line-height: 1.8;
-  color: #A0A0A0; 
+.summary-actions,
+.post-onboarding-actions {
+  margin-top: 24px;
 }
 
-/* --- BOTONES (ESTILO ROJO CAPSULE) --- */
-button, .btn, .btn-primary {
-  background-color: #E50914; 
-  color: #F5F5F5;
-  border: none;
-  padding: 14px 30px;
-  border-radius: 50px;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+.post-onboarding-card {
+  text-align: left;
 }
 
-button:hover, .btn:hover {
-  transform: translateY(-2px);
-  background-color: #ff1a26; 
-  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.5);
-}
+@media (max-width: 900px) {
+  .auth-layout,
+  .onboarding-layout {
+    grid-template-columns: 1fr;
+  }
 
-/* Estilo para links tipo botón (como el Skip) */
-.skip-btn {
-  color: #E50914;
-  text-decoration: none;
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  padding: 10px 20px;
-  border: 1px solid rgba(229, 9, 20, 0.4);
-  border-radius: 50px;
-  transition: 0.3s;
-}
+  .step-actions,
+  .profile-header,
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.skip-btn:hover {
-  background: rgba(229, 9, 20, 0.1);
-  border-color: #E50914;
+  .step-actions-right {
+    flex-direction: column-reverse;
+  }
 }

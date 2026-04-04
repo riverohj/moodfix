@@ -3,6 +3,7 @@
 ## Definicion
 
 Este documento cierra el contrato de moods del MVP. Su funcion es definir que significa cada mood de forma visible para producto y util para el motor, sin depender solo del nombre comercial ni solo de los generos de TMDb.
+Los moods son senales de sesion y pueden usarse sin login; no crean ni sustituyen el perfil estable del usuario.
 
 ## Regla general
 
