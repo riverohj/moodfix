@@ -96,3 +96,4 @@ Este documento define las señales estables del perfil del usuario. Su funcion e
 ## Estado
 
 Las senales estables del perfil quedan cerradas para MVP con onboarding completamente opcional.
+Estas senales pertenecen al perfil estable de usuario autenticado y no forman parte del flujo guest de moods o sesion.
