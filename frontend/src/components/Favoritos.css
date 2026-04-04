@@ -4,7 +4,6 @@
 /* Aplicamos la fuente y el color base a todo el contenedor */
 .favoritos-wrapper {
   min-height: 100vh;
-  background-color: #0D0D0D;
   padding: 2.5rem 2rem 4rem;
   font-family: 'Inter', -apple-system, sans-serif; /* Se hereda a todo lo de dentro */
   color: #F5F5F5;
