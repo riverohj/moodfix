@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@600;700;800&display=swap');
+
+/* Aplicamos la fuente y el color base a todo el contenedor */
+.favoritos-wrapper {
+  min-height: 100vh;
+  background-color: #0D0D0D;
+  padding: 2.5rem 2rem 4rem;
+  font-family: 'Inter', -apple-system, sans-serif; /* Se hereda a todo lo de dentro */
+  color: #F5F5F5;
+}
+
+.favoritos-header { text-align: center; margin-bottom: 2.5rem; }
+
+.favoritos-titulo {
+  font-family: 'Outfit', sans-serif; /* <--- La fuente del onboarding */
+  font-size: 2.2rem;
+  font-weight: 800; /* Un poco más de grosor para que luzca */
+  color: #F5F5F5;
+  letter-spacing: -0.02em; /* Las fuentes modernas quedan mejor con las letras un pelín juntas */
+  margin-bottom: 0.2rem;
+  text-align: center;
+}
+
+/* Opcional: Un toque de color a la palabra MoodFix en el JSX */
+.favoritos-titulo span.brand {
+  color: #E50914; /* El rojo de tus botones para hacer marca */
+}
+
+.favoritos-subtitulo { color: #A0A0A0; font-size: 0.95rem; margin: 0; }
+
+/* Tarjetas */
+.favorito-card {
+  background-color: #1F1F1F;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.favorito-card:hover { 
+  transform: translateY(-4px); 
+  box-shadow: 0 8px 24px rgba(229, 9, 20, 0.2); 
+}
+
+.favorito-poster-wrapper { 
+  width: 100%; 
+  aspect-ratio: 2 / 2.5; 
+  background-color: #2a2a2a; 
+  overflow: hidden; 
+}
+
+.favorito-poster { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.poster-fallback { display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+.poster-fallback::after { content: '🎬'; }
+
+.card-body {
+    padding: 0.6rem 0.6rem 0px 0.6rem !important;
+    display: flex;
+    flex-direction: column;
+}
+.favorito-nombre {
+  margin-bottom: 0.2rem; /* Casi pegado a la meta-info */
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.favorito-meta {
+  margin-bottom: 0.5rem; /* Este es el espacio que separa el año de los botones */
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+}
+
+.favorito-genero { 
+  font-size: 0.7rem; 
+  color: #A0A0A0; 
+  background-color: #2a2a2a; 
+  padding: 2px 8px; 
+  border-radius: 20px; 
+}
+
+.favorito-año { font-size: 0.72rem; color: #A0A0A0; }
+
+/* Botones */
+.favorito-acciones {
+    margin-top: 0.5rem !important; /* Espacio fijo arriba de los botones */
+    margin-bottom: 0px !important; 
+    padding-bottom: 0.6rem; /* ESTE es el margen real que verás abajo del todo */
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.btn-ver, .btn-eliminar { 
+  font-weight: 600; 
+  font-size: 0.8rem; 
+  border-radius: 8px; 
+  padding: 0.5rem 0; 
+  transition: all 0.2s ease; 
+}
+
+.btn-ver { background-color: #E50914; color: #F5F5F5; border: none; }
+.btn-ver:hover { background-color: #c4060f; color: #fff; }
+
+.btn-eliminar { 
+  background-color: transparent; 
+  color: #A0A0A0; 
+  border: 1px solid #2a2a2a; 
+}
+
+.btn-eliminar:hover { 
+  color: #E50914; 
+  border-color: #E50914; 
+}
+
+/* Estado Vacío */
+.favoritos-empty { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+  min-height: 50vh; 
+  text-align: center; 
+}
+
+.empty-icon { font-size: 4rem; margin-bottom: 1.2rem; opacity: 0.6; }
+.empty-titulo { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem; }
+.empty-texto { color: #A0A0A0; font-size: 0.95rem; max-width: 420px; line-height: 1.6; }
+
+/* --- AJUSTES EXCLUSIVOS PARA MÓVIL --- */
+@media (max-width: 576px) {
+  /* 1. Atacamos el padding de 28px que se ve en tu captura */
+  .favorito-card {
+    padding: 8px !important; /* Pasamos de 28px a 8px para ganar ancho */
+  }
+
+  .favorito-nombre {
+    margin-top: 5px !important; 
+    margin-bottom: 2px !important;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* 2. Ajustamos el cuerpo para que el contenido respire */
+  .card-body {
+    padding: 4px 2px 0px 2px !important;
+  }
+
+  /* 3. Aseguramos que los botones aprovechen el nuevo ancho */
+  .favorito-acciones {
+    width: 100%;
+    gap: 3px !important;
+  }
+
+  .btn-ver, .btn-eliminar {
+    width: 100%;
+    padding: 6px 0 !important;
+    font-size: 0.75rem;
+  }
+}
