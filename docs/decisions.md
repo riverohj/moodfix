@@ -184,6 +184,13 @@ Cada entrada debe incluir:
 - Impacto: el aviso se mueve al punto donde el usuario intenta usar `Sorprendeme` o `Preguntame`; ahi se le debe informar de que la recomendacion funcionara peor sin onboarding y ofrecerle completar perfil o continuar igualmente.
 - Responsable o acuerdo del equipo: acuerdo del equipo tras revisar el enrutado nuevo de EPIC 3.
 
+### 2026-04-06 · Pantallas por ruta y CSS aislado por pantalla
+
+- Decision: el frontend se organiza con pantallas independientes definidas desde `routes`, y cada pantalla debe mantener sus estilos aislados en archivos CSS descriptivos para no modificar otras vistas.
+- Motivo: el equipo quiere evitar que una pantalla rompa otra al compartir selectores genericos, hojas globales o imports de estilos de librerias dentro de componentes hoja.
+- Impacto: las pantallas viven en `frontend/pages/`, los estilos por pantalla en `frontend/css/` o en un archivo CSS claramente asociado a esa pantalla, los componentes reutilizables viven aparte, y cualquier selector debe ir scopiado al contenedor de la vista. No deben introducirse reglas globales tipo `.card-body` ni imports globales de frameworks dentro de componentes aislados.
+- Responsable o acuerdo del equipo: acuerdo del equipo al cerrar la nueva base de rutas, pages y CSS de EPIC 3.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.

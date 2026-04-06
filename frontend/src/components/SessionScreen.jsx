@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import "./SessionScreen.css";
 import {
@@ -10,167 +10,280 @@ import {
   TIME_OPTIONS,
 } from "../config/session";
 
-// ── Componentes de selección reutilizables ────────────────────────────────────
+const ASK_STEPS = [
+  {
+    id: "mood",
+    title: "¿Qué te apetece hoy?",
+    description: "¿Qué experiencia te apetece?",
+    options: MOOD_OPTIONS,
+    required: true,
+  },
+  {
+    id: "preferencia_tiempo",
+    title: "¿Cómo vas de tiempo?",
+    description: "¿Algo rapidito o tenemos tiempo?",
+    options: TIME_OPTIONS,
+    required: false,
+  },
+  {
+    id: "preferencia_energia",
+    title: "¿Cuál es tu nivel de energía?",
+    description: "¿Cuánto quieres estrujar el cerebro hoy?",
+    options: ENERGY_OPTIONS,
+    required: false,
+  },
+  {
+    id: "seguro_o_descubrir",
+    title: "¿Qué prefieres hoy?",
+    description: "¿Cómo de mainstream eres hoy?",
+    options: DISCOVERY_OPTIONS,
+    required: false,
+  },
+  {
+    id: "preferencia_epoca",
+    title: "¿Cuál es tu época hoy?",
+    description: "Súbete a nuestro DeLorean.",
+    options: ERA_OPTIONS,
+    required: false,
+  },
+];
 
-function ChipGroup({ options, selected, multi, onToggle }) {
+function Header({ userEmail, onLogout, onOpenProfile }) {
   return (
-    <div className="session-chips">
-      {options.map((option) => {
-        const isSelected = multi ? selected.includes(option.id) : selected === option.id;
-        return (
-          <button
-            className={`session-chip ${isSelected ? "selected" : ""}`}
-            key={option.id}
-            type="button"
-            onClick={() => onToggle(option.id)}
-          >
-            {option.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+    <header className="session-topbar">
+      <div className="session-brand-block">
+        <p className="eyebrow">MoodFix</p>
+        <h2 className="session-user-email">{userEmail}</h2>
+      </div>
 
-function OptionCardGroup({ options, selected, onSelect }) {
-  return (
-    <div className="session-option-cards">
-      {options.map((option) => (
-        <button
-          className={`session-option-card ${selected === option.id ? "selected" : ""}`}
-          key={option.id}
-          type="button"
-          onClick={() => onSelect(option.id)}
-        >
-          {option.label}
+      <div className="header-actions">
+        <button className="ghost-button" type="button" onClick={onOpenProfile}>
+          Ver perfil
         </button>
-      ))}
-    </div>
+        <button className="ghost-button" type="button" onClick={onLogout}>
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
   );
 }
 
-function SectionBlock({ label, title, children }) {
+function ViewShell({ children, compact = false }) {
   return (
-    <div className="session-block">
-      <p className="session-block-label">{label}</p>
-      <p className="session-block-title">{title}</p>
+    <section className={`session-view-shell ${compact ? "session-view-shell-compact" : ""}`}>
       {children}
-    </div>
+    </section>
   );
 }
 
-// ── Tarjeta de película ───────────────────────────────────────────────────────
-
-function MovieCard({ movie }) {
-  const providerNames = movie.providers
-    .filter((p) => p.provider_type === "flatrate")
-    .map((p) => p.provider_name);
-
+function ChoiceButton({ children, onClick }) {
   return (
-    <div className="session-movie-card">
-      <div className="session-movie-header">
-        <h4 className="session-movie-title">{movie.title}</h4>
-        <span className="session-movie-meta">
-          {movie.release_year} · {movie.runtime} min
-        </span>
-      </div>
-      <p className="session-movie-overview">{movie.overview}</p>
-      {providerNames.length > 0 && (
-        <div className="session-movie-providers">
-          {providerNames.map((name) => (
-            <span className="session-provider-pill" key={name}>
-              {name}
-            </span>
-          ))}
+    <button className="session-choice-button" type="button" onClick={onClick}>
+      {children}
+    </button>
+  );
+}
+
+function MoodChip({ active, children, onClick }) {
+  return (
+    <button
+      className={`session-pill ${active ? "session-pill-active" : ""}`}
+      type="button"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+
+function StepArrow({ children, hidden = false, onClick, disabled = false }) {
+  return (
+    <button
+      className={`session-nav-arrow ${hidden ? "session-nav-arrow-hidden" : ""}`}
+      disabled={disabled}
+      type="button"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+
+function LandingView({ onAsk, onSurprise }) {
+  return (
+    <ViewShell compact>
+      <div className="session-home-card">
+        <h1 className="session-home-title">
+          <span className="session-home-line">“No sé qué ver hoy”</span>
+          <span className="session-home-line">¡Rompe el bucle!</span>
+        </h1>
+        <p className="session-home-copy">A veces la peli te elige a ti.</p>
+
+        <div className="session-home-actions">
+          <ChoiceButton onClick={onAsk}>Pregúntame</ChoiceButton>
+          <ChoiceButton onClick={onSurprise}>Sorpréndeme</ChoiceButton>
         </div>
-      )}
-    </div>
+      </div>
+    </ViewShell>
   );
 }
 
-// ── Sección de resultados ─────────────────────────────────────────────────────
+function SurpriseView({ onBack, onSearch, searching }) {
+  return (
+    <ViewShell compact>
+      <div className="session-detail-card">
+        <div>
+          <p className="session-mode-tag">Modo rápido</p>
+          <h1 className="session-detail-title">Déjalo en nuestras manos</h1>
+          <p className="session-detail-copy">
+            Teniendo en cuenta tu perfil, te proponemos algo sin preguntas extra. Una
+            recomendación directa, con personalidad.
+          </p>
+        </div>
 
-function ResultsSection({ results, onReset }) {
-  if (results.length === 0) {
-    return (
-      <div className="session-empty-results">
-        <p className="session-empty-title">Sin resultados por ahora</p>
-        <p className="session-empty-copy">
-          No encontramos nada que encaje del todo. Prueba con otras opciones.
-        </p>
-        <button className="session-reset-btn" type="button" onClick={onReset}>
-          Volver a intentar
-        </button>
+        <div className="session-detail-actions">
+          <button className="ghost-button" type="button" onClick={onBack}>
+            Volver
+          </button>
+          <button className="session-primary-button" disabled={searching} type="button" onClick={onSearch}>
+            {searching ? "Buscando..." : "Sorpréndeme"}
+          </button>
+        </div>
       </div>
-    );
-  }
+    </ViewShell>
+  );
+}
+
+function QuestionStep({
+  step,
+  stepIndex,
+  stepValue,
+  onSelect,
+  onBack,
+  onNext,
+  searching,
+  isFirstStep,
+  isLastStep,
+}) {
+  const canAdvance = !step.required || Boolean(stepValue);
 
   return (
-    <div className="session-results-section">
-      <div className="session-results-header">
-        <p className="eyebrow">Esto te puede gustar</p>
-        <button className="session-reset-link" type="button" onClick={onReset}>
-          Nueva búsqueda
-        </button>
+    <ViewShell compact>
+      <div className="session-question-shell">
+        <StepArrow onClick={onBack}>
+          <span className="session-nav-icon">&lt;</span>
+          <span className="session-nav-copy">{isFirstStep ? "VOLVER" : "ANTERIOR"}</span>
+        </StepArrow>
+
+        <div className="session-question-card">
+          <div className="session-question-header">
+            <p className="session-mode-tag">
+              Pregúntame · Paso {stepIndex + 1} de {ASK_STEPS.length}
+            </p>
+            <h1 className="session-question-title">{step.title}</h1>
+            <p className="session-question-copy">{step.description}</p>
+          </div>
+
+          <div className="session-question-options">
+            <div className="session-pill-grid session-pill-grid-centered">
+              {step.options.map((option) => (
+                <MoodChip
+                  active={stepValue === option.id}
+                  key={option.id}
+                  onClick={() => onSelect(step.id, option.id)}
+                >
+                  {option.label}
+                </MoodChip>
+              ))}
+            </div>
+          </div>
+
+          {!step.required ? (
+            <p className="session-step-hint">Esta pregunta es opcional. Puedes seguir sin elegir.</p>
+          ) : null}
+        </div>
+
+        <StepArrow
+          disabled={!canAdvance || searching}
+          onClick={onNext}
+        >
+          <span className="session-nav-copy">
+            {searching ? "BUSCANDO" : isLastStep ? "BUSCAR" : "SIGUIENTE"}
+          </span>
+          <span className="session-nav-icon">{isLastStep ? "✓" : ">"}</span>
+        </StepArrow>
       </div>
-      <div className="session-results">
+    </ViewShell>
+  );
+}
+
+function ResultCard({ movie }) {
+  const providers = movie.providers
+    .filter((provider) => provider.provider_type === "flatrate")
+    .map((provider) => provider.provider_name)
+    .join(" · ");
+
+  return (
+    <article className="session-result-card">
+      <div className="session-result-poster">
+        <span>{movie.title.slice(0, 1)}</span>
+      </div>
+
+      <div className="session-result-content">
+        <div className="session-result-heading">
+          <h3>{movie.title}</h3>
+          <p>
+            {movie.release_year} · {movie.runtime} min
+          </p>
+        </div>
+
+        <p className="session-result-overview">{movie.overview}</p>
+
+        {providers ? <p className="session-result-provider">{providers}</p> : null}
+      </div>
+    </article>
+  );
+}
+
+function ResultsView({ mode, results, onRestart, onBack }) {
+  return (
+    <ViewShell>
+      <div className="session-results-header">
+        <div>
+          <p className="session-mode-tag">
+            {mode === "preguntame" ? "Pregúntame" : "Sorpréndeme"}
+          </p>
+          <h1 className="session-detail-title">Tus 3 para hoy</h1>
+          <p className="session-detail-copy session-detail-copy-wide">
+            Tres ideas para arrancar. Si no te encajan, ajustamos y seguimos buscando.
+          </p>
+        </div>
+
+        <div className="session-results-actions">
+          <button className="ghost-button" type="button" onClick={onBack}>
+            Ajustar
+          </button>
+          <button className="session-primary-button" type="button" onClick={onRestart}>
+            Nueva búsqueda
+          </button>
+        </div>
+      </div>
+
+      <div className="session-results-grid">
         {results.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} />
+          <ResultCard key={movie.id} movie={movie} />
         ))}
       </div>
-    </div>
+    </ViewShell>
   );
 }
 
-// ── Tab: Sorpréndeme ──────────────────────────────────────────────────────────
-// Según el contrato (epic-0-session-signals.md), este modo solo captura `modo_entrada`.
-// No recoge señales adicionales — se apoya en el perfil estable del usuario.
-
-function SorprendemView({ onResults }) {
+export default function SessionScreen({ onLogout, onOpenProfile, userEmail }) {
+  const [view, setView] = useState("landing");
+  const [results, setResults] = useState([]);
+  const [lastMode, setLastMode] = useState("preguntame");
   const [searching, setSearching] = useState(false);
-
-  function handleSearch() {
-    setSearching(true);
-    // TODO (EPIC 3 backend): reemplazar setTimeout con:
-    //   const data = await postSessionRecommend(token, { modo_entrada: "sorprendeme" });
-    //   onResults(data.items);
-    setTimeout(() => {
-      onResults(MOCK_RESULTS);
-      setSearching(false);
-    }, 900);
-  }
-
-  return (
-    <div className="session-tab-content">
-      <div className="session-copy session-copy--center">
-        <h2 className="session-heading">Confía en MoodFix</h2>
-        <p className="session-subheading">
-          Usamos tu perfil para elegir algo pensado para ti ahora mismo. Sin preguntas.
-        </p>
-      </div>
-
-      <div className="session-surprise-cta">
-        <button
-          className="session-cta-btn session-cta-btn--large"
-          disabled={searching}
-          type="button"
-          onClick={handleSearch}
-        >
-          {searching ? "Buscando…" : "Sorpréndeme"}
-        </button>
-        <p className="session-cta-hint">
-          Nos basamos en tu perfil estable. Si no lo tienes completo, usamos criterios generales.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ── Tab: Pregúntame ───────────────────────────────────────────────────────────
-// Recoge: mood, preferencia_tiempo, preferencia_energia, seguro_o_descubrir, preferencia_epoca
-// Nombres técnicos según epic-0-session-signals.md
-
-function PreguntameView({ onResults }) {
+  const [askStepIndex, setAskStepIndex] = useState(0);
   const [draft, setDraft] = useState({
     mood: null,
     preferencia_tiempo: null,
@@ -178,134 +291,100 @@ function PreguntameView({ onResults }) {
     seguro_o_descubrir: null,
     preferencia_epoca: null,
   });
-  const [searching, setSearching] = useState(false);
 
-  const canSearch = draft.mood !== null;
+  function updateDraft(field, value) {
+    setDraft((current) => ({
+      ...current,
+      [field]: current[field] === value ? null : value,
+    }));
+  }
 
-  function handleSearch() {
+  function resetSession() {
+    setResults([]);
+    setView("landing");
+    setSearching(false);
+    setAskStepIndex(0);
+  }
+
+  function runMockSearch(mode) {
     setSearching(true);
-    // TODO (EPIC 3 backend): reemplazar setTimeout con:
-    //   const data = await postSessionRecommend(token, { modo_entrada: "preguntame", ...draft });
-    //   onResults(data.items);
-    setTimeout(() => {
-      onResults(MOCK_RESULTS);
+    setLastMode(mode);
+
+    // TODO (EPIC 3 backend): sustituir este mock por postSessionRecommend(token, payload)
+    window.setTimeout(() => {
+      setResults(MOCK_RESULTS.slice(0, 3));
+      setView("results");
       setSearching(false);
     }, 900);
   }
 
-  return (
-    <div className="session-tab-content">
-      <div className="session-copy">
-        <h2 className="session-heading">Cuéntanos qué te apetece</h2>
-        <p className="session-subheading">
-          Responde lo que quieras. Con el mood ya tenemos suficiente para empezar.
-        </p>
-      </div>
+  function goToAsk() {
+    setAskStepIndex(0);
+    setView("preguntame");
+  }
 
-      <div className="session-blocks">
-        <SectionBlock label="Mood" title="¿Qué tipo de experiencia buscas?">
-          <ChipGroup
-            multi={false}
-            options={MOOD_OPTIONS}
-            selected={draft.mood}
-            onToggle={(id) => setDraft((d) => ({ ...d, mood: id }))}
-          />
-        </SectionBlock>
+  function handleAskBack() {
+    if (askStepIndex === 0) {
+      setView("landing");
+      return;
+    }
 
-        <SectionBlock label="Tiempo" title="¿Cuánto rato tienes?">
-          <OptionCardGroup
-            options={TIME_OPTIONS}
-            selected={draft.preferencia_tiempo}
-            onSelect={(id) => setDraft((d) => ({ ...d, preferencia_tiempo: id }))}
-          />
-        </SectionBlock>
+    setAskStepIndex((current) => current - 1);
+  }
 
-        <SectionBlock label="Energía" title="¿Con qué actitud llegas?">
-          <OptionCardGroup
-            options={ENERGY_OPTIONS}
-            selected={draft.preferencia_energia}
-            onSelect={(id) => setDraft((d) => ({ ...d, preferencia_energia: id }))}
-          />
-        </SectionBlock>
+  function handleAskNext() {
+    const currentStep = ASK_STEPS[askStepIndex];
 
-        <SectionBlock label="Descubrimiento" title="¿Qué prefieres, seguridad o sorpresa?">
-          <ChipGroup
-            multi={false}
-            options={DISCOVERY_OPTIONS}
-            selected={draft.seguro_o_descubrir}
-            onToggle={(id) => setDraft((d) => ({ ...d, seguro_o_descubrir: id }))}
-          />
-        </SectionBlock>
+    if (currentStep.required && !draft[currentStep.id]) {
+      return;
+    }
 
-        <SectionBlock label="Época" title="¿De qué época te apetece algo?">
-          <ChipGroup
-            multi={false}
-            options={ERA_OPTIONS}
-            selected={draft.preferencia_epoca}
-            onToggle={(id) => setDraft((d) => ({ ...d, preferencia_epoca: id }))}
-          />
-        </SectionBlock>
-      </div>
+    if (askStepIndex === ASK_STEPS.length - 1) {
+      runMockSearch("preguntame");
+      return;
+    }
 
-      <div className="session-cta">
-        {!canSearch && (
-          <p className="session-cta-hint">
-            Elige al menos un mood para continuar. El resto es opcional.
-          </p>
-        )}
-        <button
-          className="session-cta-btn"
-          disabled={!canSearch || searching}
-          type="button"
-          onClick={handleSearch}
-        >
-          {searching ? "Buscando…" : "Buscar películas"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Componente principal ──────────────────────────────────────────────────────
-
-export default function SessionScreen() {
-  const [activeTab, setActiveTab] = useState("sorprendeme");
-  const [results, setResults] = useState(null);
-
-  function handleReset() {
-    setResults(null);
+    setAskStepIndex((current) => current + 1);
   }
 
   return (
-    <div className="session-shell">
-      {results !== null ? (
-        <ResultsSection results={results} onReset={handleReset} />
-      ) : (
-        <>
-          <div className="session-tabs">
-            <button
-              className={`session-tab-btn ${activeTab === "sorprendeme" ? "active" : ""}`}
-              type="button"
-              onClick={() => setActiveTab("sorprendeme")}
-            >
-              Sorpréndeme
-            </button>
-            <button
-              className={`session-tab-btn ${activeTab === "preguntame" ? "active" : ""}`}
-              type="button"
-              onClick={() => setActiveTab("preguntame")}
-            >
-              Pregúntame
-            </button>
-          </div>
+    <section className="session-screen">
+      <Header userEmail={userEmail} onLogout={onLogout} onOpenProfile={onOpenProfile} />
 
-          {activeTab === "sorprendeme" ? (
-            <SorprendemView onResults={setResults} />
-          ) : (
-            <PreguntameView onResults={setResults} />
-          )}
-        </>
-      )}
-    </div>
+      {view === "landing" ? (
+        <LandingView onAsk={goToAsk} onSurprise={() => setView("sorprendeme")} />
+      ) : null}
+
+      {view === "sorprendeme" ? (
+        <SurpriseView
+          searching={searching}
+          onBack={() => setView("landing")}
+          onSearch={() => runMockSearch("sorprendeme")}
+        />
+      ) : null}
+
+      {view === "preguntame" ? (
+        <QuestionStep
+          isFirstStep={askStepIndex === 0}
+          isLastStep={askStepIndex === ASK_STEPS.length - 1}
+          searching={searching}
+          step={ASK_STEPS[askStepIndex]}
+          stepIndex={askStepIndex}
+          stepValue={draft[ASK_STEPS[askStepIndex].id]}
+          onBack={handleAskBack}
+          onNext={handleAskNext}
+          onSelect={updateDraft}
+        />
+      ) : null}
+
+      {view === "results" ? (
+        <ResultsView
+          mode={lastMode}
+          results={results}
+          onBack={() => setView(lastMode)}
+          onRestart={resetSession}
+        />
+      ) : null}
+    </section>
   );
 }

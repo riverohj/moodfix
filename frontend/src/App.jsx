@@ -264,28 +264,22 @@ export default function App() {
       ) : (
         <section className="onboarding-flow-shell">
           {!editing && onboardingDone ? (
-            <section className="panel onboarding-layout">
-              <header className="profile-header profile-header-plain">
-                <div>
-                  <p className="eyebrow">MoodFix</p>
-                  <h2>{user?.email}</h2>
-                </div>
-                <div className="header-actions">
-                  {showProfilePanel ? (
+            showProfilePanel ? (
+              <section className="panel onboarding-layout">
+                <header className="profile-header profile-header-plain">
+                  <div>
+                    <p className="eyebrow">MoodFix</p>
+                    <h2>{user?.email}</h2>
+                  </div>
+                  <div className="header-actions">
                     <button className="ghost-button" type="button" onClick={closeProfilePanel}>
                       Volver
                     </button>
-                  ) : (
-                    <button className="ghost-button" type="button" onClick={openProfilePanel}>
-                      Ver perfil
+                    <button className="ghost-button" type="button" onClick={handleLogout}>
+                      Cerrar sesión
                     </button>
-                  )}
-                  <button className="ghost-button" type="button" onClick={handleLogout}>
-                    Cerrar sesión
-                  </button>
-                </div>
-              </header>
-              {showProfilePanel ? (
+                  </div>
+                </header>
                 <section className="summary-card">
                   <h3>Tu perfil estable</h3>
                   <p>
@@ -307,10 +301,14 @@ export default function App() {
                     </button>
                   </div>
                 </section>
-              ) : (
-                <SessionScreen />
-              )}
-            </section>
+              </section>
+            ) : (
+              <SessionScreen
+                onLogout={handleLogout}
+                onOpenProfile={openProfilePanel}
+                userEmail={user?.email}
+              />
+            )
           ) : (
             <Onboarding
               draft={draft}

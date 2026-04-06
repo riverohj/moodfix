@@ -25,7 +25,7 @@ export const TIME_OPTIONS = [
 ];
 
 export const ENERGY_OPTIONS = [
-  { id: "facil",  label: "Ponmelo fácil" },
+  { id: "facil",  label: "Pónmelo fácil" },
   { id: "reto",   label: "Acepto el reto" },
 ];
 
