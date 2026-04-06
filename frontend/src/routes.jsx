@@ -7,6 +7,7 @@ import LoadingScreen from "../pages/LoadingScreen";
 import Layout from "../pages/layout";
 import Onboarding from "../pages/Onboarding";
 import ProfileScreen from "../pages/ProfileScreen";
+import SessionScreen from "../pages/SessionScreen";
 import { ONBOARDING_STEPS } from "./config/onboarding";
 
 function LayoutRoute({ isAuthenticated, onLogout }) {
@@ -24,12 +25,49 @@ function LayoutRoute({ isAuthenticated, onLogout }) {
   );
 }
 
+function HomeRoute({ isAuthenticated }) {
+  const navigate = useNavigate();
+
+  return (
+    <Home
+      ctaLabel={isAuthenticated ? "Encuentra tu película" : "Empieza ahora"}
+      onPrimaryAction={() => navigate(isAuthenticated ? "/sesion" : "/auth")}
+    />
+  );
+}
+
 function ProtectedRoute({ allow, children, redirectTo }) {
   if (!allow) {
     return <Navigate replace to={redirectTo} />;
   }
 
   return children;
+}
+
+function SessionPreviewRoute({
+  hasCompletedOnboarding = false,
+  onGoToOnboarding,
+  onLogout,
+  onOpenProfile,
+  userEmail,
+}) {
+  const navigate = useNavigate();
+
+  return (
+    <SessionScreen
+      hasCompletedOnboarding={hasCompletedOnboarding}
+      onGoToOnboarding={() => {
+        onGoToOnboarding?.();
+        navigate("/onboarding");
+      }}
+      onLogout={onLogout}
+      onOpenProfile={() => {
+        onOpenProfile();
+        navigate("/perfil");
+      }}
+      userEmail={userEmail}
+    />
+  );
 }
 
 export default function AppRoutes({
@@ -66,12 +104,25 @@ export default function AppRoutes({
   }
 
   const shouldShowOnboarding = isAuthenticated && (!onboardingDone || editing);
+  const hasCompletedOnboarding = Boolean(profile?.onboarding_completed);
+
+  function renderSessionScreen() {
+    return (
+      <SessionPreviewRoute
+        hasCompletedOnboarding={hasCompletedOnboarding}
+        onGoToOnboarding={() => undefined}
+        onLogout={onLogout}
+        onOpenProfile={onOpenProfilePanel}
+        userEmail={user?.email}
+      />
+    );
+  }
 
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<LayoutRoute isAuthenticated={isAuthenticated} onLogout={onLogout} />}>
-          <Route element={<Home />} path="/" />
+          <Route element={<HomeRoute isAuthenticated={isAuthenticated} />} path="/" />
         </Route>
 
         <Route
@@ -145,6 +196,14 @@ export default function AppRoutes({
             </ProtectedRoute>
           }
           path="/favoritos"
+        />
+        <Route
+          element={<ProtectedRoute allow={isAuthenticated} redirectTo="/auth">{renderSessionScreen()}</ProtectedRoute>}
+          path="/sesion"
+        />
+        <Route
+          element={<Navigate replace to="/sesion" />}
+          path="/sesion-preview"
         />
         <Route element={<Navigate replace to="/" />} path="*" />
       </Routes>

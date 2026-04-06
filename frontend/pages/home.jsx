@@ -1,6 +1,6 @@
 import "../css/home.css";
 
-export default function Home() {
+export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAction }) {
   return (
     <section className="home-page">
       <section className="home-card">
@@ -13,8 +13,8 @@ export default function Home() {
           </p>
         </div>
 
-        <button type="button" className="home-cta">
-          Encuentra tu Pelicula
+        <button type="button" className="home-cta" onClick={onPrimaryAction}>
+          {ctaLabel}
         </button>
       </section>
     </section>

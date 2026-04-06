@@ -8,7 +8,7 @@ import {
   MOCK_RESULTS,
   MOOD_OPTIONS,
   TIME_OPTIONS,
-} from "../config/session";
+} from "../src/config/session";
 
 const ASK_STEPS = [
   {
@@ -106,6 +106,30 @@ function StepArrow({ children, hidden = false, onClick, disabled = false }) {
     >
       {children}
     </button>
+  );
+}
+
+function SoftGate({ onContinue, onCompleteProfile }) {
+  return (
+    <div className="session-soft-gate">
+      <div className="session-soft-gate-card">
+        <p className="session-mode-tag">Perfil incompleto</p>
+        <h2 className="session-soft-gate-title">Funcionará mejor si terminas el onboarding</h2>
+        <p className="session-soft-gate-copy">
+          Puedes seguir igualmente, pero las recomendaciones serán menos precisas sin tus
+          preferencias básicas.
+        </p>
+
+        <div className="session-soft-gate-actions">
+          <button className="ghost-button" type="button" onClick={onContinue}>
+            Continuar igualmente
+          </button>
+          <button className="session-primary-button" type="button" onClick={onCompleteProfile}>
+            Completar onboarding
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -278,12 +302,20 @@ function ResultsView({ mode, results, onRestart, onBack }) {
   );
 }
 
-export default function SessionScreen({ onLogout, onOpenProfile, userEmail }) {
+export default function SessionScreen({
+  hasCompletedOnboarding = false,
+  onGoToOnboarding,
+  onLogout,
+  onOpenProfile,
+  userEmail,
+}) {
   const [view, setView] = useState("landing");
   const [results, setResults] = useState([]);
   const [lastMode, setLastMode] = useState("preguntame");
   const [searching, setSearching] = useState(false);
   const [askStepIndex, setAskStepIndex] = useState(0);
+  const [pendingMode, setPendingMode] = useState(null);
+  const [showSoftGate, setShowSoftGate] = useState(false);
   const [draft, setDraft] = useState({
     mood: null,
     preferencia_tiempo: null,
@@ -304,6 +336,8 @@ export default function SessionScreen({ onLogout, onOpenProfile, userEmail }) {
     setView("landing");
     setSearching(false);
     setAskStepIndex(0);
+    setPendingMode(null);
+    setShowSoftGate(false);
   }
 
   function runMockSearch(mode) {
@@ -321,6 +355,31 @@ export default function SessionScreen({ onLogout, onOpenProfile, userEmail }) {
   function goToAsk() {
     setAskStepIndex(0);
     setView("preguntame");
+  }
+
+  function openMode(mode) {
+    if (!hasCompletedOnboarding) {
+      setPendingMode(mode);
+      setShowSoftGate(true);
+      return;
+    }
+
+    if (mode === "preguntame") {
+      goToAsk();
+      return;
+    }
+
+    setView("sorprendeme");
+  }
+
+  function continueWithoutOnboarding() {
+    setShowSoftGate(false);
+
+    if (pendingMode === "preguntame") {
+      goToAsk();
+    } else if (pendingMode === "sorprendeme") {
+      setView("sorprendeme");
+    }
   }
 
   function handleAskBack() {
@@ -351,8 +410,18 @@ export default function SessionScreen({ onLogout, onOpenProfile, userEmail }) {
     <section className="session-screen">
       <Header userEmail={userEmail} onLogout={onLogout} onOpenProfile={onOpenProfile} />
 
+      {showSoftGate ? (
+        <SoftGate
+          onCompleteProfile={onGoToOnboarding}
+          onContinue={continueWithoutOnboarding}
+        />
+      ) : null}
+
       {view === "landing" ? (
-        <LandingView onAsk={goToAsk} onSurprise={() => setView("sorprendeme")} />
+        <LandingView
+          onAsk={() => openMode("preguntame")}
+          onSurprise={() => openMode("sorprendeme")}
+        />
       ) : null}
 
       {view === "sorprendeme" ? (

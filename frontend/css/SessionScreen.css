@@ -14,6 +14,41 @@
   margin-bottom: 34px;
 }
 
+.session-soft-gate {
+  width: min(720px, 100%);
+  margin: 0 auto 28px;
+}
+
+.session-soft-gate-card {
+  display: grid;
+  gap: 16px;
+  padding: 26px 28px;
+  border-radius: 28px;
+  border: 1px solid rgba(229, 9, 20, 0.45);
+  background: rgba(15, 15, 15, 0.88);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
+}
+
+.session-soft-gate-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.02;
+  color: #f5f5f5;
+}
+
+.session-soft-gate-copy {
+  margin: 0;
+  color: #a0a0a0;
+  line-height: 1.65;
+}
+
+.session-soft-gate-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
 .session-brand-block {
   display: grid;
   gap: 8px;
@@ -421,13 +456,15 @@
 
   .session-page-actions,
   .session-results-actions,
-  .session-detail-actions {
+  .session-detail-actions,
+  .session-soft-gate-actions {
     justify-content: stretch;
   }
 
   .session-page-actions > *,
   .session-results-actions > *,
   .session-detail-actions > *,
+  .session-soft-gate-actions > *,
   .session-nav-arrow {
     width: 100%;
   }
