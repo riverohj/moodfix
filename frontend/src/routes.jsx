@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
 import AuthScreen from "../pages/AuthScreen";
+import Favorites from "../pages/Favorites";
 import Home from "../pages/home";
 import LoadingScreen from "../pages/LoadingScreen";
 import Layout from "../pages/layout";
@@ -140,7 +141,7 @@ export default function AppRoutes({
               allow={isAuthenticated && !shouldShowOnboarding}
               redirectTo={isAuthenticated ? "/onboarding" : "/auth"}
             >
-              <Navigate replace to="/perfil" />
+              <Favorites />
             </ProtectedRoute>
           }
           path="/favoritos"
