@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@600;700;800&display=swap');
 
 /* Aplicamos la fuente y el color base a todo el contenedor */
@@ -55,7 +54,7 @@
 .poster-fallback { display: flex; align-items: center; justify-content: center; font-size: 3rem; }
 .poster-fallback::after { content: '🎬'; }
 
-.card-body {
+.favorito-card .card-body {
     padding: 0.6rem 0.6rem 0px 0.6rem !important;
     display: flex;
     flex-direction: column;
@@ -145,7 +144,7 @@
     text-overflow: ellipsis;
   }
   /* 2. Ajustamos el cuerpo para que el contenido respire */
-  .card-body {
+  .favorito-card .card-body {
     padding: 4px 2px 0px 2px !important;
   }
 
