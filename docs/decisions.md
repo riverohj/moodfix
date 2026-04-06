@@ -177,6 +177,13 @@ Cada entrada debe incluir:
 - Impacto: EPIC 2 no implementa migracion `local -> user`; EPIC 3 debe cerrar el handoff guest -> autenticado, al menos con persistencia temporal en frontend para MVP.
 - Responsable o acuerdo del equipo: separacion explicita entre perfil estable y senales de sesion.
 
+### 2026-04-06 · Home accesible con onboarding incompleto y aviso blando al entrar en sesion
+
+- Decision: un usuario autenticado con onboarding incompleto puede entrar en `/` y ver la home; no se le redirige de forma obligatoria a `/onboarding`.
+- Motivo: el onboarding sigue siendo opcional y el equipo prefiere una friccion baja de entrada antes que un bloqueo duro de navegacion.
+- Impacto: el aviso se mueve al punto donde el usuario intenta usar `Sorprendeme` o `Preguntame`; ahi se le debe informar de que la recomendacion funcionara peor sin onboarding y ofrecerle completar perfil o continuar igualmente.
+- Responsable o acuerdo del equipo: acuerdo del equipo tras revisar el enrutado nuevo de EPIC 3.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.
