@@ -7,9 +7,7 @@ import {
   firstIncompleteStepIndex,
   optionLabelByValue,
 } from "./config/onboarding";
-import AuthScreen from "./components/AuthScreen";
-import Onboarding from "./components/Onboarding";
-import SessionScreen from "./components/SessionScreen";
+import AppRoutes from "./routes";
 import {
   getAuthenticatedUser,
   getProfile,
@@ -62,10 +60,22 @@ export default function App() {
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [authFeedback, setAuthFeedback] = useState({
+    login: { error: "", message: "" },
+    signup: { error: "", message: "" },
+  });
 
   const currentStep = ONBOARDING_STEPS[stepIndex];
   const isLastStep = stepIndex === ONBOARDING_STEPS.length - 1;
   const onboardingDone = profileLooksCompleted(profile);
+  const isAuthenticated = Boolean(token);
+
+  function resetAuthFeedback() {
+    setAuthFeedback({
+      login: { error: "", message: "" },
+      signup: { error: "", message: "" },
+    });
+  }
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem(AUTH_TOKEN_KEY);
@@ -107,12 +117,20 @@ export default function App() {
   async function handleLoginSubmit(email, password) {
     try {
       setAuthSubmitting(true);
+      resetAuthFeedback();
       setError("");
+      setMessage("");
       const payload = await loginUser(email, password);
-      setMessage("Sesión iniciada.");
+      setAuthFeedback({
+        login: { error: "", message: "Sesión iniciada." },
+        signup: { error: "", message: "" },
+      });
       await bootstrapSession(payload.auth.access_token);
     } catch (authError) {
-      setError(authError.message);
+      setAuthFeedback({
+        login: { error: authError.message, message: "" },
+        signup: { error: "", message: "" },
+      });
     } finally {
       setAuthSubmitting(false);
     }
@@ -121,12 +139,20 @@ export default function App() {
   async function handleRegisterSubmit(email, password) {
     try {
       setAuthSubmitting(true);
+      resetAuthFeedback();
       setError("");
+      setMessage("");
       const payload = await registerUser(email, password);
-      setMessage("Cuenta creada. Vamos al onboarding.");
+      setAuthFeedback({
+        login: { error: "", message: "" },
+        signup: { error: "", message: "Cuenta creada. Vamos al onboarding." },
+      });
       await bootstrapSession(payload.auth.access_token);
     } catch (authError) {
-      setError(authError.message);
+      setAuthFeedback({
+        login: { error: "", message: "" },
+        signup: { error: authError.message, message: "" },
+      });
     } finally {
       setAuthSubmitting(false);
     }
@@ -147,6 +173,10 @@ export default function App() {
       setDraft(emptyProfileDraft());
       setEditing(false);
       setShowProfilePanel(false);
+      setAuthFeedback({
+        login: { error: "", message: "Sesión cerrada." },
+        signup: { error: "", message: "" },
+      });
       setMessage("Sesión cerrada.");
       setError("");
     }
@@ -236,94 +266,36 @@ export default function App() {
     setError("");
   }
 
-  if (loadingSession) {
-    return (
-      <main className="app-shell">
-        <section className="panel panel-centered">
-          <p className="eyebrow">MoodFix</p>
-          <h1>Cargando sesión y perfil...</h1>
-          <p className="lead">Estamos preparando tu experiencia.</p>
-        </section>
-      </main>
-    );
-  }
-
   return (
-    <main className="app-shell">
-      {token && error ? <div className="feedback feedback-error">{error}</div> : null}
-      {token && message ? <div className="feedback feedback-success">{message}</div> : null}
-
-      {!token ? (
-        <AuthScreen
-          error={error}
-          message={message}
-          onLogin={handleLoginSubmit}
-          onRegister={handleRegisterSubmit}
-          submitting={authSubmitting}
-        />
-      ) : (
-        <section className="onboarding-flow-shell">
-          {!editing && onboardingDone ? (
-            showProfilePanel ? (
-              <section className="panel onboarding-layout">
-                <header className="profile-header profile-header-plain">
-                  <div>
-                    <p className="eyebrow">MoodFix</p>
-                    <h2>{user?.email}</h2>
-                  </div>
-                  <div className="header-actions">
-                    <button className="ghost-button" type="button" onClick={closeProfilePanel}>
-                      Volver
-                    </button>
-                    <button className="ghost-button" type="button" onClick={handleLogout}>
-                      Cerrar sesión
-                    </button>
-                  </div>
-                </header>
-                <section className="summary-card">
-                  <h3>Tu perfil estable</h3>
-                  <p>
-                    Aquí puedes revisar lo que has guardado y volver a editarlo cuando quieras.
-                  </p>
-
-                  <dl className="summary-grid">
-                    {ONBOARDING_STEPS.map((step) => (
-                      <div key={step.id}>
-                        <dt>{PROFILE_FIELD_LABELS[step.id]}</dt>
-                        <dd>{formatSelection(step, profile?.[step.id]) || "Sin definir"}</dd>
-                      </div>
-                    ))}
-                  </dl>
-
-                  <div className="summary-actions">
-                    <button className="primary-button" type="button" onClick={startEditing}>
-                      Editar perfil
-                    </button>
-                  </div>
-                </section>
-              </section>
-            ) : (
-              <SessionScreen
-                onLogout={handleLogout}
-                onOpenProfile={openProfilePanel}
-                userEmail={user?.email}
-              />
-            )
-          ) : (
-            <Onboarding
-              draft={draft}
-              isLastStep={isLastStep}
-              onAdvance={() => saveCurrentStep(isLastStep)}
-              onFieldChange={updateDraft}
-              onPrevious={() => setStepIndex((currentValue) => Math.max(currentValue - 1, 0))}
-              onSkip={handleSkip}
-              profile={profile}
-              savingStep={savingStep}
-              stepIndex={stepIndex}
-            />
-          )}
-        </section>
-      )}
-    </main>
+    <AppRoutes
+      authFeedback={authFeedback}
+      currentStep={currentStep}
+      draft={draft}
+      error={error}
+      formatSelection={formatSelection}
+      isAuthenticated={isAuthenticated}
+      isLastStep={isLastStep}
+      loadingSession={loadingSession}
+      message={message}
+      onboardingDone={onboardingDone}
+      onAdvance={() => saveCurrentStep(isLastStep)}
+      onCloseProfilePanel={closeProfilePanel}
+      onFieldChange={updateDraft}
+      onLogin={handleLoginSubmit}
+      onLogout={handleLogout}
+      onOpenProfilePanel={openProfilePanel}
+      onPrevious={() => setStepIndex((currentValue) => Math.max(currentValue - 1, 0))}
+      onRegister={handleRegisterSubmit}
+      onSkip={handleSkip}
+      onStartEditing={startEditing}
+      profile={profile}
+      savingStep={savingStep}
+      showProfilePanel={showProfilePanel}
+      stepIndex={stepIndex}
+      submitting={authSubmitting}
+      user={user}
+      editing={editing}
+      profileFieldLabels={PROFILE_FIELD_LABELS}
+    />
   );
 }

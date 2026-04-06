@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import "./SessionScreen.css";
+import "../css/SessionScreen.css";
 import {
   DISCOVERY_OPTIONS,
   ENERGY_OPTIONS,

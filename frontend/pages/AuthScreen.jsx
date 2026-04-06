@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import "./AuthScreen.css";
+import "../css/AuthScreen.css";
 
 function LockIcon({ accent = false }) {
   return (
@@ -52,7 +52,15 @@ function MailIcon() {
   );
 }
 
-export default function AuthScreen({ error, message, onLogin, onRegister, submitting }) {
+export default function AuthScreen({
+  loginError,
+  loginMessage,
+  signupError,
+  signupMessage,
+  onLogin,
+  onRegister,
+  submitting,
+}) {
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
@@ -65,7 +73,7 @@ export default function AuthScreen({ error, message, onLogin, onRegister, submit
   });
   const [localError, setLocalError] = useState("");
 
-  const visibleError = localError || error;
+  const visibleSignupError = localError || signupError;
   const signupPasswordsMatch = useMemo(
     () =>
       signupForm.confirmPassword.length === 0 || signupForm.password === signupForm.confirmPassword,
@@ -116,8 +124,8 @@ export default function AuthScreen({ error, message, onLogin, onRegister, submit
         <section className="auth-card">
           <h2 className="auth-title">Inicia sesión</h2>
 
-          {message ? <div className="auth-feedback auth-feedback-success">{message}</div> : null}
-          {visibleError ? <div className="auth-feedback auth-feedback-error">{visibleError}</div> : null}
+          {loginMessage ? <div className="auth-feedback auth-feedback-success">{loginMessage}</div> : null}
+          {loginError ? <div className="auth-feedback auth-feedback-error">{loginError}</div> : null}
 
           <form className="auth-form" onSubmit={handleLoginSubmit}>
             <label className="auth-field">
@@ -164,6 +172,9 @@ export default function AuthScreen({ error, message, onLogin, onRegister, submit
 
         <section className="auth-card">
           <h2 className="auth-title">Crea tu cuenta</h2>
+
+          {signupMessage ? <div className="auth-feedback auth-feedback-success">{signupMessage}</div> : null}
+          {visibleSignupError ? <div className="auth-feedback auth-feedback-error">{visibleSignupError}</div> : null}
 
           <form className="auth-form" onSubmit={handleSignupSubmit}>
             <label className="auth-field">
