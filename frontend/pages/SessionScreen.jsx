@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import "../css/SessionScreen.css";
 import {
@@ -48,23 +48,34 @@ const ASK_STEPS = [
   },
 ];
 
-function Header({ userEmail, onLogout, onOpenProfile }) {
-  return (
-    <header className="session-topbar">
-      <div className="session-brand-block">
-        <p className="eyebrow">MoodFix</p>
-        <h2 className="session-user-email">{userEmail}</h2>
-      </div>
+// ── Banner de perfil incompleto (ligero, no bloquea) ──────────────────────────
 
-      <div className="header-actions">
-        <button className="ghost-button" type="button" onClick={onOpenProfile}>
-          Ver perfil
+function ProfileNudgeBanner({ onCompleteProfile, onContinue, pendingMode }) {
+  const selectedModeLabel = pendingMode === "sorprendeme" ? "Sorpréndeme" : "Pregúntame";
+
+  return (
+    <div className="session-inline-nudge">
+      <p className="session-inline-nudge-copy">
+        Si no has completado{" "}
+        <button className="session-inline-link" type="button" onClick={onCompleteProfile}>
+          tus gustos
         </button>
-        <button className="ghost-button" type="button" onClick={onLogout}>
-          Cerrar sesión
+        , las recomendaciones serán más genéricas.
+      </p>
+      <div className="session-inline-nudge-actions">
+        <button className="session-choice-button session-choice-button-secondary" type="button" onClick={onContinue}>
+          Continuar igualmente
+        </button>
+        <button className="session-choice-button" type="button" onClick={onCompleteProfile}>
+          Completar tus gustos
         </button>
       </div>
-    </header>
+      <p className="session-inline-nudge-hint">
+        {selectedModeLabel === "Sorpréndeme"
+          ? "Si continúas, lanzaremos directamente una recomendación rápida."
+          : "Si continúas, entrarás directamente en las preguntas."}
+      </p>
+    </div>
   );
 }
 
@@ -109,44 +120,43 @@ function StepArrow({ children, hidden = false, onClick, disabled = false }) {
   );
 }
 
-function SoftGate({ onContinue, onCompleteProfile }) {
-  return (
-    <div className="session-soft-gate">
-      <div className="session-soft-gate-card">
-        <p className="session-mode-tag">Perfil incompleto</p>
-        <h2 className="session-soft-gate-title">Funcionará mejor si terminas el onboarding</h2>
-        <p className="session-soft-gate-copy">
-          Puedes seguir igualmente, pero las recomendaciones serán menos precisas sin tus
-          preferencias básicas.
-        </p>
-
-        <div className="session-soft-gate-actions">
-          <button className="ghost-button" type="button" onClick={onContinue}>
-            Continuar igualmente
-          </button>
-          <button className="session-primary-button" type="button" onClick={onCompleteProfile}>
-            Completar onboarding
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LandingView({ onAsk, onSurprise }) {
+function LandingView({
+  onAsk,
+  onSurprise,
+  onContinueWithoutProfile,
+  onCompleteProfile,
+  pendingMode,
+  searching,
+  showNudge,
+}) {
   return (
     <ViewShell compact>
       <div className="session-home-card">
         <h1 className="session-home-title">
-          <span className="session-home-line">“No sé qué ver hoy”</span>
+          <span className="session-home-line">"No sé qué ver hoy"</span>
           <span className="session-home-line">¡Rompe el bucle!</span>
         </h1>
         <p className="session-home-copy">A veces la peli te elige a ti.</p>
 
-        <div className="session-home-actions">
-          <ChoiceButton onClick={onAsk}>Pregúntame</ChoiceButton>
-          <ChoiceButton onClick={onSurprise}>Sorpréndeme</ChoiceButton>
-        </div>
+        {showNudge ? (
+          <ProfileNudgeBanner
+            pendingMode={pendingMode}
+            onCompleteProfile={onCompleteProfile}
+            onContinue={onContinueWithoutProfile}
+          />
+        ) : searching ? (
+          <div className="session-home-loading">
+            <p className="session-home-loading-title">Estamos buscando tus 3 para hoy...</p>
+            <p className="session-home-loading-copy">
+              Un momento y te enseñamos una selección rápida.
+            </p>
+          </div>
+        ) : (
+          <div className="session-home-actions">
+            <ChoiceButton onClick={onAsk}>Pregúntame</ChoiceButton>
+            <ChoiceButton onClick={onSurprise}>Sorpréndeme</ChoiceButton>
+          </div>
+        )}
       </div>
     </ViewShell>
   );
@@ -269,7 +279,7 @@ function ResultCard({ movie }) {
   );
 }
 
-function ResultsView({ mode, results, onRestart, onBack }) {
+function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
   return (
     <ViewShell>
       <div className="session-results-header">
@@ -284,8 +294,13 @@ function ResultsView({ mode, results, onRestart, onBack }) {
         </div>
 
         <div className="session-results-actions">
-          <button className="ghost-button" type="button" onClick={onBack}>
-            Ajustar
+          {mode === "preguntame" ? (
+            <button className="ghost-button" type="button" onClick={onBack}>
+              Ajustar
+            </button>
+          ) : null}
+          <button className="ghost-button" type="button" onClick={onGoHome}>
+            Ir al inicio
           </button>
           <button className="session-primary-button" type="button" onClick={onRestart}>
             Nueva búsqueda
@@ -304,7 +319,9 @@ function ResultsView({ mode, results, onRestart, onBack }) {
 
 export default function SessionScreen({
   hasCompletedOnboarding = false,
+  onGoHome,
   onGoToOnboarding,
+  // onLogout y userEmail siguen en props para compatibilidad con routes, ya no se renderizan
   onLogout,
   onOpenProfile,
   userEmail,
@@ -315,7 +332,7 @@ export default function SessionScreen({
   const [searching, setSearching] = useState(false);
   const [askStepIndex, setAskStepIndex] = useState(0);
   const [pendingMode, setPendingMode] = useState(null);
-  const [showSoftGate, setShowSoftGate] = useState(false);
+  const [showInlineNudge, setShowInlineNudge] = useState(false);
   const [draft, setDraft] = useState({
     mood: null,
     preferencia_tiempo: null,
@@ -337,12 +354,13 @@ export default function SessionScreen({
     setSearching(false);
     setAskStepIndex(0);
     setPendingMode(null);
-    setShowSoftGate(false);
+    setShowInlineNudge(false);
   }
 
   function runMockSearch(mode) {
     setSearching(true);
     setLastMode(mode);
+    setShowInlineNudge(false);
 
     // TODO (EPIC 3 backend): sustituir este mock por postSessionRecommend(token, payload)
     window.setTimeout(() => {
@@ -360,25 +378,30 @@ export default function SessionScreen({
   function openMode(mode) {
     if (!hasCompletedOnboarding) {
       setPendingMode(mode);
-      setShowSoftGate(true);
+      setShowInlineNudge(true);
       return;
     }
 
-    if (mode === "preguntame") {
-      goToAsk();
-      return;
-    }
-
-    setView("sorprendeme");
+    enterMode(mode);
   }
 
-  function continueWithoutOnboarding() {
-    setShowSoftGate(false);
-
-    if (pendingMode === "preguntame") {
+  function enterMode(mode) {
+    if (mode === "preguntame") {
       goToAsk();
-    } else if (pendingMode === "sorprendeme") {
+    } else {
       setView("sorprendeme");
+    }
+  }
+
+  function handleNudgeContinue() {
+    setShowInlineNudge(false);
+    if (pendingMode) {
+      if (pendingMode === "sorprendeme") {
+        runMockSearch("sorprendeme");
+      } else {
+        enterMode(pendingMode);
+      }
+      setPendingMode(null);
     }
   }
 
@@ -408,19 +431,15 @@ export default function SessionScreen({
 
   return (
     <section className="session-screen">
-      <Header userEmail={userEmail} onLogout={onLogout} onOpenProfile={onOpenProfile} />
-
-      {showSoftGate ? (
-        <SoftGate
-          onCompleteProfile={onGoToOnboarding}
-          onContinue={continueWithoutOnboarding}
-        />
-      ) : null}
-
       {view === "landing" ? (
         <LandingView
+          onCompleteProfile={onGoToOnboarding}
+          onContinueWithoutProfile={handleNudgeContinue}
           onAsk={() => openMode("preguntame")}
           onSurprise={() => openMode("sorprendeme")}
+          pendingMode={pendingMode}
+          searching={searching}
+          showNudge={showInlineNudge}
         />
       ) : null}
 
@@ -451,6 +470,7 @@ export default function SessionScreen({
           mode={lastMode}
           results={results}
           onBack={() => setView(lastMode)}
+          onGoHome={onGoHome}
           onRestart={resetSession}
         />
       ) : null}

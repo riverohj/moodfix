@@ -8,22 +8,31 @@ export default function Navbar({
   return (
     <header className="site-navbar">
       <div className="site-shell site-navbar-inner">
-        <div aria-label="Logo de la aplicacion" className="site-logo-placeholder">
-          <span />
-        </div>
+        <Link aria-label="Ir a MoodFix" className="site-logo-placeholder site-logo-link" to={isAuthenticated ? "/inicio" : "/"}>
+          <span>MoodFix</span>
+        </Link>
 
         <nav aria-label="Principal" className="site-nav">
-          {isAuthenticated ? <Link to="/favoritos">Favoritos</Link> : null}
+          {isAuthenticated ? (
+            <>
+              <Link to="/inicio">Inicio</Link>
+              <Link to="/sesion">Encuentra película</Link>
+              <Link to="/favoritos">Favoritos</Link>
+              <Link to="/historial">Historial</Link>
+              <Link to="/mis-gustos">Mis gustos</Link>
+              <Link to="/mi-cuenta">Mi cuenta</Link>
+            </>
+          ) : null}
         </nav>
 
         <div className="site-auth-actions">
           {isAuthenticated ? (
             <button className="site-auth-button site-auth-button-primary" onClick={onLogout} type="button">
-              Logout
+              Cerrar sesión
             </button>
           ) : (
             <button className="site-auth-button site-auth-button-primary" onClick={onLogin} type="button">
-              Login
+              Entrar
             </button>
           )}
         </div>

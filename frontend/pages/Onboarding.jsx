@@ -33,6 +33,7 @@ const platformLogos = {
 function AutocompleteField({ step, draftValue, onSelect }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showOptions, setShowOptions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const selectedValues = Array.isArray(draftValue) ? draftValue : [];
 
   useEffect(() => {
@@ -42,6 +43,7 @@ function AutocompleteField({ step, draftValue, onSelect }) {
       setSearchTerm("");
     }
     setShowOptions(false);
+    setHighlightedIndex(0);
   }, [draftValue, step.options, step.type]);
 
   const filteredOptions = useMemo(() => {
@@ -52,6 +54,10 @@ function AutocompleteField({ step, draftValue, onSelect }) {
 
     return step.options.filter((option) => option.label.toLowerCase().includes(normalizedQuery));
   }, [searchTerm, step.options]);
+
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [filteredOptions]);
 
   function handleSelect(option) {
     if (step.type === "multi-search") {
@@ -75,6 +81,30 @@ function AutocompleteField({ step, draftValue, onSelect }) {
         onChange={(event) => {
           setSearchTerm(event.target.value);
           setShowOptions(true);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            setShowOptions(true);
+            setHighlightedIndex((currentValue) =>
+              Math.min(currentValue + 1, Math.max(filteredOptions.length - 1, 0)),
+            );
+          }
+
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            setShowOptions(true);
+            setHighlightedIndex((currentValue) => Math.max(currentValue - 1, 0));
+          }
+
+          if (event.key === "Enter" && filteredOptions[highlightedIndex]) {
+            event.preventDefault();
+            handleSelect(filteredOptions[highlightedIndex]);
+          }
+
+          if (event.key === "Escape") {
+            setShowOptions(false);
+          }
         }}
         onFocus={() => setShowOptions(true)}
         placeholder={step.placeholder}
@@ -101,13 +131,14 @@ function AutocompleteField({ step, draftValue, onSelect }) {
         </div>
       ) : null}
 
-      {showOptions && searchTerm.trim() ? (
+      {showOptions && filteredOptions.length > 0 ? (
         <div className="autocomplete-dropdown">
-          {filteredOptions.map((option) => (
+          {filteredOptions.map((option, index) => (
             <div
-              className="autocomplete-item"
+              className={`autocomplete-item ${index === highlightedIndex ? "autocomplete-item-active" : ""}`}
               key={option.value}
               onClick={() => handleSelect(option)}
+              onMouseEnter={() => setHighlightedIndex(index)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
@@ -211,6 +242,51 @@ function HardNoField({ step, draftValue, onSelect }) {
   );
 }
 
+function OnboardingIntro({ onStart, onSkip, savingStep }) {
+  return (
+    <div className="onboarding-wrapper">
+      <div className="onboarding-container">
+        <div className="onboarding-card onboarding-card-intro">
+          <div className="card-header">
+            <h1 className="onboarding-title">Vamos a conocernos...</h1>
+            <p className="complice-box">
+              Te haremos unas pocas preguntas para afinar tus recomendaciones.
+            </p>
+          </div>
+
+          <div className="responses-zone">
+            <p className="onboarding-intro-detail">
+              Son cinco preguntas rápidas. Y ya está.
+            </p>
+          </div>
+
+          <div className="skip-footer" style={{ flexDirection: "column", gap: "12px" }}>
+            <button className="onboarding-start-btn" type="button" onClick={onStart}>
+              Empezar
+            </button>
+            <button className="skip-btn" disabled={savingStep} type="button" onClick={onSkip}>
+              Saltar por ahora
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OnboardingStepTitle({ step }) {
+  if (step.id === "pais") {
+    return (
+      <h1 className="onboarding-title onboarding-title-split">
+        <span>Lo primero,</span>
+        <span>¿desde dónde nos ves? 🌍</span>
+      </h1>
+    );
+  }
+
+  return <h1 className="onboarding-title">{step.title}</h1>;
+}
+
 export default function Onboarding({
   draft,
   isLastStep,
@@ -219,12 +295,25 @@ export default function Onboarding({
   onPrevious,
   onSkip,
   savingStep,
+  singleStepMode = false,
   stepIndex,
   error,
   message,
 }) {
   const currentStep = ONBOARDING_STEPS[stepIndex];
   const [showSkipModal, setShowSkipModal] = useState(false);
+  const [introSeen, setIntroSeen] = useState(false);
+
+  // Muestra la intro solo si estamos en el paso 0 y aún no se ha visto
+  if (!singleStepMode && !introSeen && stepIndex === 0) {
+    return (
+      <OnboardingIntro
+        savingStep={savingStep}
+        onSkip={onSkip}
+        onStart={() => setIntroSeen(true)}
+      />
+    );
+  }
 
   return (
     <main className="app-shell">
@@ -246,7 +335,7 @@ export default function Onboarding({
                   type="button"
                   onClick={() => setShowSkipModal(false)}
                 >
-                  VOLVER AL TEST
+                  Volver al test
                 </button>
                 <button
                   className="modal-btn-skip-anyway"
@@ -257,7 +346,7 @@ export default function Onboarding({
                     setShowSkipModal(false);
                   }}
                 >
-                  SALTAR POR AHORA
+                  Saltar por ahora
                 </button>
               </div>
             </div>
@@ -266,8 +355,8 @@ export default function Onboarding({
 
         <div className="onboarding-container">
           <button
-            className={`nav-arrow left ${stepIndex === 0 ? "hidden" : ""}`}
-            disabled={stepIndex === 0}
+            className={`nav-arrow left ${stepIndex === 0 || singleStepMode ? "hidden" : ""}`}
+            disabled={stepIndex === 0 || singleStepMode}
             type="button"
             onClick={onPrevious}
           >
@@ -277,7 +366,7 @@ export default function Onboarding({
 
           <div className="onboarding-card">
             <div className="card-header">
-              <h1 className="onboarding-title">{currentStep.title}</h1>
+              <OnboardingStepTitle step={currentStep} />
               <p className="complice-box">{currentStep.description}</p>
             </div>
 
@@ -311,23 +400,25 @@ export default function Onboarding({
               ) : null}
             </div>
 
-            <div className="skip-footer">
-              <button className="skip-btn" type="button" onClick={() => setShowSkipModal(true)}>
-                SKIP
-              </button>
-            </div>
+            {!singleStepMode ? (
+              <div className="skip-footer">
+                <button className="skip-btn" type="button" onClick={() => setShowSkipModal(true)}>
+                  Saltar por ahora
+                </button>
+              </div>
+            ) : null}
           </div>
 
           <button
-            className={`nav-arrow right ${isLastStep ? "btn-finish" : ""}`}
+            className={`nav-arrow right ${isLastStep || singleStepMode ? "btn-finish" : ""}`}
             disabled={savingStep}
             type="button"
             onClick={onAdvance}
           >
             <span className="arrow-text">
-              {savingStep ? "GUARDANDO" : isLastStep ? "FINALIZAR" : "SIGUIENTE"}
+              {savingStep ? "GUARDANDO" : singleStepMode ? "GUARDAR" : isLastStep ? "FINALIZAR" : "SIGUIENTE"}
             </span>
-            <span className="arrow-icon">{isLastStep ? "✓" : ">"}</span>
+            <span className="arrow-icon">{isLastStep || singleStepMode ? "✓" : ">"}</span>
           </button>
         </div>
       </div>

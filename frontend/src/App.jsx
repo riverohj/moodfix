@@ -57,6 +57,7 @@ export default function App() {
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [savingStep, setSavingStep] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [editingSingleStep, setEditingSingleStep] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -100,6 +101,8 @@ export default function App() {
       setProfile(profilePayload.item);
       setDraft(mergeProfileIntoDraft(profilePayload.item));
       setStepIndex(firstIncompleteStepIndex(profilePayload.item));
+      setEditing(false);
+      setEditingSingleStep(false);
       setShowProfilePanel(false);
       window.localStorage.setItem(AUTH_TOKEN_KEY, nextToken);
     } catch (sessionError) {
@@ -108,6 +111,7 @@ export default function App() {
       setUser(null);
       setProfile(null);
       setDraft(emptyProfileDraft());
+      setEditingSingleStep(false);
       setError(sessionError.message);
     } finally {
       setLoadingSession(false);
@@ -211,6 +215,18 @@ export default function App() {
       const response = await patchProfile(token, payload);
       setProfile(response.item);
       setDraft(mergeProfileIntoDraft(response.item));
+
+      if (editingSingleStep) {
+        setMessage("Respuesta guardada.");
+        setEditing(false);
+        setEditingSingleStep(false);
+        setShowProfilePanel(false);
+        window.setTimeout(() => {
+          window.location.assign("/mis-gustos");
+        }, 0);
+        return;
+      }
+
       setMessage(markCompleted ? "Perfil guardado. Ya puedes seguir." : "Paso guardado.");
       if (!markCompleted) {
         setStepIndex((currentValue) => Math.min(currentValue + 1, ONBOARDING_STEPS.length - 1));
@@ -237,6 +253,7 @@ export default function App() {
       setProfile(response.item);
       setDraft(mergeProfileIntoDraft(response.item));
       setEditing(false);
+      setEditingSingleStep(false);
       setShowProfilePanel(false);
       setMessage("Has saltado este paso por ahora. Podrás completarlo más tarde.");
     } catch (skipError) {
@@ -246,10 +263,16 @@ export default function App() {
     }
   }
 
-  function startEditing() {
+  function startEditing(targetStepId = null) {
     setEditing(true);
+    setEditingSingleStep(Boolean(targetStepId));
     setShowProfilePanel(false);
-    setStepIndex(firstIncompleteStepIndex(draft));
+    if (targetStepId) {
+      const matchingIndex = ONBOARDING_STEPS.findIndex((step) => step.id === targetStepId);
+      setStepIndex(matchingIndex >= 0 ? matchingIndex : firstIncompleteStepIndex(draft));
+    } else {
+      setStepIndex(firstIncompleteStepIndex(draft));
+    }
     setMessage("");
     setError("");
   }
@@ -280,6 +303,7 @@ export default function App() {
       onboardingDone={onboardingDone}
       onAdvance={() => saveCurrentStep(isLastStep)}
       onCloseProfilePanel={closeProfilePanel}
+      onEditStep={startEditing}
       onFieldChange={updateDraft}
       onLogin={handleLoginSubmit}
       onLogout={handleLogout}
@@ -295,6 +319,7 @@ export default function App() {
       submitting={authSubmitting}
       user={user}
       editing={editing}
+      editingSingleStep={editingSingleStep}
       profileFieldLabels={PROFILE_FIELD_LABELS}
     />
   );

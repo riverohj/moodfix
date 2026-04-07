@@ -39,17 +39,29 @@
   height: 44px;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  color: #f5f5f5;
+  text-decoration: none;
 }
 
 .site-logo-placeholder span {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 1.5px dashed rgba(255, 255, 255, 0.28);
-  border-radius: 14px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.01);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.site-logo-link:hover span,
+.site-logo-link:focus-visible span {
+  border-color: rgba(229, 9, 20, 0.4);
+  color: #ffffff;
 }
 
 .site-nav {

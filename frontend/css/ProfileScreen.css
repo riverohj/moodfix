@@ -1,106 +1,183 @@
-.onboarding-flow-shell {
-  position: relative;
-  width: min(1100px, 100%);
-  margin: 0 auto;
-  z-index: 1;
-}
+/* ProfileScreen.css — Mis gustos
+   Paleta: #0d0d0d fondo · #e50914 rojo · #f5f5f5 texto · #a0a0a0 secundario
+   ─────────────────────────────────────────────────────────────────────────── */
 
-.onboarding-layout {
+.taste-page {
   display: grid;
-  gap: 24px;
-  padding: 28px;
+  gap: 28px;
 }
 
-.summary-card {
-  border-radius: 24px;
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
+/* ── Feedback ──────────────────────────────────────────── */
 
-.profile-header,
-.summary-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.profile-header-plain {
-  width: min(1100px, 100%);
-  margin: 0 auto 18px;
-  padding: 0 10px;
-}
-
-.summary-grid {
-  display: grid;
-  gap: 12px;
-  margin-top: 24px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.summary-grid div {
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.summary-grid dt {
-  margin-bottom: 8px;
-  font-weight: 700;
-  color: #f6bd60;
-}
-
-.summary-grid dd {
-  margin: 0;
-  color: rgba(245, 239, 227, 0.84);
+.taste-feedback {
+  padding: 13px 18px;
+  border-radius: 14px;
+  font-size: 0.94rem;
   line-height: 1.5;
 }
 
-.post-onboarding-card {
-  text-align: center;
+.taste-feedback-error {
+  background: rgba(155, 34, 38, 0.18);
+  border: 1px solid rgba(255, 122, 122, 0.18);
+  color: rgba(255, 200, 200, 0.9);
 }
 
-.post-onboarding-card p {
-  margin: 0 auto;
+.taste-feedback-success {
+  background: rgba(43, 116, 86, 0.18);
+  border: 1px solid rgba(122, 219, 171, 0.18);
+  color: rgba(180, 240, 200, 0.9);
 }
 
-.post-onboarding-actions {
+/* ── Header ────────────────────────────────────────────── */
+
+.taste-header {
   display: flex;
-  justify-content: center;
-  margin-top: 28px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
-@media (max-width: 860px) {
-  .profile-header {
+.taste-header-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.taste-title {
+  margin: 0;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: #f5f5f5;
+}
+
+.taste-sub {
+  margin: 0;
+  font-size: 0.96rem;
+  color: #a0a0a0;
+  line-height: 1.55;
+  max-width: 54ch;
+}
+
+.taste-nudge {
+  margin: 0;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  background: rgba(229, 9, 20, 0.07);
+  color: rgba(245, 245, 245, 0.72);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  width: fit-content;
+}
+
+.taste-edit-all-btn {
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 11px 22px;
+  background: transparent;
+  color: rgba(245, 245, 245, 0.72);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 180ms, color 180ms;
+}
+
+.taste-edit-all-btn:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #f5f5f5;
+}
+
+/* ── Lista de campos ────────────────────────────────────── */
+
+.taste-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  /* Separador entre rows en vez de borders en cada card */
+}
+
+.taste-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 150ms;
+}
+
+.taste-row:first-child {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.taste-row-body {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.taste-row-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(229, 9, 20, 0.85);
+}
+
+.taste-row-value {
+  font-size: 0.97rem;
+  color: rgba(245, 245, 245, 0.88);
+  line-height: 1.5;
+}
+
+.taste-row-pending {
+  color: #a0a0a0;
+  font-style: italic;
+}
+
+/* Campo vacío: tono más apagado */
+.taste-row-empty .taste-row-label {
+  color: rgba(229, 9, 20, 0.45);
+}
+
+/* ── Botón de edición por campo ─────────────────────────── */
+
+.taste-row-edit {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(245, 245, 245, 0.5);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms, color 180ms, transform 180ms;
+}
+
+.taste-row-edit:hover,
+.taste-row-edit:focus-visible {
+  border-color: rgba(229, 9, 20, 0.5);
+  background: rgba(229, 9, 20, 0.1);
+  color: #f5f5f5;
+  transform: translateY(-1px);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .taste-header {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .header-actions {
+  .taste-edit-all-btn {
     width: 100%;
-    flex-direction: column;
-  }
-
-  .primary-button,
-  .ghost-button {
-    width: 100%;
-  }
-}
-
-@media (max-width: 600px) {
-  .onboarding-layout,
-  .summary-card {
-    padding: 18px;
-  }
-
-  .summary-grid {
-    grid-template-columns: 1fr;
+    text-align: center;
   }
 }

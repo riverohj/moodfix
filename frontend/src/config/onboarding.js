@@ -60,7 +60,7 @@ export const HARD_NO_OPTIONS = [
 export const ONBOARDING_STEPS = [
   {
     id: "pais",
-    title: "Primero lo primero, ¿desde dónde nos ves? 🌍",
+    title: "Lo primero, ¿desde dónde nos ves? 🌍",
     description: "Configuraremos el catálogo según tu ubicación actual.",
     type: "single-search",
     placeholder: "Escribe tu país...",
@@ -68,14 +68,14 @@ export const ONBOARDING_STEPS = [
   },
   {
     id: "plataformas",
-    title: "¿A qué mandos tienes acceso hoy? 📺",
+    title: "¿A qué plataformas tienes acceso hoy? 📺",
     description: "Marca tus plataformas para filtrar bien tu catálogo.",
     type: "multi-grid",
     options: PLATFORM_OPTIONS,
   },
   {
     id: "idiomas_comodos",
-    title: "¿En qué idiomas te sientes como en casa? 🗣️",
+    title: "¿Tus idiomas preferidos? 🗣️",
     description: "Dime en qué idiomas ves cine sin esfuerzo.",
     type: "multi-search",
     placeholder: "Escribe un idioma...",

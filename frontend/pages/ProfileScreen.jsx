@@ -1,88 +1,84 @@
-import "../css/AppShell.css";
 import "../css/ProfileScreen.css";
+
+function IncompleteNudge({ count }) {
+  return (
+    <p className="taste-nudge">
+      {count === 1
+        ? "Tienes 1 preferencia sin completar."
+        : `Tienes ${count} preferencias sin completar.`}{" "}
+      Cuanto más sepamos, mejores serán las recomendaciones.
+    </p>
+  );
+}
 
 export default function ProfileScreen({
   error,
   formatSelection,
   message,
-  onCloseProfilePanel,
-  onLogout,
-  onOpenProfilePanel,
+  onEditStep,
   onStartEditing,
   profile,
   profileFieldLabels,
+  steps,
+  // Props de compatibilidad con routes — no se renderizan en la vista limpia
+  forceDetails,
+  onCloseProfilePanel,
+  onLogout,
+  onOpenAccount,
+  onOpenProfilePanel,
   showProfilePanel,
   user,
-  steps,
 }) {
+  const emptyFields = steps.filter((step) => {
+    const val = profile?.[step.id];
+    if (Array.isArray(val)) return val.length === 0;
+    return val === null || val === "" || val === undefined;
+  });
+
   return (
-    <main className="app-shell">
-      {error ? <div className="feedback feedback-error">{error}</div> : null}
-      {message ? <div className="feedback feedback-success">{message}</div> : null}
+    <section className="taste-page">
+      {error ? <div className="taste-feedback taste-feedback-error">{error}</div> : null}
+      {message ? <div className="taste-feedback taste-feedback-success">{message}</div> : null}
 
-      <section className="onboarding-flow-shell">
-        <section className="panel onboarding-layout">
-          <header className="profile-header profile-header-plain">
-            <div>
-              <p className="eyebrow">MoodFix</p>
-              <h2>{user?.email}</h2>
-            </div>
+      <header className="taste-header">
+        <div className="taste-header-copy">
+          <h1 className="taste-title">Mis gustos</h1>
+          <p className="taste-sub">
+            Tus respuestas del onboarding. Cuanto más precisas, mejor te conocemos.
+          </p>
+          {emptyFields.length > 0 ? <IncompleteNudge count={emptyFields.length} /> : null}
+        </div>
+        <button className="taste-edit-all-btn" type="button" onClick={onStartEditing}>
+          Editar todo
+        </button>
+      </header>
 
-            <div className="header-actions">
-              {showProfilePanel ? (
-                <button className="ghost-button" type="button" onClick={onCloseProfilePanel}>
-                  Volver
-                </button>
-              ) : (
-                <button className="ghost-button" type="button" onClick={onOpenProfilePanel}>
-                  Ver perfil
-                </button>
-              )}
+      <ul className="taste-list">
+        {steps.map((step) => {
+          const raw = profile?.[step.id];
+          const isEmpty = Array.isArray(raw) ? raw.length === 0 : !raw;
+          const display = formatSelection(step, raw);
 
-              <button className="ghost-button" type="button" onClick={onLogout}>
-                Cerrar sesión
+          return (
+            <li className={`taste-row ${isEmpty ? "taste-row-empty" : ""}`} key={step.id}>
+              <div className="taste-row-body">
+                <span className="taste-row-label">{profileFieldLabels[step.id]}</span>
+                <span className="taste-row-value">
+                  {isEmpty ? <span className="taste-row-pending">Sin completar</span> : display}
+                </span>
+              </div>
+              <button
+                aria-label={`Editar ${profileFieldLabels[step.id]}`}
+                className="taste-row-edit"
+                type="button"
+                onClick={() => onEditStep?.(step.id)}
+              >
+                ✎
               </button>
-            </div>
-          </header>
-
-          {showProfilePanel ? (
-            <section className="summary-card">
-              <h3>Tu perfil estable</h3>
-              <p>Aquí puedes revisar lo que has guardado y volver a editarlo cuando quieras.</p>
-
-              <dl className="summary-grid">
-                {steps.map((step) => (
-                  <div key={step.id}>
-                    <dt>{profileFieldLabels[step.id]}</dt>
-                    <dd>{formatSelection(step, profile?.[step.id]) || "Sin definir"}</dd>
-                  </div>
-                ))}
-              </dl>
-
-              <div className="summary-actions">
-                <button className="primary-button" type="button" onClick={onStartEditing}>
-                  Editar perfil
-                </button>
-              </div>
-            </section>
-          ) : (
-            <section className="summary-card post-onboarding-card">
-              <h3>{profile?.onboarding_skipped ? "Seguimos cuando quieras" : "Ya está listo"}</h3>
-              <p>
-                {profile?.onboarding_skipped
-                  ? "Has decidido saltarte este paso por ahora. Más adelante podrás completar tu perfil desde “Ver perfil”."
-                  : "Ya hemos guardado tus preferencias básicas. Si quieres revisarlas o cambiarlas, las tienes en “Ver perfil”."}
-              </p>
-
-              <div className="post-onboarding-actions">
-                <button className="primary-button" type="button" onClick={onOpenProfilePanel}>
-                  Ver perfil
-                </button>
-              </div>
-            </section>
-          )}
-        </section>
-      </section>
-    </main>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
