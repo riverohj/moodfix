@@ -113,6 +113,13 @@ Cada actualizacion debe incluir:
 - Que queda: coordinar los PRs del equipo sobre `epic-2-2.1-user_prifile_model`, decidir si hace falta mas pulido visual en auth y cerrar EPIC 2 cuando el equipo de frontend confirme el flujo final.
 - Bloqueos o riesgos: si alguien vuelve a sacar trabajo desde una rama vieja o mezcla shell, historico o favoritos dentro de EPIC 2, se reabrira una confusion de alcance que ya esta resuelta en los contratos.
 
+### 2026-04-06
+
+- Que se hizo: se cerro la decision de producto sobre la home y el onboarding incompleto para la nueva arquitectura de rutas; un usuario autenticado con onboarding incompleto puede entrar en `/` sin redireccion forzada.
+- Que se hizo: se acordo que el aviso y el CTA para completar perfil deben aparecer cuando el usuario intente usar `Sorprendeme` o `Preguntame`, manteniendo la opcion de continuar igualmente.
+- Que queda: implementar ese aviso blando dentro de los puntos de entrada a sesion y no en el enrutado base.
+- Bloqueos o riesgos: si se reintroduce una redireccion obligatoria a `/onboarding` sin acuerdo de producto, puede volver la confusion entre onboarding opcional y flujo real de sesion.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

@@ -1,0 +1,161 @@
+/* UserHome.css — home privada del usuario
+   Paleta: #0d0d0d fondo · #e50914 rojo · #f5f5f5 texto · #a0a0a0 secundario
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.user-home-page {
+  display: grid;
+  gap: 24px;
+}
+
+/* ── Intro (sin card, solo tipografía) ─────────────────── */
+
+.user-home-intro {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+
+.user-home-heading {
+  margin: 0;
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  color: #f5f5f5;
+}
+
+.user-home-sub {
+  margin: 0;
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  color: #a0a0a0;
+  line-height: 1.5;
+}
+
+/* ── CTA principal ─────────────────────────────────────── */
+
+.user-home-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px 32px;
+  border-radius: 22px;
+  border: 1px solid rgba(229, 9, 20, 0.5);
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.14), rgba(15, 15, 15, 0.6));
+  text-decoration: none;
+  transition: border-color 180ms, background 180ms, transform 180ms;
+}
+
+.user-home-cta:hover,
+.user-home-cta:focus-visible {
+  border-color: #e50914;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.22), rgba(15, 15, 15, 0.7));
+  transform: translateY(-2px);
+}
+
+.user-home-cta-body {
+  display: grid;
+  gap: 4px;
+}
+
+.user-home-cta-label {
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 800;
+  color: #f5f5f5;
+  line-height: 1.1;
+}
+
+.user-home-cta-hint {
+  font-size: 0.9rem;
+  color: #a0a0a0;
+}
+
+.user-home-cta-arrow {
+  font-size: 1.8rem;
+  color: #e50914;
+  transition: transform 180ms;
+  flex-shrink: 0;
+}
+
+.user-home-cta:hover .user-home-cta-arrow {
+  transform: translateX(4px);
+}
+
+/* ── Nav secundaria ────────────────────────────────────── */
+
+.user-home-nav {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.user-home-nav-item {
+  display: grid;
+  gap: 6px;
+  padding: 20px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+  text-decoration: none;
+  transition: border-color 180ms, background 180ms, transform 180ms;
+}
+
+.user-home-nav-item:hover,
+.user-home-nav-item:focus-visible {
+  border-color: rgba(229, 9, 20, 0.35);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.user-home-nav-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.user-home-nav-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f5f5f5;
+}
+
+.user-home-nav-badge {
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: rgba(229, 9, 20, 0.16);
+  color: #f5f5f5;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.user-home-nav-desc {
+  font-size: 0.84rem;
+  color: #a0a0a0;
+  line-height: 1.4;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .user-home-nav {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .user-home-cta {
+    padding: 22px 22px;
+  }
+
+  .user-home-nav {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .user-home-nav-item {
+    padding: 16px 14px;
+  }
+}

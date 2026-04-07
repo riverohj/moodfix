@@ -108,6 +108,7 @@ Notas de implementacion:
 - para MVP puede bastar con conservar temporalmente el payload en frontend hasta completar login y reenviarlo despues autenticado
 - la pantalla posterior al onboarding, junto con navbar, footer o cajon de navegacion, pasa a EPIC 3
 - la primera version de historico y favoritos, y la memoria interna derivada de esos datos para ayudar al top 3, pasan a EPIC 3
+- la home puede mostrarse aunque el usuario tenga onboarding incompleto; el aviso y el CTA para completar perfil deben aparecer al entrar a `Sorprendeme` o `Preguntame`, no como redireccion forzada desde `/`
 
 ### EPIC 4 · Mood Radar v1
 

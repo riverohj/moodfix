@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import "./AuthScreen.css";
+import "../css/AuthScreen.css";
 
 function LockIcon({ accent = false }) {
   return (

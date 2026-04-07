@@ -1,0 +1,228 @@
+/* AccountScreen.css — Mi cuenta
+   Paleta: #0d0d0d fondo · #e50914 rojo · #f5f5f5 texto · #a0a0a0 secundario
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.account-page {
+  display: grid;
+  gap: 32px;
+  max-width: 640px;
+}
+
+/* ── Header ────────────────────────────────────────────── */
+
+.account-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.account-title {
+  margin: 0;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: #f5f5f5;
+}
+
+.account-logout-btn {
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 10px 18px;
+  background: transparent;
+  color: rgba(245, 245, 245, 0.6);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 180ms, color 180ms;
+}
+
+.account-logout-btn:hover {
+  border-color: rgba(229, 9, 20, 0.5);
+  color: #f5f5f5;
+}
+
+/* ── Divisor ───────────────────────────────────────────── */
+
+.account-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ── Secciones ─────────────────────────────────────────── */
+
+.account-section {
+  display: grid;
+  gap: 12px;
+}
+
+.account-section-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(229, 9, 20, 0.8);
+}
+
+/* ── Sesión activa ─────────────────────────────────────── */
+
+.account-email-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Punto verde de "conectado" */
+.account-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.account-email {
+  font-size: clamp(1.1rem, 2vw, 1.45rem);
+  font-weight: 700;
+  color: #f5f5f5;
+  line-height: 1.2;
+  word-break: break-all;
+}
+
+.account-section-hint {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #a0a0a0;
+  line-height: 1.55;
+  max-width: 46ch;
+}
+
+/* ── Funciones bloqueadas ──────────────────────────────── */
+
+.account-locked-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-locked-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.account-locked-row:first-child {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.account-locked-body {
+  flex: 1;
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.account-locked-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(245, 245, 245, 0.5);
+}
+
+.account-locked-desc {
+  font-size: 0.82rem;
+  color: rgba(160, 160, 160, 0.6);
+  line-height: 1.4;
+}
+
+.account-locked-badge {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 5px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: rgba(245, 245, 245, 0.28);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Enlace a Mis gustos ────────────────────────────────── */
+
+.account-section-taste {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.account-taste-copy {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+}
+
+.account-taste-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #a0a0a0;
+  line-height: 1.55;
+  max-width: 40ch;
+}
+
+.account-taste-desc strong {
+  color: rgba(245, 245, 245, 0.72);
+}
+
+.account-taste-link {
+  flex-shrink: 0;
+  align-self: flex-end;
+  color: rgba(245, 245, 245, 0.72);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(229, 9, 20, 0.4);
+  padding-bottom: 2px;
+  transition: color 180ms, border-color 180ms;
+}
+
+.account-taste-link:hover {
+  color: #f5f5f5;
+  border-color: #e50914;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+
+@media (max-width: 560px) {
+  .account-page {
+    gap: 24px;
+  }
+
+  .account-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .account-logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .account-section-taste {
+    flex-direction: column;
+  }
+
+  .account-taste-link {
+    align-self: auto;
+  }
+}

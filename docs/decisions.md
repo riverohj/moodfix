@@ -177,6 +177,48 @@ Cada entrada debe incluir:
 - Impacto: EPIC 2 no implementa migracion `local -> user`; EPIC 3 debe cerrar el handoff guest -> autenticado, al menos con persistencia temporal en frontend para MVP.
 - Responsable o acuerdo del equipo: separacion explicita entre perfil estable y senales de sesion.
 
+### 2026-04-04 · Shell de frontend comun con layout y routing basico
+
+- Decision: el frontend adopta un `Layout` comun con navbar y footer persistentes, y centraliza la navegacion en `frontend/src/routes.jsx` usando `react-router-dom`.
+- Motivo: el equipo necesita una base limpia para crecer por paginas sin duplicar estructura comun y dejando claro donde vive el routing de la app.
+- Impacto: la home queda servida en `/` dentro del layout, la autenticacion vive en `/auth`, el onboarding en `/onboarding` y la salida minima del perfil en `/perfil`.
+- Responsable o acuerdo del equipo: implementacion actual del frontend para EPIC 3.1 y reintegracion del flujo real de EPIC 2.
+
+### 2026-04-04 · Flujo de auth y perfil estable queda gobernado por `App` con backend real
+
+- Decision: `frontend/src/App.jsx` vuelve a ser el contenedor de estado de sesion y perfil, conectado a `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`, `GET /api/profile`, `PATCH /api/profile` y `POST /api/profile/skip`.
+- Motivo: el flujo critico de EPIC 2 no puede quedar repartido entre maquetas visuales o banderas provisionales; necesita una sola fuente de verdad en frontend alineada con el backend ya integrado.
+- Impacto: el token Bearer se persiste en `localStorage`, la navegacion a onboarding o perfil depende del estado real del usuario y del perfil, y la app deja atras la decision temporal de auth solo visual en frontend.
+- Responsable o acuerdo del equipo: integracion real frontend-backend de auth y perfil estable.
+
+### 2026-04-04 · Pantallas y estilos se separan por responsabilidad en frontend
+
+- Decision: las pantallas que renderizan vistas viven en `frontend/pages/` y los estilos asociados viven en `frontend/css/`, manteniendo `App` y `routes` como capa de orquestacion.
+- Motivo: la reintegracion del flujo de sesion y onboarding necesitaba recuperar logica importante sin volver a una estructura ambigua donde entrypoints, vistas y estilos quedaran mezclados.
+- Impacto: auth, onboarding, perfil y loading quedan como paginas explicitas, el CSS antiguo se reparte en archivos con nombres funcionales, y el equipo tiene una estructura mas legible para seguir creciendo por rutas.
+- Responsable o acuerdo del equipo: refactorizacion actual del frontend para consolidar EPIC 2 y EPIC 3.1.
+
+### 2026-04-04 · Navbar reducido a acciones esenciales segun sesion
+
+- Decision: el navbar elimina `Inicio` y `Explorar`, y mantiene `Favoritos` solo cuando el usuario esta logueado.
+- Motivo: esas opciones no aportan valor en el estado actual del flujo y `Favoritos` solo tiene sentido como espacio ligado a una sesion de usuario.
+- Impacto: la navegacion publica queda centrada en el acceso al login, mientras la opcion de favoritos pasa a depender explicitamente del estado de autenticacion.
+- Responsable o acuerdo del equipo: ajuste de interfaz aplicado en EPIC 3.1.
+
+### 2026-04-06 · Home accesible con onboarding incompleto y aviso blando al entrar en sesion
+
+- Decision: un usuario autenticado con onboarding incompleto puede entrar en `/`, y no se le fuerza redireccion automatica a `/onboarding`.
+- Motivo: el equipo prefiere no bloquear el acceso a home y reservar la friccion para el momento en que el usuario intenta usar `Preguntame` o `Sorprendeme`.
+- Impacto: antes de iniciar una sesion de recomendacion, la app debe avisar de que sin onboarding completo la recomendacion funcionara peor y ofrecer dos caminos: completar onboarding o continuar igualmente.
+- Responsable o acuerdo del equipo: decision consensuada del equipo al revisar el flujo de `/` en EPIC 3.1.
+
+### 2026-04-06 · Pantallas por ruta y CSS aislado por pantalla
+
+- Decision: cada pantalla nueva debe montarse desde `routes` como vista independiente, y sus estilos deben vivir en archivos descriptivos y aislados por pantalla.
+- Motivo: el equipo quiere evitar colisiones entre vistas y dejar una estructura clara para crecer por paginas sin que el CSS de una pantalla rompa otra.
+- Impacto: no se deben importar frameworks CSS dentro de componentes hoja, ni usar selectores globales ambiguos como `.card-body` sin scope; los estilos de pagina deben quedar acotados a su propia pantalla.
+- Responsable o acuerdo del equipo: directriz acordada al consolidar la arquitectura nueva de frontend.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.
