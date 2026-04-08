@@ -5,10 +5,10 @@ import {
   DISCOVERY_OPTIONS,
   ENERGY_OPTIONS,
   ERA_OPTIONS,
-  MOCK_RESULTS,
   MOOD_OPTIONS,
   TIME_OPTIONS,
 } from "../src/config/session";
+import { postSessionRecommend } from "../src/lib/api";
 
 const ASK_STEPS = [
   {
@@ -93,6 +93,14 @@ function ChoiceButton({ children, onClick }) {
       {children}
     </button>
   );
+}
+
+function SessionFeedback({ message }) {
+  if (!message) {
+    return null;
+  }
+
+  return <p className="session-feedback session-feedback-error">{message}</p>;
 }
 
 function MoodChip({ active, children, onClick }) {
@@ -519,6 +527,38 @@ function ResultCard({ movie, onOpenDetail }) {
 function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
   const [detailMovie, setDetailMovie] = useState(null);
 
+  if (results.length === 0) {
+    return (
+      <ViewShell>
+        <div className="session-results-empty">
+          <div>
+            <p className="session-mode-tag">
+              {mode === "preguntame" ? "Pregúntame" : "Sorpréndeme"}
+            </p>
+            <h1 className="session-detail-title">No hemos encontrado 3 para hoy</h1>
+            <p className="session-detail-copy session-detail-copy-wide">
+              Prueba otra búsqueda o ajusta tus señales para ampliar el catálogo disponible.
+            </p>
+          </div>
+
+          <div className="session-results-actions">
+            {mode === "preguntame" ? (
+              <button className="ghost-button" type="button" onClick={onBack}>
+                Ajustar
+              </button>
+            ) : null}
+            <button className="ghost-button" type="button" onClick={onGoHome}>
+              Ir al inicio
+            </button>
+            <button className="session-primary-button" type="button" onClick={onRestart}>
+              Nueva búsqueda
+            </button>
+          </div>
+        </div>
+      </ViewShell>
+    );
+  }
+
   return (
     <ViewShell>
       <div className="session-results-header">
@@ -571,12 +611,14 @@ export default function SessionScreen({
   // onLogout y userEmail siguen en props para compatibilidad con routes, ya no se renderizan
   onLogout,
   onOpenProfile,
+  token,
   userEmail,
 }) {
   const [view, setView] = useState("landing");
   const [results, setResults] = useState([]);
   const [lastMode, setLastMode] = useState("preguntame");
   const [searching, setSearching] = useState(false);
+  const [requestError, setRequestError] = useState("");
   const [askStepIndex, setAskStepIndex] = useState(0);
   const [pendingMode, setPendingMode] = useState(null);
   const [showInlineNudge, setShowInlineNudge] = useState(false);
@@ -599,22 +641,38 @@ export default function SessionScreen({
     setResults([]);
     setView("landing");
     setSearching(false);
+    setRequestError("");
     setAskStepIndex(0);
     setPendingMode(null);
     setShowInlineNudge(false);
   }
 
-  function runMockSearch(mode) {
+  function buildRequestPayload(mode) {
+    if (mode === "sorprendeme") {
+      return { mode };
+    }
+
+    return {
+      mode,
+      ...draft,
+    };
+  }
+
+  async function runSearch(mode) {
     setSearching(true);
     setLastMode(mode);
     setShowInlineNudge(false);
+    setRequestError("");
 
-    // TODO (EPIC 3 backend): sustituir este mock por postSessionRecommend(token, payload)
-    window.setTimeout(() => {
-      setResults(MOCK_RESULTS.slice(0, 3));
+    try {
+      const response = await postSessionRecommend(token, buildRequestPayload(mode));
+      setResults(Array.isArray(response.items) ? response.items : []);
       setView("results");
+    } catch (searchError) {
+      setRequestError(searchError.message);
+    } finally {
       setSearching(false);
-    }, 900);
+    }
   }
 
   function goToAsk() {
@@ -644,7 +702,7 @@ export default function SessionScreen({
     setShowInlineNudge(false);
     if (pendingMode) {
       if (pendingMode === "sorprendeme") {
-        runMockSearch("sorprendeme");
+        void runSearch("sorprendeme");
       } else {
         enterMode(pendingMode);
       }
@@ -669,7 +727,7 @@ export default function SessionScreen({
     }
 
     if (askStepIndex === ASK_STEPS.length - 1) {
-      runMockSearch("preguntame");
+      void runSearch("preguntame");
       return;
     }
 
@@ -678,6 +736,8 @@ export default function SessionScreen({
 
   return (
     <section className="session-screen">
+      <SessionFeedback message={requestError} />
+
       {view === "landing" ? (
         <LandingView
           onCompleteProfile={onGoToOnboarding}
@@ -694,7 +754,9 @@ export default function SessionScreen({
         <SurpriseView
           searching={searching}
           onBack={() => setView("landing")}
-          onSearch={() => runMockSearch("sorprendeme")}
+          onSearch={() => {
+            void runSearch("sorprendeme");
+          }}
         />
       ) : null}
 

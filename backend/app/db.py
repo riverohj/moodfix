@@ -56,6 +56,7 @@ def init_db() -> None:
                 overview TEXT,
                 popularity REAL,
                 vote_count INTEGER,
+                genre_ids TEXT NOT NULL DEFAULT '[]',
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
@@ -115,6 +116,7 @@ def init_db() -> None:
             );
             """
         )
+        _ensure_column(connection, "movies", "genre_ids", "TEXT NOT NULL DEFAULT '[]'")
         _ensure_column(connection, "user_profiles", "user_id", "INTEGER")
         _ensure_index(
             connection,

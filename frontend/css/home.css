@@ -8,7 +8,7 @@
 }
 
 .home-card {
-  width: min(100%, 920px);
+  width: min(100%, 1040px);
   min-height: 620px;
   display: flex;
   flex-direction: column;
@@ -27,7 +27,11 @@
   flex-direction: column;
   gap: 22px;
   align-items: center;
-  max-width: 640px;
+  width: min(100%, 760px);
+}
+
+.home-copy p {
+  width: min(100%, 680px);
 }
 
 .home-copy h1 {
@@ -95,6 +99,11 @@
 
   .home-copy {
     gap: 18px;
+    width: 100%;
+  }
+
+  .home-copy p {
+    width: 100%;
   }
 
   .home-cta {
