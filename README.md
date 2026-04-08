@@ -27,6 +27,7 @@ La base ya no es solo boilerplate. A dia de hoy incluye catalogo local validado,
 ### Backend
 
 ```bash
+cp .env.example .env
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
@@ -37,20 +38,37 @@ python run.py
 Por defecto el backend arranca en modo estable, sin `debug` ni `reloader`.
 Si alguien necesita debug local en su propia maquina, puede activar `FLASK_DEBUG=1`.
 
+La configuracion del backend vive en el `.env` de la raiz del repo.
+
 ### Frontend
 
 ```bash
 cd frontend
+cp .env.example .env.local
 npm install
 npm run dev
 ```
 
-Si necesitas apuntar el frontend a otro backend, usa `VITE_API_BASE_URL`.
-Por defecto la app trabaja contra:
+La configuracion del frontend vive en `frontend/.env.local`.
+Por defecto la app trabaja contra su propio backend local:
 
 ```bash
 VITE_API_BASE_URL=http://localhost:5001/api
 ```
+
+Importante:
+
+- `localhost` siempre significa "mi propio ordenador"
+- si Jose abre la app en su Mac, `http://localhost:5001/api` apunta al backend de Jose, no al de Juan
+- para trabajar en equipo, lo recomendado es que cada persona tenga su propio backend y su propia BD local
+
+Si alguien necesita pegar temporalmente al backend de otra persona para una demo o una revision puntual, puede cambiar `frontend/.env.local` a algo como:
+
+```bash
+VITE_API_BASE_URL=http://192.168.1.67:5001/api
+```
+
+El backend que recibe conexiones externas debe arrancar en `0.0.0.0`, que ya es el valor por defecto actual.
 
 ## Convenciones de trabajo
 
