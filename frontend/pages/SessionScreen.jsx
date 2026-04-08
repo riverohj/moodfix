@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import "../css/SessionScreen.css";
 import {
@@ -251,35 +251,268 @@ function QuestionStep({
   );
 }
 
-function ResultCard({ movie }) {
-  const providers = movie.providers
-    .filter((provider) => provider.provider_type === "flatrate")
-    .map((provider) => provider.provider_name)
-    .join(" · ");
+// ── Modal de detalle de película ─────────────────────────────────────────────
+
+function MovieDetailModal({ movie, onClose }) {
+  useEffect(() => {
+    function handleKey(e) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
+  const allProviders = movie.providers.filter((p) => p.provider_type === "flatrate");
 
   return (
-    <article className="session-result-card">
-      <div className="session-result-poster">
-        <span>{movie.title.slice(0, 1)}</span>
+    <div className="rc-modal-backdrop" onClick={onClose}>
+      <div
+        className="rc-modal"
+        role="dialog"
+        aria-modal
+        aria-label={movie.title}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          aria-label="Cerrar"
+          className="rc-modal-close"
+          type="button"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+
+        {movie.poster_path ? (
+          <img
+            alt={movie.title}
+            className="rc-modal-poster"
+            src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
+          />
+        ) : null}
+
+        <div className="rc-modal-body">
+          <div className="rc-meta">
+            <span className="rc-year">{movie.release_year}</span>
+            <span className="rc-dot" aria-hidden>·</span>
+            <span className="rc-runtime">{movie.runtime} min</span>
+            {movie.original_language && movie.original_language !== "es" ? (
+              <>
+                <span className="rc-dot" aria-hidden>·</span>
+                <span className="rc-lang">{movie.original_language.toUpperCase()}</span>
+              </>
+            ) : null}
+            {allProviders.length > 0 ? (
+              <>
+                <span className="rc-dot" aria-hidden>·</span>
+                <span className="rc-provider">
+                  {allProviders.map((p) => p.provider_name).join(", ")}
+                </span>
+              </>
+            ) : null}
+          </div>
+
+          <h2 className="rc-modal-title">{movie.title}</h2>
+
+          <p className="rc-modal-overview">{movie.overview}</p>
+
+          {movie.reason ? (
+            <p className="rc-reason">
+              <span className="rc-reason-label">Por qué te la proponemos</span>
+              {movie.reason}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Estrellitas de valoración ─────────────────────────────────────────────────
+
+function StarRating({ value, onRate }) {
+  const [hovered, setHovered] = useState(null);
+  const active = hovered ?? value;
+
+  return (
+    <div className="rc-stars" onMouseLeave={() => setHovered(null)}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          aria-label={`${n} estrella${n > 1 ? "s" : ""}`}
+          className={`rc-star ${n <= active ? "rc-star-on" : ""}`}
+          key={n}
+          type="button"
+          onClick={() => onRate(n)}
+          onMouseEnter={() => setHovered(n)}
+        >
+          {n <= active ? "★" : "☆"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── Card de resultado ─────────────────────────────────────────────────────────
+
+function ResultCard({ movie, onOpenDetail }) {
+  // action: null | "saved" | "seen" | "dismissed"
+  const [action, setAction] = useState(null);
+  // showRating: true mientras se pide la valoración (tras pulsar "Ya la he visto")
+  const [showRating, setShowRating] = useState(false);
+  const [rating, setRating] = useState(null);
+  // ratingDone: true una vez confirmada, para mostrar el mensaje de agradecimiento
+  const [ratingDone, setRatingDone] = useState(false);
+
+  const flatrateProviders = movie.providers
+    .filter((p) => p.provider_type === "flatrate")
+    .map((p) => p.provider_name);
+
+  function handleSeen() {
+    setAction("seen");
+    setShowRating(true);
+  }
+
+  function handleRate(n) {
+    setRating(n);
+    setRatingDone(true);
+    // TODO (EPIC 3 backend): enviar { tmdb_id: movie.tmdb_id, rating: n } a POST /api/history
+  }
+
+  function handleSave() {
+    setAction("saved");
+    // TODO (EPIC 3 backend): enviar { tmdb_id: movie.tmdb_id } a POST /api/watchlist
+  }
+
+  function handleDismiss() {
+    setAction("dismissed");
+    // TODO (EPIC 3 backend): enviar { tmdb_id: movie.tmdb_id } a POST /api/discard
+  }
+
+  // Estado descartado: card colapsada con opción de deshacer
+  if (action === "dismissed") {
+    return (
+      <article className="rc-card rc-card-dismissed">
+        <span className="rc-dismissed-title">{movie.title}</span>
+        <button
+          className="rc-dismissed-undo"
+          type="button"
+          onClick={() => setAction(null)}
+        >
+          Deshacer
+        </button>
+      </article>
+    );
+  }
+
+  return (
+    <article className={`rc-card ${action === "seen" ? "rc-card-seen" : ""} ${action === "saved" ? "rc-card-saved" : ""}`}>
+
+      {/* Póster */}
+      <div className="rc-poster" aria-hidden>
+        {movie.poster_path ? (
+          <img
+            alt={movie.title}
+            className="rc-poster-img"
+            loading="lazy"
+            src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
+          />
+        ) : (
+          <span className="rc-poster-initial">{movie.title.slice(0, 1)}</span>
+        )}
+        {action === "saved" ? <span className="rc-poster-badge rc-poster-badge-saved">Ver luego</span> : null}
+        {action === "seen" && !showRating ? <span className="rc-poster-badge rc-poster-badge-seen">Vista {rating ? `· ${"★".repeat(rating)}` : ""}</span> : null}
       </div>
 
-      <div className="session-result-content">
-        <div className="session-result-heading">
-          <h3>{movie.title}</h3>
-          <p>
-            {movie.release_year} · {movie.runtime} min
-          </p>
+      {/* Contenido */}
+      <div className="rc-body">
+        <div className="rc-meta">
+          <span className="rc-year">{movie.release_year}</span>
+          <span className="rc-dot" aria-hidden>·</span>
+          <span className="rc-runtime">{movie.runtime} min</span>
+          {movie.original_language && movie.original_language !== "es" ? (
+            <>
+              <span className="rc-dot" aria-hidden>·</span>
+              <span className="rc-lang">{movie.original_language.toUpperCase()}</span>
+            </>
+          ) : null}
+          {flatrateProviders.length > 0 ? (
+            <>
+              <span className="rc-dot" aria-hidden>·</span>
+              <span className="rc-provider">{flatrateProviders[0]}</span>
+            </>
+          ) : null}
         </div>
 
-        <p className="session-result-overview">{movie.overview}</p>
+        <h3 className="rc-title">{movie.title}</h3>
 
-        {providers ? <p className="session-result-provider">{providers}</p> : null}
+        <p className="rc-overview">{movie.overview}</p>
+        <button className="rc-more-btn" type="button" onClick={onOpenDetail}>
+          Ver sinopsis completa
+        </button>
+
+        {/* Zona "Por qué te la proponemos" — preparada, se activa cuando el backend la devuelva */}
+        {movie.reason ? (
+          <p className="rc-reason">
+            <span className="rc-reason-label">Por qué te la proponemos</span>
+            {movie.reason}
+          </p>
+        ) : null}
+
+        {/* Zona de valoración (al pulsar "Ya la he visto") */}
+        {showRating ? (
+          <div className="rc-rating-zone">
+            {ratingDone ? (
+              <p className="rc-rating-thanks">
+                Anotado{rating ? ` · ${"★".repeat(rating)}` : ""}. Gracias.
+              </p>
+            ) : (
+              <>
+                <p className="rc-rating-prompt">¿Qué te pareció?</p>
+                <StarRating value={rating} onRate={handleRate} />
+                <button
+                  className="rc-rating-skip"
+                  type="button"
+                  onClick={() => { setShowRating(false); }}
+                >
+                  Saltar valoración
+                </button>
+              </>
+            )}
+          </div>
+        ) : null}
+
+        {/* Acciones */}
+        {!showRating ? (
+          <div className="rc-actions">
+            <div className="rc-actions-primary">
+              <button
+                className={`rc-btn-save ${action === "saved" ? "rc-btn-save-active" : ""}`}
+                type="button"
+                onClick={action === "saved" ? () => setAction(null) : handleSave}
+              >
+                {action === "saved" ? "Guardada" : "Ver luego"}
+              </button>
+              <button
+                className={`rc-btn-seen ${action === "seen" ? "rc-btn-seen-active" : ""}`}
+                type="button"
+                onClick={action === "seen" ? () => setAction(null) : handleSeen}
+              >
+                Ya la he visto
+              </button>
+            </div>
+            <button className="rc-btn-dismiss" type="button" onClick={handleDismiss}>
+              No me interesa
+            </button>
+          </div>
+        ) : null}
       </div>
+
     </article>
   );
 }
 
 function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
+  const [detailMovie, setDetailMovie] = useState(null);
+
   return (
     <ViewShell>
       <div className="session-results-header">
@@ -289,7 +522,7 @@ function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
           </p>
           <h1 className="session-detail-title">Tus 3 para hoy</h1>
           <p className="session-detail-copy session-detail-copy-wide">
-            Tres ideas para arrancar. Si no te encajan, ajustamos y seguimos buscando.
+            Guarda, descarta o marca las que ya viste.
           </p>
         </div>
 
@@ -308,11 +541,19 @@ function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
         </div>
       </div>
 
-      <div className="session-results-grid">
+      <div className="rc-grid">
         {results.map((movie) => (
-          <ResultCard key={movie.id} movie={movie} />
+          <ResultCard
+            key={movie.id}
+            movie={movie}
+            onOpenDetail={() => setDetailMovie(movie)}
+          />
         ))}
       </div>
+
+      {detailMovie ? (
+        <MovieDetailModal movie={detailMovie} onClose={() => setDetailMovie(null)} />
+      ) : null}
     </ViewShell>
   );
 }

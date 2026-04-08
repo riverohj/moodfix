@@ -408,68 +408,483 @@
   justify-content: center;
 }
 
-.session-results-grid {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-}
-
-.session-result-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border-radius: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 15, 15, 0.84);
-  overflow: hidden;
-  min-height: 100%;
-}
-
-.session-result-poster {
-  aspect-ratio: 2 / 3;
-  background:
-    linear-gradient(135deg, rgba(229, 9, 20, 0.28), rgba(15, 15, 15, 0.9)),
-    #1f1f1f;
-  display: grid;
-  place-items: center;
-  font-size: 2.8rem;
-  font-weight: 800;
-  color: #f5f5f5;
-}
-
 .session-question-card .session-pill {
   width: 232px;
   min-height: 56px;
 }
 
-.session-result-content {
+/* ══════════════════════════════════════════════════════════
+   RESULT CARDS  (.rc-*)
+   Prefijo aislado para no pisar otros componentes.
+   ══════════════════════════════════════════════════════════ */
+
+.rc-grid {
   display: grid;
-  gap: 12px;
-  padding: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: min(1080px, 100%);
+  margin: 0 auto;
 }
 
-.session-result-heading {
+/* ── Card base ─────────────────────────────────────────── */
+
+.rc-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(12, 12, 12, 0.97);
+  overflow: hidden;
+  transition: border-color 220ms, box-shadow 220ms, transform 240ms;
+}
+
+.rc-card:hover {
+  border-color: rgba(229, 9, 20, 0.22);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(229, 9, 20, 0.08);
+  transform: translateY(-4px);
+}
+
+.rc-card-saved {
+  border-color: rgba(245, 245, 245, 0.18);
+}
+
+.rc-card-seen {
+  opacity: 0.58;
+}
+
+/* ── Póster ────────────────────────────────────────────── */
+
+.rc-poster {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, rgba(229, 9, 20, 0.2), rgba(8, 8, 8, 1));
+  overflow: hidden;
+}
+
+/* Velo inferior: suaviza el corte entre imagen y contenido */
+.rc-poster::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 80px;
+  background: linear-gradient(to top, rgba(12, 12, 12, 1), transparent);
+  pointer-events: none;
+}
+
+.rc-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.rc-poster-initial {
+  position: absolute;
+  inset: 0;
   display: grid;
-  gap: 4px;
+  place-items: center;
+  font-size: 5rem;
+  font-weight: 800;
+  color: rgba(245, 245, 245, 0.1);
+  user-select: none;
 }
 
-.session-result-heading h3 {
-  margin: 0;
-  font-size: 1.2rem;
+.rc-poster-badge {
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  z-index: 1;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.session-result-heading p,
-.session-result-provider {
-  margin: 0;
-  color: #a0a0a0;
-  font-size: 0.92rem;
+.rc-poster-badge-saved {
+  background: rgba(245, 245, 245, 0.12);
+  color: #f5f5f5;
+  border: 1px solid rgba(245, 245, 245, 0.28);
 }
 
-.session-result-overview {
+.rc-poster-badge-seen {
+  background: rgba(34, 197, 94, 0.14);
+  color: rgba(152, 244, 185, 0.95);
+  border: 1px solid rgba(34, 197, 94, 0.32);
+}
+
+/* ── Cuerpo ────────────────────────────────────────────── */
+
+.rc-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px 16px;
+  min-width: 0;
+}
+
+.rc-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: rgba(160, 160, 160, 0.75);
+  letter-spacing: 0.01em;
+}
+
+.rc-dot {
+  opacity: 0.3;
+}
+
+/* Plataforma en rojo: dato de alta utilidad, que pese visualmente */
+.rc-provider {
+  font-weight: 700;
+  color: rgba(229, 9, 20, 0.85);
+}
+
+.rc-title {
   margin: 0;
-  color: rgba(245, 245, 245, 0.84);
+  font-size: clamp(1.08rem, 1.5vw, 1.28rem);
+  font-weight: 800;
+  color: #f5f5f5;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.rc-overview {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(245, 245, 245, 0.52);
   line-height: 1.6;
-  font-size: 0.96rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Línea "Por qué" (preparada, visible si el backend la devuelve) ── */
+
+.rc-reason {
+  margin: 0;
+  display: grid;
+  gap: 3px;
+  font-size: 0.83rem;
+  color: rgba(245, 245, 245, 0.5);
+  line-height: 1.5;
+}
+
+.rc-reason-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(229, 9, 20, 0.65);
+  margin-bottom: 1px;
+}
+
+/* ── Acciones ─────────────────────────────────────────── */
+
+.rc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+/* Primarios y dismiss fluyen al mismo flex; el dismiss wrappea solo si no cabe */
+.rc-actions-primary {
+  display: contents;
+}
+
+.rc-btn-save,
+.rc-btn-seen,
+.rc-btn-dismiss {
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 180ms, border-color 180ms, color 180ms, transform 180ms;
+}
+
+.rc-btn-save {
+  border: 1px solid rgba(245, 245, 245, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(245, 245, 245, 0.8);
+}
+
+.rc-btn-save:hover {
+  border-color: rgba(245, 245, 245, 0.3);
+  background: rgba(255, 255, 255, 0.09);
+  transform: translateY(-1px);
+}
+
+.rc-btn-save-active {
+  border-color: rgba(245, 245, 245, 0.36);
+  background: rgba(255, 255, 255, 0.1);
+  color: #f5f5f5;
+}
+
+.rc-btn-seen {
+  border: 0;
+  background: #e50914;
+  color: #fff;
+}
+
+.rc-btn-seen:hover {
+  background: #ff2b36;
+  transform: translateY(-1px);
+}
+
+.rc-btn-seen-active {
+  background: rgba(34, 197, 94, 0.15);
+  color: rgba(134, 239, 172, 0.95);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.rc-btn-seen-active:hover {
+  background: rgba(34, 197, 94, 0.25);
+}
+
+/* "No me interesa" — mismo sistema, más discreto */
+.rc-btn-dismiss {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: transparent;
+  color: rgba(160, 160, 160, 0.48);
+  padding: 8px 12px;
+}
+
+.rc-btn-dismiss:hover {
+  border-color: rgba(229, 9, 20, 0.28);
+  background: rgba(229, 9, 20, 0.05);
+  color: rgba(229, 9, 20, 0.72);
+}
+
+/* ── Valoración (microtarea) ──────────────────────────── */
+
+.rc-rating-zone {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(245, 245, 245, 0.07);
+  background: rgba(255, 255, 255, 0.025);
+  margin-top: 4px;
+}
+
+.rc-rating-prompt {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(245, 245, 245, 0.72);
+}
+
+.rc-stars {
+  display: flex;
+  gap: 6px;
+}
+
+.rc-star {
+  border: 0;
+  background: transparent;
+  font-size: 1.6rem;
+  color: rgba(245, 245, 245, 0.18);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 120ms, transform 120ms;
+}
+
+.rc-star-on {
+  color: #e50914;
+}
+
+.rc-star:hover {
+  transform: scale(1.18);
+}
+
+.rc-rating-skip {
+  border: 0;
+  background: transparent;
+  color: rgba(160, 160, 160, 0.65);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: color 150ms;
+}
+
+.rc-rating-skip:hover {
+  color: rgba(245, 245, 245, 0.8);
+}
+
+.rc-rating-thanks {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgba(134, 239, 172, 0.85);
+  font-weight: 600;
+}
+
+/* ── Trigger "Ver sinopsis" ───────────────────────────── */
+
+.rc-more-btn {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  color: rgba(229, 9, 20, 0.7);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  padding: 0;
+  transition: color 150ms;
+}
+
+.rc-more-btn:hover {
+  color: #e50914;
+}
+
+/* ── Modal de detalle ─────────────────────────────────── */
+
+.rc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.rc-modal {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: rgba(14, 14, 14, 0.99);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  box-shadow: 0 48px 120px rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: none;
+}
+
+.rc-modal::-webkit-scrollbar {
+  display: none;
+}
+
+.rc-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(14, 14, 14, 0.85);
+  color: rgba(245, 245, 245, 0.65);
+  font-size: 0.85rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+
+.rc-modal-close:hover {
+  background: rgba(229, 9, 20, 0.18);
+  color: #f5f5f5;
+  border-color: rgba(229, 9, 20, 0.4);
+}
+
+.rc-modal-poster {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  border-radius: 28px 28px 0 0;
+  flex-shrink: 0;
+}
+
+.rc-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 26px 28px;
+}
+
+.rc-modal-title {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  font-weight: 800;
+  color: #f5f5f5;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.rc-modal-overview {
+  margin: 0;
+  font-size: 0.93rem;
+  color: rgba(245, 245, 245, 0.72);
+  line-height: 1.7;
+}
+
+/* ── Card descartada (colapsada) ──────────────────────── */
+
+.rc-card-dismissed {
+  flex-direction: row;
+  min-height: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 22px;
+  opacity: 0.4;
+  transition: opacity 200ms;
+}
+
+.rc-card-dismissed:hover {
+  opacity: 0.65;
+}
+
+.rc-dismissed-title {
+  font-size: 0.9rem;
+  color: #a0a0a0;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rc-dismissed-undo {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(245, 245, 245, 0.45);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.rc-dismissed-undo:hover {
+  color: #f5f5f5;
 }
 
 @media (max-width: 960px) {
@@ -522,6 +937,25 @@
   .session-inline-nudge-actions > *,
   .session-nav-arrow {
     width: 100%;
+  }
+}
+
+/* ── Cards responsive ──────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .rc-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .rc-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .rc-poster {
+    height: 220px;
   }
 }
 

@@ -61,7 +61,7 @@ export const MOCK_RESULTS = [
     original_language: "en",
     overview:
       "Una lavandera de mediana edad se ve envuelta en una alucinante aventura multiversal en la que solo ella puede salvar el mundo.",
-    poster_path: null,
+    poster_path: "/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg",
     providers: [
       { provider_id: 8, provider_name: "Netflix", provider_type: "flatrate" },
     ],
@@ -75,7 +75,7 @@ export const MOCK_RESULTS = [
     original_language: "en",
     overview:
       "Dos amigos de infancia se reencuentran décadas después en Nueva York, enfrentándose a lo que pudo haber sido.",
-    poster_path: null,
+    poster_path: "/spELEiSuUaUzTyub2xL29ZdSFbv.jpg",
     providers: [
       { provider_id: 63, provider_name: "Filmin", provider_type: "flatrate" },
     ],
@@ -89,7 +89,7 @@ export const MOCK_RESULTS = [
     original_language: "en",
     overview:
       "En una isla irlandesa, una amistad de toda la vida se rompe sin motivo aparente, con consecuencias impredecibles.",
-    poster_path: null,
+    poster_path: "/24zHdUTv3dHOB9VLsPPvx0WGntA.jpg",
     providers: [
       { provider_id: 1899, provider_name: "HBO Max", provider_type: "flatrate" },
     ],
@@ -103,7 +103,7 @@ export const MOCK_RESULTS = [
     original_language: "en",
     overview:
       "Maverick vuelve a la academia para entrenar a una nueva generación de pilotos de élite en una misión casi imposible.",
-    poster_path: null,
+    poster_path: "/62HCnUTziyWcpDaBO2i1DX17ljH.jpg",
     providers: [
       { provider_id: 119, provider_name: "Prime Video", provider_type: "flatrate" },
     ],
