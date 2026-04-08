@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 
-import "../css/Favorites.css";
 import "../css/HistoryScreen.css";
 
 const MOCK_HISTORY = [
@@ -74,7 +73,7 @@ export default function HistoryScreen() {
   const historyItems = MOCK_HISTORY;
 
   return (
-    <section className="history-screen favoritos-wrapper">
+    <section className="history-screen">
       <header className="history-screen-header">
         <div>
           <h1 className="history-section-title">

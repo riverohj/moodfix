@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@600;700;800&display=swap');
-
 .history-screen {
   --history-bg-main: #0d0d0d;
   --history-card-bg: #1f1f1f;
@@ -8,7 +6,6 @@
   --history-muted: #a0a0a0;
   --history-accent: #e50914;
   --history-accent-hover: #c4060f;
-  min-height: 100vh;
   display: block;
   background-color: var(--history-bg-main);
   font-family: 'Inter', -apple-system, sans-serif;
