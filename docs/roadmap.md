@@ -6,9 +6,9 @@ Este documento es el cuaderno de ruta del proyecto. Su funcion es decir en que p
 
 ## Estado del proyecto
 
-- Estado general: EPIC 0 y EPIC 1 cerrados; EPIC 2 en implementacion y PR
+- Estado general: EPIC 0, EPIC 1 y EPIC 2 cerrados; EPIC 3 en implementacion
 - Fecha objetivo del MVP: 24 de abril
-- Estado actual: catalogo local validado en el Mac mini de referencia, backend comun LAN operativo y onboarding de EPIC 2 en integracion real contra auth y profile
+- Estado actual: catalogo local validado en el Mac mini de referencia, backend comun LAN operativo, perfil estable y onboarding ya integrados en `main`, y EPIC 3 avanzando sobre home privada, sesion e historico
 
 ## Bloques de trabajo
 
@@ -67,7 +67,7 @@ Objetivo:
 Persistir las señales estables minimas del usuario con el menor roce posible.
 
 Estado:
-En implementacion y PR
+Cerrado
 
 Alcance esperado:
 
@@ -99,7 +99,7 @@ Objetivo:
 Capturar bien la intencion de la sesion, llevar al usuario hasta resultados y empezar a dar forma a la experiencia posterior al onboarding.
 
 Estado:
-Pendiente
+En implementacion
 
 Notas de implementacion:
 
@@ -107,7 +107,10 @@ Notas de implementacion:
 - ese handoff no debe resolverse usando `user_profiles`; pertenece a la capa de `sessions`
 - para MVP puede bastar con conservar temporalmente el payload en frontend hasta completar login y reenviarlo despues autenticado
 - la pantalla posterior al onboarding, junto con navbar, footer o cajon de navegacion, pasa a EPIC 3
-- la primera version de historico y favoritos, y la memoria interna derivada de esos datos para ayudar al top 3, pasan a EPIC 3
+- ya existe una home privada en `main` con acceso a `Sesion`, `Favoritos`, `Historico`, `Mis gustos` y `Mi cuenta`
+- la primera version de `Historico` ya entro en `main`; `Favoritos` sigue necesitando pulido visual
+- la pantalla de resultados de sesion ya incorpora acciones de aprendizaje ligeras (`Ver luego`, `Ya la he visto`, `No me interesa`) y microvaloracion visual en frontend
+- sigue pendiente enchufar el backend real de `sessions` y persistir esas acciones
 - la home puede mostrarse aunque el usuario tenga onboarding incompleto; el aviso y el CTA para completar perfil deben aparecer al entrar a `Sorprendeme` o `Preguntame`, no como redireccion forzada desde `/`
 
 ### EPIC 4 · Mood Radar v1

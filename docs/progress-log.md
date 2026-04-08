@@ -120,6 +120,14 @@ Cada actualizacion debe incluir:
 - Que queda: implementar ese aviso blando dentro de los puntos de entrada a sesion y no en el enrutado base.
 - Bloqueos o riesgos: si se reintroduce una redireccion obligatoria a `/onboarding` sin acuerdo de producto, puede volver la confusion entre onboarding opcional y flujo real de sesion.
 
+### 2026-04-08
+
+- Que se hizo: se consolido en `main` la home privada de usuario, el flujo de sesion `Preguntame / Sorprendeme`, el onboarding con intro y skip hacia `/inicio`, la separacion entre `Mis gustos` y `Mi cuenta`, y el acceso privado a `Favoritos`, `Historico` y `Sesion`.
+- Que se hizo: se redisenaron las result cards de sesion con acciones `Ver luego`, `Ya la he visto`, `No me interesa` y una microtarea de valoracion ligera tras marcar una peli como ya vista.
+- Que se hizo: entro tambien `Historico` v1 en `main`, con un ajuste final para aislar sus estilos y evitar dependencias de `Favoritos`.
+- Que queda: conectar `Sesion` al backend real con `POST /api/session/recommend`, resolver el handoff guest -> autenticado, pulir `Favoritos`, integrar la homepage publica nueva y decidir si entra una `thank you page` tras signup.
+- Bloqueos o riesgos: mientras `Sesion` siga con mocks en frontend, la UX ya puede validarse, pero el aprendizaje y la persistencia real de historial, ver luego y descartes siguen siendo solo preparacion visual.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.
