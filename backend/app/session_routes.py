@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from typing import Any
 
@@ -70,6 +71,41 @@ def _normalize_provider_ids(value: Any) -> list[int]:
     return providers
 
 
+def _normalize_int_list(value: Any, field_name: str) -> list[int]:
+    normalized: list[int] = []
+    for item in _ensure_list(value, field_name):
+        if isinstance(item, bool):
+            continue
+        try:
+            normalized.append(int(item))
+        except (TypeError, ValueError):
+            continue
+    return normalized
+
+
+def _decode_genre_ids(value: Any) -> list[int]:
+    if not value:
+        return []
+
+    try:
+        raw_items = json.loads(value) if isinstance(value, str) else value
+    except json.JSONDecodeError:
+        return []
+
+    if not isinstance(raw_items, list):
+        return []
+
+    genre_ids: list[int] = []
+    for item in raw_items:
+        if isinstance(item, bool):
+            continue
+        try:
+            genre_ids.append(int(item))
+        except (TypeError, ValueError):
+            continue
+    return genre_ids
+
+
 def _profile_context_for_request() -> dict[str, Any]:
     user = get_authenticated_user_from_request(required=False)
     context = dict(DEFAULT_PROFILE_CONTEXT)
@@ -83,7 +119,7 @@ def _profile_context_for_request() -> dict[str, Any]:
     context["idiomas_comodos"] = _normalize_language_codes(profile.get("idiomas_comodos"))
     tolerancia = profile.get("tolerancia_subtitulos")
     context["tolerancia_subtitulos"] = tolerancia if tolerancia in ("si", "no") else "si"
-    context["no_rotundos"] = _ensure_list(profile.get("no_rotundos"), "no_rotundos")
+    context["no_rotundos"] = _normalize_int_list(profile.get("no_rotundos"), "no_rotundos")
     return context
 
 
@@ -155,6 +191,7 @@ def _fetch_movies(country_code: str) -> list[dict[str, Any]]:
                 movies.overview,
                 movies.popularity,
                 movies.vote_count,
+                movies.genre_ids,
                 movie_providers.provider_id,
                 movie_providers.provider_name,
                 movie_providers.provider_type
@@ -183,6 +220,7 @@ def _fetch_movies(country_code: str) -> list[dict[str, Any]]:
                 "overview": row["overview"],
                 "popularity": row["popularity"] or 0,
                 "vote_count": row["vote_count"] or 0,
+                "genre_ids": _decode_genre_ids(row["genre_ids"]),
                 "providers": [],
             }
             movies[movie_id] = movie
@@ -238,6 +276,11 @@ def _matches_base_filters(movie: dict[str, Any], profile_context: dict[str, Any]
         and comfortable_languages
         and movie.get("original_language") not in comfortable_languages
     ):
+        return False
+
+    blocked_genres = set(profile_context["no_rotundos"])
+    movie_genres = set(movie.get("genre_ids") or [])
+    if blocked_genres and movie_genres and not blocked_genres.isdisjoint(movie_genres):
         return False
 
     return True
