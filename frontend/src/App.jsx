@@ -317,6 +317,7 @@ export default function App() {
       showProfilePanel={showProfilePanel}
       stepIndex={stepIndex}
       submitting={authSubmitting}
+      token={token}
       user={user}
       editing={editing}
       editingSingleStep={editingSingleStep}

@@ -104,6 +104,7 @@ function SessionPreviewRoute({
   onGoHome,
   onGoToOnboarding,
   onLogout,
+  sessionToken,
   userEmail,
 }) {
   const navigate = useNavigate();
@@ -118,6 +119,7 @@ function SessionPreviewRoute({
       }}
       onLogout={onLogout}
       onOpenProfile={() => navigate("/mis-gustos")}
+      token={sessionToken}
       userEmail={userEmail}
     />
   );
@@ -209,6 +211,7 @@ export default function AppRoutes({
   showProfilePanel,
   stepIndex,
   submitting,
+  token,
   user,
 }) {
   if (loadingSession) {
@@ -225,6 +228,7 @@ export default function AppRoutes({
         onGoHome={() => undefined}
         onGoToOnboarding={() => undefined}
         onLogout={onLogout}
+        sessionToken={token}
         userEmail={user?.email}
       />
     );

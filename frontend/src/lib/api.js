@@ -94,3 +94,11 @@ export function skipProfile(token, body = {}) {
     body,
   });
 }
+
+export function postSessionRecommend(token, body) {
+  return apiRequest("/session/recommend", {
+    method: "POST",
+    token,
+    body,
+  });
+}
