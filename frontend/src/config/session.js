@@ -75,7 +75,7 @@ export const MOCK_RESULTS = [
     original_language: "en",
     overview:
       "Dos amigos de infancia se reencuentran décadas después en Nueva York, enfrentándose a lo que pudo haber sido.",
-    poster_path: "/spELEiSuUaUzTyub2xL29ZdSFbv.jpg",
+    poster_path: null,
     providers: [
       { provider_id: 63, provider_name: "Filmin", provider_type: "flatrate" },
     ],
