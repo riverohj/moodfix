@@ -282,13 +282,19 @@ function MovieDetailModal({ movie, onClose }) {
           ✕
         </button>
 
-        {movie.poster_path ? (
-          <img
-            alt={movie.title}
-            className="rc-modal-poster"
-            src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
-          />
-        ) : null}
+        <div className="rc-modal-media">
+          {movie.poster_path ? (
+            <img
+              alt={movie.title}
+              className="rc-modal-poster"
+              src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
+            />
+          ) : (
+            <div className="rc-modal-poster-fallback" aria-hidden="true">
+              {movie.title.slice(0, 1)}
+            </div>
+          )}
+        </div>
 
         <div className="rc-modal-body">
           <div className="rc-meta">
