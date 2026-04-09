@@ -1,37 +1,101 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@600;700;800&display=swap');
 
-/* Aplicamos la fuente y el color base a todo el contenedor */
-.favoritos-wrapper {
-  min-height: 100vh;
-  background-color: #0D0D0D;
+.favorites-screen {
+  --favorites-bg-main: #0d0d0d;
+  --favorites-card-bg: #1f1f1f;
+  --favorites-surface: #2a2a2a;
+  --favorites-text: #f5f5f5;
+  --favorites-muted: #a0a0a0;
+  --favorites-accent: #e50914;
+  --favorites-accent-hover: #c4060f;
+  display: block;
   padding: 2.5rem 2rem 4rem;
-  font-family: 'Inter', -apple-system, sans-serif; /* Se hereda a todo lo de dentro */
-  color: #F5F5F5;
+  background-color: var(--favorites-bg-main);
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--favorites-text);
 }
 
-.favoritos-header { text-align: center; margin-bottom: 2.5rem; }
+.favorites-screen-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 18px;
+  align-items: end;
+  margin-bottom: 2.5rem;
+}
+
+.favorites-screen-header .ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 15px 24px;
+  border: 1px solid rgba(245, 245, 245, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--favorites-text);
+  font-size: 0.98rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.favorites-screen-header .ghost-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(229, 9, 20, 0.22);
+}
+
+.favoritos-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
 
 .favoritos-titulo {
-  font-family: 'Outfit', sans-serif; /* <--- La fuente del onboarding */
+  margin: 0 0 10px;
+  font-family: 'Outfit', sans-serif;
   font-size: 2.2rem;
-  font-weight: 800; /* Un poco más de grosor para que luzca */
-  color: #F5F5F5;
-  letter-spacing: -0.02em; /* Las fuentes modernas quedan mejor con las letras un pelín juntas */
-  margin-bottom: 0.2rem;
-  text-align: center;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
-/* Opcional: Un toque de color a la palabra MoodFix en el JSX */
-.favoritos-titulo span.brand {
-  color: #E50914; /* El rojo de tus botones para hacer marca */
+.favoritos-title-heart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.1rem;
+  line-height: 1;
+  transform: translate(-4px, -5px);
 }
 
-.favoritos-subtitulo { color: #A0A0A0; font-size: 0.95rem; margin: 0; }
+.favoritos-subtitulo,
+.favorites-empty-card p {
+  margin: 0;
+  color: var(--favorites-muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+  text-align: left;
+}
 
-/* Tarjetas */
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 268px));
+  gap: 16px;
+  width: 100%;
+  margin: 0 auto;
+  justify-content: center;
+}
+
 .favorito-card {
-  background-color: #1F1F1F;
-  border: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  width: 100%;
+  max-width: 268px;
+  background-color: var(--favorites-card-bg);
+  border: 1px solid var(--favorites-surface);
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -43,120 +107,220 @@
 }
 
 .favorito-poster-wrapper {
-  width: 100%;
-  aspect-ratio: 2 / 2.5;
-  background-color: #2a2a2a;
+  position: relative;
+  width: calc(100% - 1rem);
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0.45rem;
+  margin-bottom: 0.55rem;
+  aspect-ratio: 2 / 2.7;
   overflow: hidden;
+  background-color: var(--favorites-surface);
 }
 
-.favorito-poster { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-.poster-fallback { display: flex; align-items: center; justify-content: center; font-size: 3rem; }
-.poster-fallback::after { content: '🎬'; }
-
-.favorito-card .card-body {
-    padding: 0.6rem 0.6rem 0px 0.6rem !important;
-    display: flex;
-    flex-direction: column;
-}
-.favorito-nombre {
-  margin-bottom: 0.2rem; /* Casi pegado a la meta-info */
-  font-size: 0.9rem;
-  font-weight: 600;
+.favorito-poster,
+.favorito-poster-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.favorito-meta {
-  margin-bottom: 0.5rem; /* Este es el espacio que separa el año de los botones */
+.favorito-poster {
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.favorito-poster-fallback {
+  position: relative;
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  color: rgba(245, 245, 245, 0.72);
+}
+
+.favorito-poster-fallback::after {
+  content: '🎬';
+}
+
+.favorito-poster-has-fallback::after {
+  content: '🎬';
+  position: absolute;
+  inset: 0;
   display: flex;
-  justify-content: space-between;
-  font-size: 0.72rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
+.favorito-card-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--favorites-muted);
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+}
+
+.favorito-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 0.65rem 0.62rem 0;
+}
+
+.favorito-nombre {
+  margin: 0 0 0.34rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--favorites-text);
+  min-height: calc(1.3em * 2);
+}
+
+.favorito-genero,
+.favorito-año {
+  display: flex;
+  align-items: center;
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  color: var(--favorites-muted);
 }
 
 .favorito-genero {
-  font-size: 0.7rem;
-  color: #A0A0A0;
-  background-color: #2a2a2a;
-  padding: 2px 8px;
-  border-radius: 20px;
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
-.favorito-año { font-size: 0.72rem; color: #A0A0A0; }
+.favorito-año {
+  gap: 4px;
+  line-height: 1.4;
+  min-height: calc(1.4em + 2px);
+}
 
-/* Botones */
+.favorito-año-icon {
+  display: inline-flex;
+  margin-right: 4px;
+  font-size: 0.78rem;
+}
+
 .favorito-acciones {
-    margin-top: 0.5rem !important; /* Espacio fijo arriba de los botones */
-    margin-bottom: 0px !important;
-    padding-bottom: 0.6rem; /* ESTE es el margen real que verás abajo del todo */
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
+  display: grid;
+  gap: 7px;
+  margin-top: auto;
+  margin-bottom: 0.5rem;
 }
 
-.favoritos-wrapper .btn-ver, .favoritos-wrapper .btn-eliminar {
-  font-weight: 600;
-  font-size: 0.8rem;
+.btn-ver,
+.btn-eliminar {
+  width: 100%;
+  padding: 0.46rem 0.82rem;
   border-radius: 8px;
-  padding: 0.5rem 0;
-  transition: all 0.2s ease;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.favoritos-wrapper .btn-ver { background-color: #E50914; color: #F5F5F5; border: none; }
-.favoritos-wrapper .btn-ver:hover { background-color: #c4060f; color: #fff; }
-
-.favoritos-wrapper .btn-eliminar {
-  background-color: transparent;
-  color: #A0A0A0;
-  border: 1px solid #2a2a2a;
+.btn-ver {
+  border: none;
+  background: var(--favorites-accent);
+  color: var(--favorites-text);
 }
 
-.favoritos-wrapper .btn-eliminar:hover {
-  color: #E50914;
-  border-color: #E50914;
+.btn-ver:hover {
+  background-color: var(--favorites-accent-hover);
+  color: #fff;
 }
 
-/* Estado Vacío */
-.favoritos-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.btn-eliminar {
+  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--favorites-text);
+}
+
+.btn-eliminar:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.favorites-empty-card {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  padding: 38px 28px;
+  text-align: center;
   min-height: 50vh;
+}
+
+.favorites-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1.2rem;
+  opacity: 0.6;
+}
+
+.favorites-empty-card h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.favorites-empty-card p {
+  max-width: 420px;
   text-align: center;
 }
 
-.empty-icon { font-size: 4rem; margin-bottom: 1.2rem; opacity: 0.6; }
-.empty-titulo { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem; }
-.empty-texto { color: #A0A0A0; font-size: 0.95rem; max-width: 420px; line-height: 1.6; }
+@media (max-width: 768px) {
+  .favorites-screen-header {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 
-/* --- AJUSTES EXCLUSIVOS PARA MÓVIL --- */
+  .favorites-screen {
+    padding: 2rem 1.25rem 3rem;
+  }
+
+  .favorites-grid {
+    grid-template-columns: repeat(2, minmax(0, 268px));
+  }
+}
+
 @media (max-width: 576px) {
-  /* 1. Atacamos el padding de 28px que se ve en tu captura */
+  .favorites-grid {
+    grid-template-columns: minmax(0, 268px);
+  }
+
   .favorito-card {
-    padding: 8px !important; /* Pasamos de 28px a 8px para ganar ancho */
+    padding: 8px;
+  }
+
+  .favorito-card-body {
+    padding: 4px 2px 0;
   }
 
   .favorito-nombre {
-    margin-top: 5px !important;
-    margin-bottom: 2px !important;
+    margin-top: 5px;
+    margin-bottom: 2px;
     font-size: 0.85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  /* 2. Ajustamos el cuerpo para que el contenido respire */
-  .favorito-card .card-body {
-    padding: 4px 2px 0px 2px !important;
+    min-height: calc(1.3em * 2);
   }
 
-  /* 3. Aseguramos que los botones aprovechen el nuevo ancho */
-  .favorito-acciones {
+  .btn-ver,
+  .btn-eliminar {
     width: 100%;
-    gap: 3px !important;
-  }
-
-  .favoritos-wrapper .btn-ver, .favoritos-wrapper .btn-eliminar {
-    width: 100%;
-    padding: 6px 0 !important;
+    padding: 6px 0;
     font-size: 0.75rem;
   }
 }
