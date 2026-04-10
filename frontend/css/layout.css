@@ -15,6 +15,13 @@
   padding-right: 24px;
 }
 
+.site-shell:has(.landing-container) {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .site-navbar {
   position: sticky;
   top: 0;
@@ -42,6 +49,13 @@
   justify-content: flex-start;
   color: #f5f5f5;
   text-decoration: none;
+}
+
+.site-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .site-logo-placeholder span {
@@ -128,6 +142,11 @@
   width: 100%;
   padding-top: 32px;
   padding-bottom: 32px;
+}
+
+.site-main:has(.landing-container) {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .site-footer {

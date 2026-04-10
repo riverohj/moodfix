@@ -58,22 +58,19 @@ export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAct
       <section id="stats-section" className="landing-stats-row">
         <div className="stat-box-unit">
           <span className="stat-number-big">+70%</span>
-          <p>del tiempo delante de Netflix termina sin elegir nada</p>
+          <p>😩 del tiempo delante de Netflix para terminar sin elegir nada.</p>
         </div>
         <div className="stat-box-unit">
           <span className="stat-number-big">23 min</span>
-          <p>de media perdidos buscando qué ver cada noche</p>
+          <p>⏰ de media perdidos buscando qué ver cada noche.</p>
         </div>
         <div className="stat-box-unit">
           <span className="stat-number-big">10 seg</span>
-          <p>es lo que tarda MoodFix en darte la respuesta</p>
+          <p>⚡ es lo que tarda MoodFix en darte la respuesta.</p>
         </div>
         <div className="stat-box-unit">
           <span className="stat-number-big">83%</span>
-          <div className="pizza-stat-flex">
-            <span className="pizza-emoji-icon">🍕</span>
-            <p>de pizzas y hamburguesas se enfrían tristes cada viernes</p>
-          </div>
+          <p>🍕 de pizzas y hamburguesas tristes se enfrían cada viernes</p>
         </div>
       </section>
 
@@ -101,7 +98,7 @@ export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAct
       <section className="landing-solution-section">
         <span className="tag-red-label">LA SOLUCIÓN</span>
         <div className="sol-header-area">
-          <h2>No buscas películas.<br />Te entienden.</h2>
+          <h2>No es buscar.<br />Es que aciertes sin buscar.</h2>
           <p>Sin listas interminables. Sin filtros. Sin debate. Tres pasos y listo.</p>
         </div>
         <div className="sol-cards-grid">

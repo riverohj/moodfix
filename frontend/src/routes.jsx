@@ -241,7 +241,7 @@ export default function AppRoutes({
           <Route element={<LandingRoute isAuthenticated={isAuthenticated} />} path="/" />
           <Route
             element={
-              <ProtectedRoute allow={isAuthenticated} redirectTo="/auth">
+              <ProtectedRoute allow={isAuthenticated} redirectTo="/">
                 <UserHomeRoute profile={profile} user={user} />
               </ProtectedRoute>
             }
