@@ -70,7 +70,11 @@ function Favoritos() {
         <div>
           <div className="favoritos-title-row">
             <h1 className="favoritos-titulo">Tu Colección MoodFix</h1>
-            <span className="favoritos-title-heart" aria-hidden="true">❤️</span>
+            <span className="favoritos-title-heart" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </span>
           </div>
           {favoritos.length > 0 ? (
             <p className="favoritos-subtitulo">{favoritosCountLabel}</p>
@@ -114,7 +118,16 @@ function Favoritos() {
                 ) : (
                   <div className="favorito-poster-fallback" aria-hidden="true" />
                 )}
-                <div className="favorito-card-badge" aria-hidden="true">❤️</div>
+                <button
+                  className="favorito-card-badge"
+                  type="button"
+                  aria-label="Eliminar de favoritos"
+                  onClick={() => handleEliminar(pelicula.id)}
+                >
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </button>
               </div>
 
               <div className="favorito-card-body">
