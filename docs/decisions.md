@@ -219,6 +219,20 @@ Cada entrada debe incluir:
 - Impacto: no se deben importar frameworks CSS dentro de componentes hoja, ni usar selectores globales ambiguos como `.card-body` sin scope; los estilos de pagina deben quedar acotados a su propia pantalla.
 - Responsable o acuerdo del equipo: directriz acordada al consolidar la arquitectura nueva de frontend.
 
+### 2026-04-08 · Resultados de sesion con acciones de aprendizaje ligeras
+
+- Decision: las cards de resultados de `Preguntame` y `Sorprendeme` incorporan tres acciones visibles: `Ver luego`, `Ya la he visto` y `No me interesa`.
+- Motivo: el equipo quiere que la pantalla de resultados no sea solo lectura, sino un primer punto de aprendizaje y de memoria util para la experiencia posterior.
+- Impacto: `Ya la he visto` abre una microtarea de valoracion ligera en frontend, `Ver luego` se alinea con la futura watchlist y `No me interesa` queda como señal negativa clara. La UI no debe vender una nota externa tipo IMDb si ese dato no esta cerrado en el shape real.
+- Responsable o acuerdo del equipo: decision aplicada al refinar EPIC 3 en frontend.
+
+### 2026-04-08 · Historico v1 entra en main como pantalla independiente
+
+- Decision: `Historico` entra como pantalla propia dentro del shell privado y debe mantener estilos aislados, sin depender de `Favoritos`.
+- Motivo: el equipo ya necesita una primera base visual de `Historico`, pero sin reabrir los problemas de CSS compartido que ya se habian decidido evitar.
+- Impacto: `Historico` vive en su propia ruta y CSS, y cualquier pulido futuro debe seguir esa misma directriz de aislamiento.
+- Responsable o acuerdo del equipo: merge del trabajo de Burcu con ajuste final de aislamiento antes de entrar en `main`.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.

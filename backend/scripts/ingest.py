@@ -15,6 +15,7 @@ Requisitos:
 """
 
 import argparse
+import json
 import os
 import sqlite3
 import sys
@@ -247,6 +248,11 @@ def upsert_movie(conn: sqlite3.Connection, detail: dict):
 
     runtime = detail.get("runtime") or 0
     vote_count = detail.get("vote_count") or 0
+    genre_ids = [
+        genre.get("id")
+        for genre in detail.get("genres", [])
+        if isinstance(genre, dict) and genre.get("id") is not None
+    ]
 
     # Filtros de calidad
     if runtime < MIN_RUNTIME or vote_count < MIN_VOTE_COUNT:
@@ -256,8 +262,8 @@ def upsert_movie(conn: sqlite3.Connection, detail: dict):
         """
         INSERT INTO movies
             (tmdb_id, title, poster_path, runtime, release_year,
-             original_language, overview, popularity, vote_count)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             original_language, overview, popularity, vote_count, genre_ids)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(tmdb_id) DO UPDATE SET
             title              = excluded.title,
             poster_path        = excluded.poster_path,
@@ -267,6 +273,7 @@ def upsert_movie(conn: sqlite3.Connection, detail: dict):
             overview           = excluded.overview,
             popularity         = excluded.popularity,
             vote_count         = excluded.vote_count,
+            genre_ids          = excluded.genre_ids,
             updated_at         = CURRENT_TIMESTAMP
         """,
         (
@@ -279,6 +286,7 @@ def upsert_movie(conn: sqlite3.Connection, detail: dict):
             detail.get("overview"),
             detail.get("popularity"),
             vote_count,
+            json.dumps(genre_ids),
         ),
     )
     # Recuperar el id real (en upsert lastrowid puede ser 0)

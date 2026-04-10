@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "http://localhost:5001/api";
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "/api";
 
 async function apiRequest(path, { method = "GET", token, body } = {}) {
   const headers = {
@@ -89,6 +89,14 @@ export function putProfile(token, body) {
 
 export function skipProfile(token, body = {}) {
   return apiRequest("/profile/skip", {
+    method: "POST",
+    token,
+    body,
+  });
+}
+
+export function postSessionRecommend(token, body) {
+  return apiRequest("/session/recommend", {
     method: "POST",
     token,
     body,
