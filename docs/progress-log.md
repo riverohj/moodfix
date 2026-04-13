@@ -125,8 +125,11 @@ Cada actualizacion debe incluir:
 - Que se hizo: se consolido en `main` la home privada de usuario, el flujo de sesion `Preguntame / Sorprendeme`, el onboarding con intro y skip hacia `/inicio`, la separacion entre `Mis gustos` y `Mi cuenta`, y el acceso privado a `Favoritos`, `Historico` y `Sesion`.
 - Que se hizo: se redisenaron las result cards de sesion con acciones `Ver luego`, `Ya la he visto`, `No me interesa` y una microtarea de valoracion ligera tras marcar una peli como ya vista.
 - Que se hizo: entro tambien `Historico` v1 en `main`, con un ajuste final para aislar sus estilos y evitar dependencias de `Favoritos`.
+- Que se hizo: se documento la separacion entre configuracion de backend (`.env`) y frontend (`frontend/.env.local`) y se deja acordado que cada persona trabaja por defecto con su propio backend y su propia BD local.
+- Que se hizo: al revisar la rama de backend de sesion se detecto que `no_rotundos` se leia del perfil pero no podia aplicarse de verdad porque el catalogo no guardaba `genre_ids`; la rama del PR ya se actualizo para soportar `genre_ids` y filtrar `no_rotundos`.
 - Que queda: conectar `Sesion` al backend real con `POST /api/session/recommend`, resolver el handoff guest -> autenticado, pulir `Favoritos`, integrar la homepage publica nueva y decidir si entra una `thank you page` tras signup.
 - Bloqueos o riesgos: mientras `Sesion` siga con mocks en frontend, la UX ya puede validarse, pero el aprendizaje y la persistencia real de historial, ver luego y descartes siguen siendo solo preparacion visual.
+- Bloqueos o riesgos: el filtro real de `no_rotundos` ya esta preparado en codigo, pero la BD local necesita refrescar o reingestar `genre_ids` para que el catalogo actual lo respete de verdad.
 
 ## Regla de uso
 
