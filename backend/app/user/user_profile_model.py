@@ -133,6 +133,26 @@ def get_or_create_profile(*, user_id: int) -> dict[str, Any]:
     return _decode_row(row)
 
 
+def agregar_pelicula_a_lista(
+    tmdb_id: int,
+    campo: str,
+    *,
+    user_id: int,
+    campos_limpiar: tuple[str, ...] = (),
+) -> dict[str, Any]:
+    profile = get_or_create_profile(user_id=user_id)
+
+    lista = list(profile.get(campo) or [])
+    if tmdb_id not in lista:
+        lista.append(tmdb_id)
+
+    payload: dict[str, Any] = {campo: lista}
+    for campo_limpiar in campos_limpiar:
+        payload[campo_limpiar] = [x for x in (profile.get(campo_limpiar) or []) if x != tmdb_id]
+
+    return save_profile(payload, user_id=user_id, merge=True)
+
+
 def save_profile(
     payload: dict[str, Any],
     *,

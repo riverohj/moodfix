@@ -239,6 +239,20 @@ Cada entrada debe incluir:
 - Motivo: `localhost` siempre apunta a la maquina de quien abre la app, y eso estaba provocando confusion en login, auth y perfil cuando alguien intentaba usar el frontend de su Mac contra un backend ajeno sin configurar la IP.
 - Impacto: el backend se configura desde el `.env` de la raiz y el frontend desde `frontend/.env.local`. Solo para demos o revisiones puntuales se permite apuntar temporalmente al backend de otra persona via `VITE_API_BASE_URL=http://IP:5001/api`.
 - Responsable o acuerdo del equipo: acuerdo operativo tras revisar los fallos de login de Jose y Lourdes.
+### 2026-04-13 · Motor determinista EPIC 4 implementado en paquete propio
+
+- Decision: la logica del motor se extrae de `session_routes.py` y pasa a vivir en `backend/app/motor/` como paquete independiente con modulos separados por responsabilidad (`contrato`, `moods`, `catalogo`, `filtros`, `puntuacion`, `seleccion`, `motor`).
+- Motivo: el motor necesita ser testeable, legible y mantenible sin mezclar logica de negocio con adaptadores HTTP.
+- Impacto: `session_routes.py` queda como adaptador fino que normaliza la entrada, llama al motor y devuelve JSON. El mood ya usa los `genre_ids` de EPIC 0 como criterio principal de scoring (+90 si coincide, -40 si no). Las exclusiones por `tmdb_id` de `peliculas_vistas`, `peliculas_para_ver` y `peliculas_descartadas` son filtros duros del motor. `reason` queda retirado de backend y frontend y pasa a backlog.
+- Responsable o acuerdo del equipo: implementado por Juan en PR #16 sobre rama `feat/epic-4-motor-determinista-mvp`.
+
+### 2026-04-13 · Persistencia atomica de acciones de sesion
+
+- Decision: se añaden tres endpoints especificos para persistir acciones sobre peliculas desde la pantalla de sesion: `POST /api/history`, `POST /api/watchlist` y `POST /api/discard`. Todos reciben `{ "tmdb_id": <int> }` y requieren autenticacion.
+- Motivo: `PATCH /api/profile` reemplaza listas enteras y no permite añadir un elemento de forma segura sin riesgo de machcar datos existentes. Hace falta una operacion de append atomica sin duplicados.
+- Impacto: marcar una pelicula como vista (`/history`) la saca de `ver_luego` si estaba. Descartarla (`/discard`) tambien la saca de `ver_luego`. La funcion `agregar_pelicula_a_lista` en `user_profile_model.py` gestiona la logica de append y limpieza. Las rutas coinciden con los TODOs del `SessionScreen.jsx` para facilitar la conexion del frontend.
+- Responsable o acuerdo del equipo: implementado por Lourdes en rama `feat/epic-4-persistencia-acciones`, pendiente de revision del equipo.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.
