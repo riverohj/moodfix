@@ -329,12 +329,6 @@ function MovieDetailModal({ movie, onClose }) {
 
           <p className="rc-modal-overview">{movie.overview}</p>
 
-          {movie.reason ? (
-            <p className="rc-reason">
-              <span className="rc-reason-label">Por qué te la proponemos</span>
-              {movie.reason}
-            </p>
-          ) : null}
         </div>
       </div>
     </div>
@@ -462,14 +456,6 @@ function ResultCard({ movie, onOpenDetail }) {
         <button className="rc-more-btn" type="button" onClick={onOpenDetail}>
           Ver sinopsis completa
         </button>
-
-        {/* Zona "Por qué te la proponemos" — preparada, se activa cuando el backend la devuelva */}
-        {movie.reason ? (
-          <p className="rc-reason">
-            <span className="rc-reason-label">Por qué te la proponemos</span>
-            {movie.reason}
-          </p>
-        ) : null}
 
         {/* Zona de valoración (al pulsar "Ya la he visto") */}
         {showRating ? (
