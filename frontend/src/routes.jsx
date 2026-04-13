@@ -10,10 +10,11 @@ import Layout from "../pages/layout";
 import Onboarding from "../pages/Onboarding";
 import ProfileScreen from "../pages/ProfileScreen";
 import SessionScreen from "../pages/SessionScreen";
+import ThankYouPage from "../pages/ThankYouPage";
 import UserHome from "../pages/UserHome";
 import { ONBOARDING_STEPS } from "./config/onboarding";
 
-// Redirige a /onboarding tras registro exitoso (en lugar de /inicio)
+// Redirige a /thank-you tras registro exitoso
 function AuthRoute({ authFeedback, isAuthenticated, onLogin, onRegister, submitting }) {
   const navigate = useNavigate();
 
@@ -30,7 +31,7 @@ function AuthRoute({ authFeedback, isAuthenticated, onLogin, onRegister, submitt
       onLogin={onLogin}
       onRegister={async (email, password) => {
         await onRegister(email, password);
-        navigate("/onboarding");
+        navigate("/thank-you");
       }}
       submitting={submitting}
     />
@@ -104,6 +105,7 @@ function SessionPreviewRoute({
   onGoHome,
   onGoToOnboarding,
   onLogout,
+  sessionToken,
   userEmail,
 }) {
   const navigate = useNavigate();
@@ -118,6 +120,7 @@ function SessionPreviewRoute({
       }}
       onLogout={onLogout}
       onOpenProfile={() => navigate("/mis-gustos")}
+      token={sessionToken}
       userEmail={userEmail}
     />
   );
@@ -209,6 +212,7 @@ export default function AppRoutes({
   showProfilePanel,
   stepIndex,
   submitting,
+  token,
   user,
 }) {
   if (loadingSession) {
@@ -225,6 +229,7 @@ export default function AppRoutes({
         onGoHome={() => undefined}
         onGoToOnboarding={() => undefined}
         onLogout={onLogout}
+        sessionToken={token}
         userEmail={user?.email}
       />
     );
@@ -235,6 +240,14 @@ export default function AppRoutes({
       <Routes>
         <Route element={<LayoutRoute isAuthenticated={isAuthenticated} onLogout={onLogout} />}>
           <Route element={<LandingRoute isAuthenticated={isAuthenticated} />} path="/" />
+          <Route
+            element={
+              <ProtectedRoute allow={isAuthenticated} redirectTo="/auth">
+                <ThankYouPage />
+              </ProtectedRoute>
+            }
+            path="/thank-you"
+          />
           <Route
             element={
               <ProtectedRoute allow={isAuthenticated} redirectTo="/auth">
