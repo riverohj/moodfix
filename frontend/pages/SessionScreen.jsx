@@ -8,7 +8,19 @@ import {
   MOOD_OPTIONS,
   TIME_OPTIONS,
 } from "../src/config/session";
-import { postSessionRecommend } from "../src/lib/api";
+import {
+  deleteWatchlistMovie,
+  postDiscardMovie,
+  postHistoryMovie,
+  postSessionRecommend,
+  postWatchlistMovie,
+} from "../src/lib/api";
+import {
+  formatLanguageLabel,
+  formatPopularity,
+  formatVoteCount,
+  getGenreLabels,
+} from "../src/lib/movieMetadata";
 
 const ASK_STEPS = [
   {
@@ -271,6 +283,7 @@ function MovieDetailModal({ movie, onClose }) {
   }, [onClose]);
 
   const allProviders = movie.providers.filter((p) => p.provider_type === "flatrate");
+  const genreLabels = getGenreLabels(movie);
 
   return (
     <div className="rc-modal-backdrop" onClick={onClose}>
@@ -327,6 +340,51 @@ function MovieDetailModal({ movie, onClose }) {
 
           <h2 className="rc-modal-title">{movie.title}</h2>
 
+          <div className="rc-modal-facts">
+            <div className="rc-modal-fact">
+              <span className="rc-modal-fact-label">Año</span>
+              <span className="rc-modal-fact-value">{movie.release_year ?? "Sin dato"}</span>
+            </div>
+            <div className="rc-modal-fact">
+              <span className="rc-modal-fact-label">Duración</span>
+              <span className="rc-modal-fact-value">{movie.runtime ? `${movie.runtime} min` : "Sin dato"}</span>
+            </div>
+            <div className="rc-modal-fact">
+              <span className="rc-modal-fact-label">Idioma original</span>
+              <span className="rc-modal-fact-value">{formatLanguageLabel(movie.original_language)}</span>
+            </div>
+            <div className="rc-modal-fact">
+              <span className="rc-modal-fact-label">Popularidad</span>
+              <span className="rc-modal-fact-value">{formatPopularity(movie.popularity)}</span>
+            </div>
+            <div className="rc-modal-fact">
+              <span className="rc-modal-fact-label">Votos</span>
+              <span className="rc-modal-fact-value">{formatVoteCount(movie.vote_count)}</span>
+            </div>
+            <div className="rc-modal-fact">
+              <span className="rc-modal-fact-label">TMDB</span>
+              <span className="rc-modal-fact-value">#{movie.tmdb_id ?? "Sin dato"}</span>
+            </div>
+          </div>
+
+          <div className="rc-modal-genre-block">
+            <p className="rc-modal-section-title">Géneros</p>
+            <div className="rc-modal-genre-list">
+              {genreLabels.map((genreLabel) => (
+                <span key={`${movie.tmdb_id}-${genreLabel}`} className="rc-modal-genre-pill">
+                  {genreLabel}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {allProviders.length > 0 ? (
+            <div className="rc-platform-block">
+              <p className="rc-platform-title">Disponible en</p>
+              <ProviderLinks movie={movie} />
+            </div>
+          ) : null}
+
           <p className="rc-modal-overview">{movie.overview}</p>
 
         </div>
@@ -359,79 +417,190 @@ function StarRating({ value, onRate }) {
   );
 }
 
-// ── Card de resultado ─────────────────────────────────────────────────────────
+function ProviderLinks({ movie, compact = false }) {
+  const flatrateProviders = movie.providers.filter((provider) => provider.provider_type === "flatrate");
 
-function ResultCard({ movie, onOpenDetail }) {
-  // action: null | "saved" | "seen" | "dismissed"
-  const [action, setAction] = useState(null);
-  // showRating: true mientras se pide la valoración (tras pulsar "Ya la he visto")
-  const [showRating, setShowRating] = useState(false);
-  const [rating, setRating] = useState(null);
-  // ratingDone: true una vez confirmada, para mostrar el mensaje de agradecimiento
-  const [ratingDone, setRatingDone] = useState(false);
+  if (flatrateProviders.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={`rc-provider-links ${compact ? "rc-provider-links-compact" : ""}`}>
+      {flatrateProviders.map((provider) => (
+        <span
+          key={`${movie.id}-${provider.provider_id}`}
+          className="rc-provider-link"
+        >
+          {provider.provider_name}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function PopcornBurst() {
+  return (
+    <div className="popcorn-burst" aria-hidden="true">
+      {Array.from({ length: 18 }, (_, index) => (
+        <span
+          key={index}
+          className="popcorn-piece"
+          style={{
+            "--angle": `${index * 20}deg`,
+            "--distance": `${58 + (index % 3) * 18}px`,
+            "--delay": `${index * 0.025}s`,
+          }}
+        >
+          🍿
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function SuccessCelebration({ movie, onReset }) {
+  return (
+    <div className="session-success-card">
+      <PopcornBurst />
+      <p className="session-mode-tag">Noche resuelta</p>
+      <h2 className="session-success-title">¡Hamburguesa salvada!</h2>
+      <p className="session-success-copy">
+        Has elegido <strong>{movie.title}</strong>. La guardamos en tu historial para que luego
+        puedas puntuarla.
+      </p>
+      <ProviderLinks compact movie={movie} />
+      <div className="session-success-actions">
+        <button className="ghost-button" type="button" onClick={onReset}>
+          Volver a películas sugeridas
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Resultado de una sola película ───────────────────────────────────────────
+
+function ResultCard({
+  movie,
+  index,
+  total,
+  state,
+  onOpenDetail,
+  onPersistAction,
+  onUpdateMovieState,
+}) {
+  const {
+    action = null,
+    showRating = false,
+    rating = null,
+    ratingDone = false,
+    actionNotice = "",
+    showCelebration = false,
+  } = state ?? {};
+  const [savingAction, setSavingAction] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   const flatrateProviders = movie.providers
     .filter((p) => p.provider_type === "flatrate")
     .map((p) => p.provider_name);
 
-  function handleSeen() {
-    setAction("seen");
-    setShowRating(true);
+  async function persistAction(nextAction) {
+    setSavingAction(true);
+    setActionError("");
+
+    try {
+      const nextState = await onPersistAction(nextAction, movie, state);
+      onUpdateMovieState(movie.tmdb_id, nextState);
+      return true;
+    } catch (error) {
+      setActionError(error.message || "No pudimos guardar esta acción.");
+      return false;
+    } finally {
+      setSavingAction(false);
+    }
+  }
+
+  async function handleWatchNow() {
+    const saved = await persistAction("watch_now");
+    if (!saved) {
+      return;
+    }
+  }
+
+  async function handleSeen() {
+    await persistAction("seen");
   }
 
   function handleRate(n) {
-    setRating(n);
-    setRatingDone(true);
-    // TODO (EPIC 3 backend): enviar { tmdb_id: movie.tmdb_id, rating: n } a POST /api/history
+    onUpdateMovieState(movie.tmdb_id, {
+      ...state,
+      action: "seen",
+      rating: n,
+      ratingDone: true,
+      showRating: true,
+      actionNotice: "Vista guardada. Tus estrellas se quedan anotadas en esta sesión.",
+    });
   }
 
-  function handleSave() {
-    setAction("saved");
-    // TODO (EPIC 3 backend): enviar { tmdb_id: movie.tmdb_id } a POST /api/watchlist
+  async function handleSave() {
+    await persistAction("saved");
   }
 
-  function handleDismiss() {
-    setAction("dismissed");
-    // TODO (EPIC 3 backend): enviar { tmdb_id: movie.tmdb_id } a POST /api/discard
+  async function handleDismiss() {
+    await persistAction("dismissed");
   }
 
-  // Estado descartado: card colapsada con opción de deshacer
+  if (showCelebration) {
+    return (
+      <SuccessCelebration
+        movie={movie}
+        onReset={() =>
+          onUpdateMovieState(movie.tmdb_id, {
+            ...state,
+            action: "seen",
+            showCelebration: false,
+            showRating: true,
+            actionNotice: "Añadida al historial. Si quieres, déjale tus estrellas.",
+          })
+        }
+      />
+    );
+  }
+
   if (action === "dismissed") {
     return (
-      <article className="rc-card rc-card-dismissed">
-        <span className="rc-dismissed-title">{movie.title}</span>
-        <button
-          className="rc-dismissed-undo"
-          type="button"
-          onClick={() => setAction(null)}
-        >
-          Deshacer
-        </button>
-      </article>
+      <div className="session-success-card session-success-card-muted">
+        <p className="session-mode-tag">Película {index + 1} de {total}</p>
+        <h2 className="session-success-title">Anotado</h2>
+        <p className="session-success-copy">
+          <strong>{movie.title}</strong> queda fuera de tus próximas recomendaciones.
+        </p>
+        {actionNotice ? <p className="session-success-hint">{actionNotice}</p> : null}
+      </div>
     );
   }
 
   return (
-    <article className={`rc-card ${action === "seen" ? "rc-card-seen" : ""} ${action === "saved" ? "rc-card-saved" : ""}`}>
-
-      {/* Póster */}
-      <div className="rc-poster" aria-hidden>
-        {movie.poster_path ? (
-          <img
-            alt={movie.title}
-            className="rc-poster-img"
-            loading="lazy"
-            src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
-          />
-        ) : (
-          <span className="rc-poster-initial">{movie.title.slice(0, 1)}</span>
-        )}
-        {action === "saved" ? <span className="rc-poster-badge rc-poster-badge-saved">Ver luego</span> : null}
-        {action === "seen" && !showRating ? <span className="rc-poster-badge rc-poster-badge-seen">Vista {rating ? `· ${"★".repeat(rating)}` : ""}</span> : null}
+    <article className={`rc-feature ${action === "seen" ? "rc-feature-seen" : ""} ${action === "saved" ? "rc-feature-saved" : ""}`}>
+      <div className="rc-feature-media">
+        <div className="rc-poster rc-poster-feature" aria-hidden>
+          {movie.poster_path ? (
+            <img
+              alt={movie.title}
+              className="rc-poster-img"
+              loading="lazy"
+              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+            />
+          ) : (
+            <span className="rc-poster-initial">{movie.title.slice(0, 1)}</span>
+          )}
+          <span className="rc-feature-counter">Película {index + 1} de {total}</span>
+          {action === "saved" ? <span className="rc-poster-badge rc-poster-badge-saved">Ver luego</span> : null}
+          {action === "seen" && !showRating ? <span className="rc-poster-badge rc-poster-badge-seen">Vista {rating ? `· ${"★".repeat(rating)}` : ""}</span> : null}
+        </div>
       </div>
 
-      {/* Contenido */}
-      <div className="rc-body">
+      <div className="rc-feature-body">
         <div className="rc-meta">
           <span className="rc-year">{movie.release_year}</span>
           <span className="rc-dot" aria-hidden>·</span>
@@ -445,19 +614,24 @@ function ResultCard({ movie, onOpenDetail }) {
           {flatrateProviders.length > 0 ? (
             <>
               <span className="rc-dot" aria-hidden>·</span>
-              <span className="rc-provider">{flatrateProviders[0]}</span>
+              <span className="rc-provider">{flatrateProviders.join(", ")}</span>
             </>
           ) : null}
         </div>
 
-        <h3 className="rc-title">{movie.title}</h3>
+        <h3 className="rc-title rc-title-feature">{movie.title}</h3>
 
-        <p className="rc-overview">{movie.overview}</p>
+        <p className="rc-overview rc-overview-feature">{movie.overview}</p>
+
+        <div className="rc-platform-block">
+          <p className="rc-platform-title">Disponible en</p>
+          <ProviderLinks movie={movie} />
+        </div>
+
         <button className="rc-more-btn" type="button" onClick={onOpenDetail}>
-          Ver sinopsis completa
+          Ver ficha completa
         </button>
 
-        {/* Zona de valoración (al pulsar "Ya la he visto") */}
         {showRating ? (
           <div className="rc-rating-zone">
             {ratingDone ? (
@@ -471,7 +645,12 @@ function ResultCard({ movie, onOpenDetail }) {
                 <button
                   className="rc-rating-skip"
                   type="button"
-                  onClick={() => { setShowRating(false); }}
+                  onClick={() =>
+                    onUpdateMovieState(movie.tmdb_id, {
+                      ...state,
+                      showRating: false,
+                    })
+                  }
                 >
                   Saltar valoración
                 </button>
@@ -480,38 +659,66 @@ function ResultCard({ movie, onOpenDetail }) {
           </div>
         ) : null}
 
-        {/* Acciones */}
+        {actionNotice ? <p className="session-feedback session-feedback-success rc-inline-notice">{actionNotice}</p> : null}
+        {actionError ? <p className="session-feedback session-feedback-error rc-inline-error">{actionError}</p> : null}
+
         {!showRating ? (
-          <div className="rc-actions">
-            <div className="rc-actions-primary">
-              <button
-                className={`rc-btn-save ${action === "saved" ? "rc-btn-save-active" : ""}`}
-                type="button"
-                onClick={action === "saved" ? () => setAction(null) : handleSave}
-              >
-                {action === "saved" ? "Guardada" : "Ver luego"}
-              </button>
-              <button
-                className={`rc-btn-seen ${action === "seen" ? "rc-btn-seen-active" : ""}`}
-                type="button"
-                onClick={action === "seen" ? () => setAction(null) : handleSeen}
-              >
-                Ya la he visto
-              </button>
-            </div>
-            <button className="rc-btn-dismiss" type="button" onClick={handleDismiss}>
+          <div className="rc-action-grid">
+            <button
+              className="rc-btn-watch"
+              disabled={savingAction || action === "seen" || action === "dismissed"}
+              type="button"
+              onClick={() => { void handleWatchNow(); }}
+            >
+              {savingAction ? "Guardando..." : "¡Quiero esta!"}
+            </button>
+            <button
+              className={`rc-btn-save ${action === "saved" ? "rc-btn-save-active" : ""}`}
+              disabled={savingAction || action === "seen" || action === "dismissed"}
+              type="button"
+              onClick={() => { void handleSave(); }}
+            >
+              {action === "saved" ? "Quitar de Ver luego" : "Ver luego"}
+            </button>
+            <button
+              className={`rc-btn-seen ${action === "seen" ? "rc-btn-seen-active" : ""}`}
+              disabled={savingAction || action === "seen" || action === "dismissed"}
+              type="button"
+              onClick={() => { void handleSeen(); }}
+            >
+              Ya la he visto
+            </button>
+            <button
+              className="rc-btn-dismiss"
+              disabled={savingAction || action === "seen" || action === "dismissed"}
+              type="button"
+              onClick={() => { void handleDismiss(); }}
+            >
               No me interesa
             </button>
           </div>
         ) : null}
       </div>
-
     </article>
   );
 }
 
-function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
+function ResultsView({
+  mode,
+  results,
+  movieStates,
+  onBack,
+  onGoHome,
+  onRestart,
+  onPersistAction,
+  onUpdateMovieState,
+}) {
   const [detailMovie, setDetailMovie] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [results]);
 
   if (results.length === 0) {
     return (
@@ -545,6 +752,8 @@ function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
     );
   }
 
+  const movie = results[activeIndex];
+
   return (
     <ViewShell>
       <div className="session-results-header">
@@ -554,7 +763,7 @@ function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
           </p>
           <h1 className="session-detail-title">Tus 3 para hoy</h1>
           <p className="session-detail-copy session-detail-copy-wide">
-            Guarda, descarta o marca las que ya viste.
+            Revisa una a una, decide rápido y ve directo a la que te encaje hoy.
           </p>
         </div>
 
@@ -573,14 +782,39 @@ function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
         </div>
       </div>
 
-      <div className="rc-grid">
-        {results.map((movie) => (
-          <ResultCard
-            key={movie.id}
-            movie={movie}
-            onOpenDetail={() => setDetailMovie(movie)}
-          />
-        ))}
+      <div className="session-carousel-shell">
+        <ResultCard
+          key={movie.tmdb_id}
+          index={activeIndex}
+          movie={movie}
+          onOpenDetail={() => setDetailMovie(movie)}
+          onPersistAction={onPersistAction}
+          onUpdateMovieState={onUpdateMovieState}
+          state={movieStates[movie.tmdb_id]}
+          total={results.length}
+        />
+      </div>
+
+      <div className="session-carousel-nav">
+        <button
+          className="session-carousel-arrow"
+          disabled={activeIndex === 0}
+          type="button"
+          onClick={() => setActiveIndex((current) => Math.max(0, current - 1))}
+        >
+          <span aria-hidden="true">‹</span>
+          <span>Anterior</span>
+        </button>
+
+        <button
+          className="session-carousel-arrow"
+          disabled={activeIndex === results.length - 1}
+          type="button"
+          onClick={() => setActiveIndex((current) => Math.min(results.length - 1, current + 1))}
+        >
+          <span>Siguiente</span>
+          <span aria-hidden="true">›</span>
+        </button>
       </div>
 
       {detailMovie ? (
@@ -593,6 +827,7 @@ function ResultsView({ mode, results, onBack, onGoHome, onRestart }) {
 export default function SessionScreen({
   hasCompletedOnboarding = false,
   onGoHome,
+  onProfileChange,
   onGoToOnboarding,
   // onLogout y userEmail siguen en props para compatibilidad con routes, ya no se renderizan
   onLogout,
@@ -615,6 +850,14 @@ export default function SessionScreen({
     seguro_o_descubrir: null,
     preferencia_epoca: null,
   });
+  const [movieStates, setMovieStates] = useState({});
+
+  function updateMovieState(tmdbId, nextState) {
+    setMovieStates((current) => ({
+      ...current,
+      [tmdbId]: nextState,
+    }));
+  }
 
   function updateDraft(field, value) {
     setDraft((current) => ({
@@ -625,6 +868,7 @@ export default function SessionScreen({
 
   function resetSession() {
     setResults([]);
+    setMovieStates({});
     setView("landing");
     setSearching(false);
     setRequestError("");
@@ -652,13 +896,90 @@ export default function SessionScreen({
 
     try {
       const response = await postSessionRecommend(token, buildRequestPayload(mode));
-      setResults(Array.isArray(response.items) ? response.items : []);
+      const items = Array.isArray(response.items) ? response.items : [];
+      setResults(items);
+      setMovieStates(
+        Object.fromEntries(
+          items
+            .filter((movie) => Boolean(movie?.tmdb_id))
+            .map((movie) => [
+              movie.tmdb_id,
+              {
+                action: null,
+                showRating: false,
+                rating: null,
+                ratingDone: false,
+                actionNotice: "",
+                showCelebration: false,
+              },
+            ]),
+        ),
+      );
       setView("results");
     } catch (searchError) {
       setRequestError(searchError.message);
     } finally {
       setSearching(false);
     }
+  }
+
+  async function handlePersistAction(action, movie, currentState = {}) {
+    if (!token) {
+      throw new Error("Necesitas iniciar sesión para guardar acciones.");
+    }
+
+    if (!movie?.tmdb_id) {
+      throw new Error("Esta película no tiene un tmdb_id válido.");
+    }
+
+    if (action === "saved") {
+      if (currentState?.action === "saved") {
+        const response = await deleteWatchlistMovie(token, movie.tmdb_id);
+        onProfileChange?.(response.item);
+        return {
+          ...currentState,
+          action: null,
+          actionNotice: "Quitada de Ver luego.",
+        };
+      }
+
+      const response = await postWatchlistMovie(token, movie.tmdb_id);
+      onProfileChange?.(response.item);
+      return {
+        ...currentState,
+        action: "saved",
+        actionNotice: "Añadida a Ver luego.",
+      };
+    }
+
+    if (action === "seen" || action === "watch_now") {
+      const response = await postHistoryMovie(token, movie.tmdb_id);
+      onProfileChange?.(response.item);
+      return {
+        ...currentState,
+        action: "seen",
+        showRating: action === "seen",
+        rating: currentState?.rating ?? null,
+        ratingDone: currentState?.ratingDone ?? false,
+        showCelebration: action === "watch_now",
+        actionNotice:
+          action === "watch_now"
+            ? "Añadida al historial. Luego podrás puntuarla."
+            : "Añadida al historial. Cuando termines, ponle estrellas.",
+      };
+    }
+
+    if (action === "dismissed") {
+      const response = await postDiscardMovie(token, movie.tmdb_id);
+      onProfileChange?.(response.item);
+      return {
+        ...currentState,
+        action: "dismissed",
+        actionNotice: "No volverá a salirte en esta sesión.",
+      };
+    }
+
+    throw new Error("Acción no soportada.");
   }
 
   function goToAsk() {
@@ -763,6 +1084,9 @@ export default function SessionScreen({
       {view === "results" ? (
         <ResultsView
           mode={lastMode}
+          movieStates={movieStates}
+          onPersistAction={handlePersistAction}
+          onUpdateMovieState={updateMovieState}
           results={results}
           onBack={() => setView(lastMode)}
           onGoHome={onGoHome}

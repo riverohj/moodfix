@@ -35,11 +35,11 @@ export default function UserHome({ profile }) {
       <nav aria-label="Secciones" className="user-home-nav">
         <SecondaryLink
           description="Las que has guardado"
-          title="Favoritos"
+          title="Ver luego"
           to="/favoritos"
         />
         <SecondaryLink
-          description="Tus últimas búsquedas"
+          description="Lo que ya te has visto"
           title="Historial"
           to="/historial"
         />

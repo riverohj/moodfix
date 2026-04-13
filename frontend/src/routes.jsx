@@ -105,6 +105,7 @@ function SessionPreviewRoute({
   onGoHome,
   onGoToOnboarding,
   onLogout,
+  onProfileChange,
   sessionToken,
   userEmail,
 }) {
@@ -120,6 +121,7 @@ function SessionPreviewRoute({
       }}
       onLogout={onLogout}
       onOpenProfile={() => navigate("/mis-gustos")}
+      onProfileChange={onProfileChange}
       token={sessionToken}
       userEmail={userEmail}
     />
@@ -202,6 +204,7 @@ export default function AppRoutes({
   onLogin,
   onLogout,
   onOpenProfilePanel,
+  onProfileChange,
   onPrevious,
   onRegister,
   onSkip,
@@ -224,14 +227,15 @@ export default function AppRoutes({
 
   function renderSessionScreen() {
     return (
-      <SessionPreviewRoute
-        hasCompletedOnboarding={hasCompletedOnboarding}
-        onGoHome={() => undefined}
-        onGoToOnboarding={() => undefined}
-        onLogout={onLogout}
-        sessionToken={token}
-        userEmail={user?.email}
-      />
+        <SessionPreviewRoute
+          hasCompletedOnboarding={hasCompletedOnboarding}
+          onGoHome={() => undefined}
+          onGoToOnboarding={() => undefined}
+          onLogout={onLogout}
+          onProfileChange={onProfileChange}
+          sessionToken={token}
+          userEmail={user?.email}
+        />
     );
   }
 
@@ -302,7 +306,7 @@ export default function AppRoutes({
                 allow={isAuthenticated}
                 redirectTo="/auth"
               >
-                <Favorites />
+                <Favorites onProfileChange={onProfileChange} token={token} />
               </ProtectedRoute>
             }
             path="/favoritos"
@@ -313,7 +317,7 @@ export default function AppRoutes({
                 allow={isAuthenticated}
                 redirectTo="/auth"
               >
-                <HistoryScreen />
+                <HistoryScreen onProfileChange={onProfileChange} token={token} />
               </ProtectedRoute>
             }
             path="/historial"

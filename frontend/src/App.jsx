@@ -194,6 +194,11 @@ export default function App() {
     }));
   }
 
+  function handleProfileChange(nextProfile) {
+    setProfile(nextProfile);
+    setDraft(mergeProfileIntoDraft(nextProfile));
+  }
+
   async function saveCurrentStep(markCompleted = false) {
     if (!token || !currentStep) {
       return;
@@ -308,6 +313,7 @@ export default function App() {
       onLogin={handleLoginSubmit}
       onLogout={handleLogout}
       onOpenProfilePanel={openProfilePanel}
+      onProfileChange={handleProfileChange}
       onPrevious={() => setStepIndex((currentValue) => Math.max(currentValue - 1, 0))}
       onRegister={handleRegisterSubmit}
       onSkip={handleSkip}

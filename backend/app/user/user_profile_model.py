@@ -192,6 +192,49 @@ def agregar_pelicula_a_lista(
     return get_or_create_profile(user_id=user_id)
 
 
+def quitar_pelicula_de_lista(
+    tmdb_id: int,
+    campo: str,
+    *,
+    user_id: int,
+) -> dict[str, Any]:
+    if campo not in LIST_FIELDS:
+        raise ValueError(f"Campo no soportado para listas de peliculas: {campo}.")
+    if get_user_by_id(user_id) is None:
+        raise ValueError("Usuario no encontrado para actualizar su perfil.")
+
+    db_path = get_db_path()
+    with sqlite3.connect(db_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("BEGIN IMMEDIATE")
+
+        row = _get_profile_row(connection, user_id=user_id)
+        if row is None:
+            connection.execute(
+                "INSERT INTO user_profiles (profile_key, user_id) VALUES (?, ?)",
+                (_profile_key_for_user(user_id), user_id),
+            )
+            row = _get_profile_row(connection, user_id=user_id)
+
+        profile = _decode_row(row)
+        assert profile is not None
+
+        lista = [x for x in (profile.get(campo) or []) if x != tmdb_id]
+
+        connection.execute(
+            f"""
+            UPDATE user_profiles
+            SET {campo} = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = ?
+            """,
+            (_serialize_list(lista), user_id),
+        )
+        connection.commit()
+
+    return get_or_create_profile(user_id=user_id)
+
+
 def save_profile(
     payload: dict[str, Any],
     *,

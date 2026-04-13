@@ -19,7 +19,7 @@ export default function Navbar({
             <>
               <Link to="/inicio">Inicio</Link>
               <Link to="/sesion">Encuentra película</Link>
-              <Link to="/favoritos">Favoritos</Link>
+              <Link to="/favoritos">Ver luego</Link>
               <Link to="/historial">Historial</Link>
               <Link to="/mis-gustos">Mis gustos</Link>
               <Link to="/mi-cuenta">Mi cuenta</Link>
