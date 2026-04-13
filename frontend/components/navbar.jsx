@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import moodfixLogo from "../src/assets/platform/MoodFix_logo1.png";
+
 
 export default function Navbar({
   isAuthenticated = false,
@@ -9,7 +11,7 @@ export default function Navbar({
     <header className="site-navbar">
       <div className="site-shell site-navbar-inner">
         <Link aria-label="Ir a MoodFix" className="site-logo-placeholder site-logo-link" to={isAuthenticated ? "/inicio" : "/"}>
-          <span>MoodFix</span>
+          <img src={moodfixLogo} alt="MoodFix" className="site-logo-img" />
         </Link>
 
         <nav aria-label="Principal" className="site-nav">
