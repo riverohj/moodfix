@@ -111,6 +111,7 @@ Notas de implementacion:
 - la primera version de `Historico` ya entro en `main`; `Favoritos` sigue necesitando pulido visual
 - la pantalla de resultados de sesion ya incorpora acciones de aprendizaje ligeras (`Ver luego`, `Ya la he visto`, `No me interesa`) y microvaloracion visual en frontend
 - sigue pendiente enchufar el backend real de `sessions` y persistir esas acciones
+- la rama de backend de sesion ya contempla `no_rotundos`, pero para que el filtro duro funcione en catalogo real el catalogo local debe guardar y poblar `genre_ids`
 - la home puede mostrarse aunque el usuario tenga onboarding incompleto; el aviso y el CTA para completar perfil deben aparecer al entrar a `Sorprendeme` o `Preguntame`, no como redireccion forzada desde `/`
 
 ### EPIC 4 · Mood Radar v1

@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../css/Favorites.css";
 
-// ─────────────────────────────────────────────────────────────
 // MOCK DATA — Juan: sustituye este array por tu llamada a la API
 // Campos esperados por card: id, titulo, poster, año, genero
-// ─────────────────────────────────────────────────────────────
 const MOCK_FAVORITOS = [
   {
     id: 1,
@@ -139,16 +137,10 @@ function Favoritos() {
                 </p>
 
                 <div className="favorito-acciones">
-                  <button
-                    className="btn-ver"
-                    onClick={() => handleVerDetalles(pelicula.id)}
-                  >
+                  <button className="btn-ver" onClick={() => handleVerDetalles(pelicula.id)}>
                     Ver Detalles
                   </button>
-                  <button
-                    className="btn-eliminar"
-                    onClick={() => handleEliminar(pelicula.id)}
-                  >
+                  <button className="btn-eliminar" onClick={() => handleEliminar(pelicula.id)}>
                     Eliminar de favoritos
                   </button>
                 </div>
