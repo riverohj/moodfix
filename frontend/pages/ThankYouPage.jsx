@@ -6,25 +6,18 @@ export default function ThankYouPage() {
   return (
     <section className="thank-you-page">
       <div className="thank-you-card">
-        <p className="thank-you-badge">VALIDA TU EMAIL</p>
+        <p className="thank-you-badge">CUENTA CREADA</p>
 
         <div className="thank-you-icon-shell" aria-hidden="true">
           <div className="icon-ring-circle">
             <svg width="50" height="50" viewBox="0 0 36 36" fill="none">
-              <rect
-                x="2"
-                y="8"
-                width="32"
-                height="20"
-                rx="4"
-                stroke="#e50914"
-                strokeWidth="1.5"
-              />
+              <circle cx="18" cy="18" r="14" stroke="#e50914" strokeWidth="1.5" />
               <path
-                d="M2 14l16 9 16-9"
+                d="M11 18l5 5 9-10"
                 stroke="#e50914"
                 strokeWidth="1.5"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </div>
@@ -42,25 +35,16 @@ export default function ThankYouPage() {
           </div>
         </div>
 
-        <h1 className="thank-you-title">¡Gracias por registrarte!</h1>
+        <h1 className="thank-you-title">¡Ya eres parte de MoodFix!</h1>
 
         <p className="thank-you-copy">
-          Te hemos enviado un enlace de confirmación. Abre tu bandeja de entrada y sigue los pasos
-          para activar tu cuenta.
-        </p>
-
-        <p className="thank-you-hint">
-          Si no lo encuentras en unos minutos, revisa spam o promociones.
+          Tu cuenta está lista. Ahora cuéntanos tus gustos para que podamos afinar tus recomendaciones.
         </p>
 
         <div className="thank-you-actions">
-          <Link className="thank-you-primary" to="/inicio">
-            Volver al inicio
+          <Link className="thank-you-primary" to="/onboarding">
+            Empezar →
           </Link>
-
-          <button className="thank-you-secondary" disabled type="button">
-            No recibí el correo · Reenviar
-          </button>
         </div>
       </div>
     </section>

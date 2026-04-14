@@ -26,10 +26,10 @@ export default function UserHome({ profile }) {
 
       <Link className="user-home-cta" to="/sesion">
         <div className="user-home-cta-body">
-          <span className="user-home-cta-label">Encuentra película</span>
+          <span className="user-home-cta-label">Encuentra tu película</span>
           <span className="user-home-cta-hint">Sorpréndeme · Pregúntame</span>
         </div>
-        <span className="user-home-cta-arrow" aria-hidden>→</span>
+        <span className="user-home-cta-arrow">Empezar →</span>
       </Link>
 
       <nav aria-label="Secciones" className="user-home-nav">
