@@ -50,6 +50,11 @@ function MovieDetailModal({ movie, onClose }) {
                 alt={movie.title}
                 className="library-modal-poster"
                 src={getPosterUrl(movie, "w342")}
+                onError={(event) => {
+                  event.target.onerror = null;
+                  event.target.style.display = "none";
+                  event.target.parentNode.classList.add("library-modal-poster-shell-has-fallback");
+                }}
               />
             ) : (
               <div className="library-modal-poster-fallback" aria-hidden="true">
@@ -190,8 +195,12 @@ function Favorites({ onProfileChange, token }) {
       <header className="favorites-screen-header">
         <div>
           <div className="favoritos-title-row">
-            <h1 className="favoritos-titulo">Tu Ver luego</h1>
-            <span className="favoritos-title-heart" aria-hidden="true">🍿</span>
+            <h1 className="favoritos-titulo">Tu Colección MoodFix</h1>
+            <span className="favoritos-title-heart" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </span>
           </div>
           {watchlist.length > 0 ? (
             <p className="favoritos-subtitulo">{watchlistCountLabel}</p>
@@ -212,7 +221,7 @@ function Favorites({ onProfileChange, token }) {
       {loading ? (
         <section className="favorites-empty-card">
           <div className="favorites-empty-icon" aria-hidden="true">⏳</div>
-          <h2>Cargando tu Ver luego...</h2>
+          <h2>Cargando tu colección...</h2>
           <p>Estamos trayendo tus películas guardadas desde tu perfil.</p>
         </section>
       ) : watchlist.length === 0 ? (
@@ -222,9 +231,14 @@ function Favorites({ onProfileChange, token }) {
           <p>
             Cuando en sesión pulses <strong>Ver luego</strong>, tus pelis aparecerán aquí para recuperarlas rápido.
           </p>
+          <div className="favorites-empty-actions">
+            <Link className="primary-button" to="/sesion">
+              Encontrar película
+            </Link>
+          </div>
         </section>
       ) : (
-        <section className="favorites-grid" aria-label="Películas guardadas para ver luego">
+        <section className="favorites-grid" aria-label="Películas favoritas">
           {watchlist.map((movie) => (
             <article key={movie.tmdb_id} className="favorito-card">
               <div className="favorito-poster-wrapper">
@@ -242,7 +256,19 @@ function Favorites({ onProfileChange, token }) {
                 ) : (
                   <div className="favorito-poster-fallback" aria-hidden="true" />
                 )}
-                <div className="favorito-card-badge" aria-hidden="true">❤️</div>
+                <button
+                  className="favorito-card-badge"
+                  type="button"
+                  aria-label="Eliminar de favoritos"
+                  disabled={removingId === movie.tmdb_id}
+                  onClick={() => {
+                    void handleRemove(movie);
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </button>
               </div>
 
               <div className="favorito-card-body">
@@ -259,7 +285,7 @@ function Favorites({ onProfileChange, token }) {
                     type="button"
                     onClick={() => setDetailMovie(movie)}
                   >
-                    Ver detalles
+                    Ver Detalles
                   </button>
                   <button
                     className="btn-eliminar"
@@ -269,7 +295,7 @@ function Favorites({ onProfileChange, token }) {
                       void handleRemove(movie);
                     }}
                   >
-                    {removingId === movie.tmdb_id ? "Quitando..." : "Quitar de Ver luego"}
+                    {removingId === movie.tmdb_id ? "Eliminando..." : "Eliminar de favoritos"}
                   </button>
                 </div>
               </div>

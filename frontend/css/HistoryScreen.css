@@ -7,6 +7,7 @@
   --history-accent: #e50914;
   --history-accent-hover: #c4060f;
   display: block;
+  padding: 2.5rem 2rem 4rem;
   background-color: var(--history-bg-main);
   font-family: 'Inter', -apple-system, sans-serif;
   color: var(--history-text);
@@ -51,6 +52,23 @@
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;
+}
+
+.history-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.history-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  line-height: 1;
+  transform: translate(-2px, -6px);
+  font-size: 1.45rem;
 }
 
 .history-screen-description,
@@ -98,14 +116,14 @@
 
 .history-poster-wrapper {
   position: relative;
-  width: calc(100% - 1.2rem);
+  width: calc(100% - 0.6rem);
   margin-left: auto;
   margin-right: auto;
-  margin-top: 0.6rem;
+  margin-top: 0.4rem;
   margin-bottom: 0.6rem;
-  aspect-ratio: 2 / 2.5;
   overflow: hidden;
   background-color: var(--history-surface);
+  border-radius: 8px;
 }
 
 .history-poster,
@@ -117,7 +135,7 @@
 
 .history-poster {
   object-fit: cover;
-  border-radius: 8px;
+  height: auto;
 }
 
 .history-poster-fallback {
@@ -131,6 +149,16 @@
   content: '🎬';
 }
 
+.history-poster-has-fallback::after {
+  content: '🎬';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
 .history-card-badge {
   position: absolute;
   top: 8px;
@@ -138,15 +166,37 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  color: var(--history-muted);
-  background: rgba(0, 0, 0, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  font-size: 12px;
+  width: 30px;
+  height: 30px;
+  color: #f2d7db;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
   line-height: 1;
   padding: 0;
+  appearance: none;
+}
+
+.history-card-badge:hover:not(:disabled) {
+  background: rgba(229, 9, 20, 0.3);
+  transform: scale(1.12);
+}
+
+.history-card-badge svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
+  fill: none;
+  transition: transform 0.15s ease;
+}
+
+.history-card-badge:hover:not(:disabled) svg {
+  transform: scale(1.12);
 }
 
 .history-card-body {
@@ -215,7 +265,7 @@
 
 .history-card-actions {
   display: grid;
-  gap: 8px;
+  gap: 7px;
   margin-top: auto;
   margin-bottom: 0.6rem;
 }
@@ -249,6 +299,11 @@
   font-size: 1.5rem;
   font-weight: 600;
   line-height: 1.05;
+}
+
+.history-empty-card p {
+  max-width: 420px;
+  text-align: center;
 }
 
 .history-empty-actions {
@@ -320,6 +375,16 @@
 }
 
 .library-modal-poster-fallback {
+  display: grid;
+  place-items: center;
+  font-size: 4rem;
+  color: rgba(245, 245, 245, 0.72);
+}
+
+.library-modal-poster-shell-has-fallback::after {
+  content: '🎬';
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
   font-size: 4rem;
@@ -427,6 +492,10 @@
   .history-screen-header {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+
+  .history-screen {
+    padding: 2rem 1.25rem 3rem;
   }
 
   .history-grid {

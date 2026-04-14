@@ -16,6 +16,113 @@ import {
   getPrimaryGenreLabel,
 } from "../src/lib/movieMetadata";
 
+const PREVIEW_HISTORY_ITEMS = [
+  {
+    tmdb_id: 603,
+    title: "The Matrix",
+    poster_path: "/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+    runtime: 136,
+    release_year: 1999,
+    original_language: "en",
+    overview: "Un programador descubre la verdadera naturaleza de su realidad y su papel en la guerra contra sus controladores.",
+    popularity: 88.4,
+    vote_count: 26000,
+    genre_ids: [28, 878],
+    providers: [],
+  },
+  {
+    tmdb_id: 680,
+    title: "Pulp Fiction",
+    poster_path: "/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg",
+    runtime: 154,
+    release_year: 1994,
+    original_language: "en",
+    overview: "Historias cruzadas de crimen, redencion y caos en Los Angeles contadas con el sello de Tarantino.",
+    popularity: 74.2,
+    vote_count: 29500,
+    genre_ids: [53, 80],
+    providers: [],
+  },
+  {
+    tmdb_id: 13,
+    title: "Forrest Gump",
+    poster_path: "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+    runtime: 142,
+    release_year: 1994,
+    original_language: "en",
+    overview: "La vida de Forrest atraviesa varias decadas de la historia reciente de Estados Unidos de forma inesperada.",
+    popularity: 69.1,
+    vote_count: 28000,
+    genre_ids: [35, 18, 10749],
+    providers: [],
+  },
+  {
+    tmdb_id: 155,
+    title: "The Dark Knight",
+    poster_path: "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    runtime: 152,
+    release_year: 2008,
+    original_language: "en",
+    overview: "Batman se enfrenta al Joker mientras Gotham cae en una espiral de caos moral y violencia.",
+    popularity: 91.3,
+    vote_count: 33000,
+    genre_ids: [18, 28, 80],
+    providers: [],
+  },
+  {
+    tmdb_id: 27205,
+    title: "Inception",
+    poster_path: "/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
+    runtime: 148,
+    release_year: 2010,
+    original_language: "en",
+    overview: "Un ladron especializado en extraer secretos de los suenos recibe el encargo opuesto: implantar una idea.",
+    popularity: 83.9,
+    vote_count: 36000,
+    genre_ids: [28, 878, 12],
+    providers: [],
+  },
+  {
+    tmdb_id: 238,
+    title: "The Godfather",
+    poster_path: "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+    runtime: 175,
+    release_year: 1972,
+    original_language: "en",
+    overview: "La saga de la familia Corleone retrata poder, lealtad y violencia dentro del crimen organizado.",
+    popularity: 67.8,
+    vote_count: 21000,
+    genre_ids: [18, 80],
+    providers: [],
+  },
+  {
+    tmdb_id: 244786,
+    title: "Whiplash",
+    poster_path: "/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+    runtime: 107,
+    release_year: 2014,
+    original_language: "en",
+    overview: "Un joven baterista entra en una dinamica extrema con su exigente profesor de conservatorio.",
+    popularity: 58.1,
+    vote_count: 16000,
+    genre_ids: [18, 10402],
+    providers: [],
+  },
+  {
+    tmdb_id: 496243,
+    title: "Parasite",
+    poster_path: "/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
+    runtime: 133,
+    release_year: 2019,
+    original_language: "ko",
+    overview: "La relacion entre dos familias de clases opuestas deriva en una cadena de tensiones y giros oscuros.",
+    popularity: 57.4,
+    vote_count: 19000,
+    genre_ids: [35, 53, 18],
+    providers: [],
+  },
+];
+
 function HistoryDetailModal({ movie, onClose }) {
   useEffect(() => {
     function handleKeyDown(event) {
@@ -50,6 +157,11 @@ function HistoryDetailModal({ movie, onClose }) {
                 alt={movie.title}
                 className="library-modal-poster"
                 src={getPosterUrl(movie, "w342")}
+                onError={(event) => {
+                  event.target.onerror = null;
+                  event.target.style.display = "none";
+                  event.target.parentNode.classList.add("library-modal-poster-shell-has-fallback");
+                }}
               />
             ) : (
               <div className="library-modal-poster-fallback" aria-hidden="true">
@@ -130,7 +242,7 @@ export default function HistoryScreen({ onProfileChange, token }) {
 
     async function loadHistory() {
       if (!token) {
-        setHistoryItems([]);
+        setHistoryItems(PREVIEW_HISTORY_ITEMS);
         setLoading(false);
         return;
       }
@@ -161,6 +273,8 @@ export default function HistoryScreen({ onProfileChange, token }) {
     };
   }, [token]);
 
+  const historyCountLabel = `${historyItems.length} película${historyItems.length !== 1 ? "s" : ""} vista${historyItems.length !== 1 ? "s" : ""}`;
+
   async function handleRemove(movie) {
     if (!token) {
       return;
@@ -187,13 +301,17 @@ export default function HistoryScreen({ onProfileChange, token }) {
     <section className="history-screen">
       <header className="history-screen-header">
         <div>
-          <h1 className="history-section-title">
-            Tu historial de visualización
-          </h1>
-          <p className="history-screen-description">
-            Aquí podrás revisar lo último que viste en MoodFix y retomar recomendaciones cuando te
-            apetezca volver sobre ellas.
-          </p>
+          <div className="history-title-row">
+            <h1 className="history-section-title">Tu historial de visualización</h1>
+            <span className="history-title-icon" aria-hidden="true">🎬</span>
+          </div>
+          {historyItems.length > 0 ? (
+            <p className="history-screen-description">{historyCountLabel}</p>
+          ) : (
+            <p className="history-screen-description">
+              Aquí reuniremos las películas que ya has marcado como vistas.
+            </p>
+          )}
         </div>
 
         <Link className="ghost-button" to="/inicio">
@@ -205,7 +323,7 @@ export default function HistoryScreen({ onProfileChange, token }) {
 
       {loading ? (
         <section className="history-empty-card">
-          <div className="history-empty-icon">⏳</div>
+          <div className="history-empty-icon" aria-hidden="true">⏳</div>
           <h2>Cargando tu historial...</h2>
           <p>Estamos recuperando las películas que ya has marcado como vistas.</p>
         </section>
@@ -215,13 +333,33 @@ export default function HistoryScreen({ onProfileChange, token }) {
             <article className="history-card" key={item.tmdb_id}>
               <div className="history-poster-wrapper">
                 {item.poster_path ? (
-                  <img alt={item.title} className="history-poster" src={getPosterUrl(item)} />
+                  <img
+                    alt={item.title}
+                    className="history-poster"
+                    src={getPosterUrl(item)}
+                    onError={(event) => {
+                      event.target.onerror = null;
+                      event.target.style.display = "none";
+                      event.target.parentNode.classList.add("history-poster-has-fallback");
+                    }}
+                  />
                 ) : (
                   <div className="history-poster-fallback" aria-hidden="true" />
                 )}
-                <div className="history-card-badge" aria-hidden="true">
-                  🎬
-                </div>
+                <button
+                  className="history-card-badge"
+                  type="button"
+                  aria-label="Quitar del historial"
+                  disabled={removingId === item.tmdb_id}
+                  onClick={() => {
+                    void handleRemove(item);
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M7 7l10 10" />
+                    <path d="M17 7 7 17" />
+                  </svg>
+                </button>
               </div>
 
               <div className="history-card-body">
@@ -259,7 +397,7 @@ export default function HistoryScreen({ onProfileChange, token }) {
         </section>
       ) : (
         <section className="history-empty-card">
-          <div className="history-empty-icon">🕘</div>
+          <div className="history-empty-icon" aria-hidden="true">🕘</div>
           <h2>Aún no hay recorrido guardado</h2>
           <p>
             Cuando marques una peli como <strong>Ya la he visto</strong> o <strong>¡Quiero esta!</strong>,
