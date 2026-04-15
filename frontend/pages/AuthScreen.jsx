@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import "../css/AuthScreen.css";
 
@@ -52,6 +52,43 @@ function MailIcon() {
   );
 }
 
+function TermsModal({ onClose }) {
+  useEffect(() => {
+    function handleKey(e) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
+  return (
+    <div className="terms-backdrop" onClick={onClose}>
+      <div className="terms-modal" role="dialog" aria-modal aria-label="Términos y Condiciones" onClick={(e) => e.stopPropagation()}>
+        <div className="terms-modal-header">
+          <h2 className="terms-modal-title">Términos y Condiciones</h2>
+          <button aria-label="Cerrar" className="terms-modal-close" type="button" onClick={onClose}>✕</button>
+        </div>
+        <div className="terms-modal-body">
+          <h3>1. Qué es MoodFix</h3>
+          <p>MoodFix es un proyecto académico desarrollado por estudiantes. Su objetivo es ayudarte a encontrar películas según tu estado de ánimo.</p>
+
+          <h3>2. Tus datos</h3>
+          <p>Solo recopilamos tu email y tus preferencias de películas. No compartimos ni vendemos tus datos con terceros. Tus datos se usan únicamente para personalizar tus recomendaciones.</p>
+
+          <h3>3. El servicio</h3>
+          <p>MoodFix usa un catálogo local basado en datos de TMDb. No garantizamos disponibilidad en tiempo real en las plataformas. El servicio puede interrumpirse sin previo aviso al ser un proyecto en desarrollo.</p>
+
+          <h3>4. Tu cuenta</h3>
+          <p>Puedes dejar de usar el servicio cuando quieras. Para cualquier duda contacta con el equipo.</p>
+        </div>
+        <div className="terms-modal-footer">
+          <button className="auth-button" type="button" onClick={onClose}>Entendido</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AuthScreen({
   loginError,
   loginMessage,
@@ -72,6 +109,7 @@ export default function AuthScreen({
     acceptedTerms: false,
   });
   const [localError, setLocalError] = useState("");
+  const [showTerms, setShowTerms] = useState(false);
 
   const visibleSignupError = localError || signupError;
   const signupPasswordsMatch = useMemo(
@@ -249,7 +287,7 @@ export default function AuthScreen({
               />
               <span>
                 Acepto los{" "}
-                <button className="auth-link-button" type="button">
+                <button className="auth-link-button" type="button" onClick={() => setShowTerms(true)}>
                   Términos y Condiciones
                 </button>
               </span>
@@ -261,6 +299,8 @@ export default function AuthScreen({
           </form>
         </section>
       </div>
+
+      {showTerms ? <TermsModal onClose={() => setShowTerms(false)} /> : null}
     </section>
   );
 }

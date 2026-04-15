@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
+import AboutScreen from "../pages/AboutScreen";
 import AccountScreen from "../pages/AccountScreen";
 import AuthScreen from "../pages/AuthScreen";
 import Favorites from "../pages/Favorites";
@@ -71,7 +72,7 @@ function LayoutRoute({ isAuthenticated, onLogout }) {
       onLogin={() => navigate("/auth")}
       onLogout={async () => {
         await onLogout();
-        navigate("/");
+        window.location.replace("/");
       }}
     />
   );
@@ -328,6 +329,7 @@ export default function AppRoutes({
           />
           <Route element={<Navigate replace to="/sesion" />} path="/sesion-preview" />
           <Route element={<Navigate replace to="/mis-gustos" />} path="/perfil" />
+          <Route element={<AboutScreen />} path="/sobre-nosotros" />
         </Route>
 
         <Route

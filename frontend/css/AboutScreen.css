@@ -1,0 +1,173 @@
+/* ── About page ─────────────────────────────────────────── */
+.about-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+/* Header */
+.about-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.about-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #e50914;
+  background: rgba(229, 9, 20, 0.1);
+  border: 1px solid rgba(229, 9, 20, 0.25);
+  border-radius: 4px;
+  padding: 0.25rem 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.about-title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #f0f0f0;
+  margin: 0 0 1rem;
+}
+
+.about-subtitle {
+  font-size: 1rem;
+  color: #999;
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Grid */
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+/* Card */
+.about-card {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.about-card:hover {
+  transform: translateY(-3px);
+  border-color: #333;
+}
+
+/* Avatar */
+.about-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.1rem;
+  flex-shrink: 0;
+}
+
+.about-avatar-initials {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Card body */
+.about-card-body {
+  width: 100%;
+}
+
+.about-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin: 0 0 0.2rem;
+}
+
+.about-role {
+  font-size: 0.78rem;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.9rem;
+}
+
+/* Tags */
+.about-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.about-tag-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  color: #aaa;
+  letter-spacing: 0.04em;
+}
+
+/* Bio */
+.about-bio {
+  font-size: 0.88rem;
+  color: #888;
+  line-height: 1.7;
+  margin: 0;
+  text-align: left;
+}
+
+/* Footer note */
+.about-footer-note {
+  margin-top: 4rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.about-footer-note strong {
+  color: #888;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .about-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .about-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .about-title {
+    font-size: 2rem;
+  }
+
+  .about-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .about-bio {
+    font-size: 0.82rem;
+  }
+}
