@@ -137,3 +137,36 @@
     font-size: 1rem;
   }
 }
+
+/* ── Animaciones de entrada al scroll ───────────────────── */
+
+.reveal {
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+
+.reveal.reveal-visible {
+  opacity: 1;
+}
+
+/* Elementos hijos con stagger — se animan cuando el padre es visible */
+.reveal-visible .reveal-child {
+  animation: fade-up 0.55s ease both;
+}
+
+.reveal-visible .reveal-delay-1 { animation-delay: 0.1s; }
+.reveal-visible .reveal-delay-2 { animation-delay: 0.22s; }
+.reveal-visible .reveal-delay-3 { animation-delay: 0.34s; }
+.reveal-visible .reveal-delay-4 { animation-delay: 0.46s; }
+
+/* Respeta preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .reveal-visible .reveal-child {
+    animation: none;
+  }
+}
