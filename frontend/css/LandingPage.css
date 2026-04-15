@@ -16,7 +16,7 @@
     radial-gradient(ellipse 80% 55% at 50% -5%, rgba(229, 9, 20, 0.22) 0%, transparent 65%),
     radial-gradient(ellipse 60% 40% at 50% 110%, rgba(229, 9, 20, 0.10) 0%, transparent 60%),
     radial-gradient(ellipse 140% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.75) 100%);
-  background-attachment: fixed;
+  background-attachment: scroll;
 }
 
 /* Grano de película — textura de cine sobre todo el fondo */

@@ -30,7 +30,7 @@ export default function Navbar({
             <>
               <NavLink className={navLinkClass} to="/inicio">Inicio</NavLink>
               <NavLink className={navLinkClass} to="/sesion">Encuentra película</NavLink>
-              <NavLink className={navLinkClass} to="/favoritos">Favoritos</NavLink>
+              <NavLink className={navLinkClass} to="/favoritos">Ver luego</NavLink>
               <NavLink className={navLinkClass} to="/historial">Historial</NavLink>
               <span className="site-nav-divider" aria-hidden="true" />
               <NavLink className={navLinkClass} to="/mis-gustos">Mis gustos</NavLink>
@@ -85,7 +85,7 @@ export default function Navbar({
         <nav aria-label="Menú móvil" className="site-nav-drawer">
           <NavLink className={navLinkClass} to="/inicio" onClick={closeMenu}>Inicio</NavLink>
           <NavLink className={navLinkClass} to="/sesion" onClick={closeMenu}>Encuentra película</NavLink>
-          <NavLink className={navLinkClass} to="/favoritos" onClick={closeMenu}>Favoritos</NavLink>
+          <NavLink className={navLinkClass} to="/favoritos" onClick={closeMenu}>Ver luego</NavLink>
           <NavLink className={navLinkClass} to="/historial" onClick={closeMenu}>Historial</NavLink>
           <NavLink className={navLinkClass} to="/mis-gustos" onClick={closeMenu}>Mis gustos</NavLink>
           <NavLink className={navLinkClass} to="/mi-cuenta" onClick={closeMenu}>Mi cuenta</NavLink>

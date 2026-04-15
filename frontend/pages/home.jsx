@@ -1,5 +1,19 @@
 import "../css/home.css";
 import "../css/LandingPage.css";
+import { useInView } from "../src/hooks/useInView";
+
+function AnimatedSection({ className, children, delay = 0, ...props }) {
+  const [ref, isVisible] = useInView();
+  return (
+    <section
+      ref={ref}
+      className={`${className} reveal${isVisible ? " reveal-visible" : ""}${delay ? ` reveal-delay-${delay}` : ""}`}
+      {...props}
+    >
+      {children}
+    </section>
+  );
+}
 
 export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAction }) {
 
@@ -24,7 +38,7 @@ export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAct
       </section>
 
       {/* 2. HERO SLOGAN */}
-      <section className="landing-hero-slogan">
+      <AnimatedSection className="landing-hero-slogan">
         <div className="top-recomendador">
           <span className="recomendador-line"></span>
           <span>TU RECOMENDADOR DE PELÍCULAS</span>
@@ -39,7 +53,7 @@ export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAct
         <p className="slogan-description">
           El problema no es Netflix, es la decisión. MoodFix te da la película perfecta en 10 segundos basándose en cómo te sientes y cómo eres.
         </p>
-        
+
         <div className="hero-vertical-cta-group">
           <button className="cta-scroll-btn-styled" onClick={scrollToNext}>Ver cómo funciona ↓</button>
           <div className="social-proof-row-fixed">
@@ -52,30 +66,30 @@ export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAct
             <p className="proof-text-label"><span>+2.400 personas</span> ya decidieron esta semana</p>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* 3. STATS */}
-      <section id="stats-section" className="landing-stats-row">
-        <div className="stat-box-unit">
+      <AnimatedSection id="stats-section" className="landing-stats-row">
+        <div className="stat-box-unit reveal-child reveal-delay-1">
           <span className="stat-number-big">+70%</span>
           <p>😩 del tiempo delante de Netflix para terminar sin elegir nada.</p>
         </div>
-        <div className="stat-box-unit">
+        <div className="stat-box-unit reveal-child reveal-delay-2">
           <span className="stat-number-big">23 min</span>
           <p>⏰ de media perdidos buscando qué ver cada noche.</p>
         </div>
-        <div className="stat-box-unit">
+        <div className="stat-box-unit reveal-child reveal-delay-3">
           <span className="stat-number-big">10 seg</span>
           <p>⚡ es lo que tarda MoodFix en darte la respuesta.</p>
         </div>
-        <div className="stat-box-unit">
+        <div className="stat-box-unit reveal-child reveal-delay-4">
           <span className="stat-number-big">83%</span>
           <p>🍕 de pizzas y hamburguesas tristes se enfrían cada viernes</p>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* 4. EL PROBLEMA */}
-      <section className="landing-problem-split">
+      <AnimatedSection className="landing-problem-split">
         <div className="problem-text-side">
           <span className="tag-red-label">EL PROBLEMA</span>
           <h2>El problema no es el contenido.</h2>
@@ -92,40 +106,39 @@ export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAct
             </div>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* 5. LA SOLUCIÓN */}
-      <section className="landing-solution-section">
+      <AnimatedSection className="landing-solution-section">
         <span className="tag-red-label">LA SOLUCIÓN</span>
         <div className="sol-header-area">
           <h2>No es buscar.<br />Es que aciertes sin buscar.</h2>
           <p>Sin listas interminables. Sin filtros. Sin debate. Tres pasos y listo.</p>
         </div>
         <div className="sol-cards-grid">
-          <div className="sol-card-item">
+          <div className="sol-card-item reveal-child reveal-delay-1">
             <div className="sol-card-emoji">😌</div>
             <div className="sol-card-number">1</div>
             <h4>Dices cómo te sientes</h4>
             <p>Relajado, con ganas de reír, algo intenso...</p>
           </div>
-          <div className="sol-card-item">
+          <div className="sol-card-item reveal-child reveal-delay-2">
             <div className="sol-card-emoji">⚡</div>
             <div className="sol-card-number">2</div>
             <h4>MoodFix decide</h4>
             <p>En segundos. Sin scroll. Sin debate por el mando.</p>
           </div>
-          <div className="sol-card-item">
+          <div className="sol-card-item reveal-child reveal-delay-3">
             <div className="sol-card-emoji">🍿</div>
             <div className="sol-card-number">3</div>
             <h4>Tú disfrutas</h4>
             <p>Con la hamburguesa todavía caliente. ¡Atracón!</p>
           </div>
         </div>
-      </section>
-
+      </AnimatedSection>
 
       {/* 7. EXPERIENCIA GUIADA */}
-      <section className="guided-exp-section">
+      <AnimatedSection className="guided-exp-section">
         <div className="guided-text-container">
           <div className="guided-gray-titles">
             <p>No es un catálogo.</p>
@@ -139,30 +152,30 @@ export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAct
             te devolvemos lo más importante: <strong>disfrutar</strong>.
           </p>
         </div>
-      </section>
+      </AnimatedSection>
 
-      {/* 8. MEMORIA (Bordes unificados) */}
-      <section className="mem-memory-section">
+      {/* 8. MEMORIA */}
+      <AnimatedSection className="mem-memory-section">
         <span className="mem-tag-label">Y ADEMÁS</span>
         <h2 className="mem-main-title">Memoria cinematográfica externa.</h2>
         <p className="mem-main-subtitle">Para que no repitas los mismos errores (de película).</p>
-        
+
         <div className="mem-cards-container">
-          <div className="mem-card mem-card-red-border">
+          <div className="mem-card mem-card-red-border reveal-child reveal-delay-1">
             <div className="mem-icon-box">⭐</div>
             <h4>Favoritas</h4>
             <p>Guarda las películas que realmente te gustaron. Sin perderlas nunca.</p>
           </div>
-          <div className="mem-card mem-card-red-border">
+          <div className="mem-card mem-card-red-border reveal-child reveal-delay-2">
             <div className="mem-icon-box">📜</div>
             <h4>Historial</h4>
             <p>Todo lo que has visto, guardado. Para no repetirte ni olvidarte de nada.</p>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
-{/* --- ÚLTIMA SESIÓN: CIERRE FINAL (image_1210c3.png) --- */}
-      <section className="final-cta-section">
+      {/* CIERRE FINAL */}
+      <AnimatedSection className="final-cta-section">
         <div className="final-cta-content">
           <div className="final-cta-titles">
             <p className="final-title-dark">Esto no va de películas.</p>
@@ -188,7 +201,7 @@ export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAct
             <span>Cancela cuando quieras</span>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
     </div>
   );
 }
