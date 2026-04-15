@@ -1,88 +1,207 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import "../css/HistoryScreen.css";
+import {
+  deleteHistoryMovie,
+  getHistoryMovies,
+} from "../src/lib/api";
+import {
+  formatLanguageLabel,
+  formatPopularity,
+  formatVoteCount,
+  getFlatrateProviders,
+  getGenreLabels,
+  getPosterUrl,
+  getPrimaryGenreLabel,
+} from "../src/lib/movieMetadata";
 
-const MOCK_HISTORY = [
-  {
-    id: "history-1",
-    title: "Dune: Parte Dos",
-    genre: "Ciencia ficción",
-    viewedAt: "Visto el 15/10/2023",
-    poster:
-      "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "history-2",
-    title: "Perfect Days",
-    genre: "Drama",
-    viewedAt: "Visto el 03/02/2024",
-    poster:
-      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "history-3",
-    title: "Spider-Man: Across the Spider-Verse",
-    genre: "Animación",
-    viewedAt: "Visto el 27/02/2024",
-    poster:
-      "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "history-4",
-    title: "Past Lives",
-    genre: "Romance",
-    viewedAt: "Visto el 10/03/2024",
-    poster:
-      "https://images.unsplash.com/photo-1513106580091-1d82408b8cd6?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "history-5",
-    title: "The Batman",
-    genre: "Acción",
-    viewedAt: "Visto el 21/03/2024",
-    poster:
-      "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "history-6",
-    title: "Aftersun",
-    genre: "Drama",
-    viewedAt: "Visto el 05/04/2024",
-    poster:
-      "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "history-7",
-    title: "Everything Everywhere All at Once",
-    genre: "Aventura",
-    viewedAt: "Visto el 19/04/2024",
-    poster:
-      "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "history-8",
-    title: "La sociedad de la nieve",
-    genre: "Supervivencia",
-    viewedAt: "Visto el 01/05/2024",
-    poster:
-      "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?auto=format&fit=crop&w=800&q=80",
-  },
-];
+function HistoryDetailModal({ movie, onClose }) {
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
 
-export default function HistoryScreen() {
-  const historyItems = MOCK_HISTORY;
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  const providers = getFlatrateProviders(movie);
+  const genreLabels = getGenreLabels(movie);
+
+  return (
+    <div className="library-modal-backdrop" onClick={onClose}>
+      <div
+        aria-label={movie.title}
+        aria-modal="true"
+        className="library-modal"
+        role="dialog"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className="library-modal-close" type="button" onClick={onClose}>
+          ✕
+        </button>
+        <div className="library-modal-layout">
+          <div className="library-modal-poster-shell">
+            {movie.poster_path ? (
+              <img
+                alt={movie.title}
+                className="library-modal-poster"
+                src={getPosterUrl(movie, "w342")}
+                onError={(event) => {
+                  event.target.onerror = null;
+                  event.target.style.display = "none";
+                  event.target.parentNode.classList.add("library-modal-poster-shell-has-fallback");
+                }}
+              />
+            ) : (
+              <div className="library-modal-poster-fallback" aria-hidden="true">
+                {movie.title.slice(0, 1)}
+              </div>
+            )}
+          </div>
+
+          <div className="library-modal-body">
+            <p className="library-modal-kicker">Historial</p>
+            <h2 className="library-modal-title">{movie.title}</h2>
+            <div className="library-modal-meta">
+              <span>{movie.release_year ?? "Sin año"}</span>
+              <span>·</span>
+              <span>{movie.runtime ? `${movie.runtime} min` : "Duración sin dato"}</span>
+              <span>·</span>
+              <span>{getPrimaryGenreLabel(movie)}</span>
+            </div>
+
+            <div className="library-modal-facts">
+              <div className="library-modal-fact">
+                <span className="library-modal-fact-label">Idioma</span>
+                <span className="library-modal-fact-value">{formatLanguageLabel(movie.original_language)}</span>
+              </div>
+              <div className="library-modal-fact">
+                <span className="library-modal-fact-label">Popularidad</span>
+                <span className="library-modal-fact-value">{formatPopularity(movie.popularity)}</span>
+              </div>
+              <div className="library-modal-fact">
+                <span className="library-modal-fact-label">Votos</span>
+                <span className="library-modal-fact-value">{formatVoteCount(movie.vote_count)}</span>
+              </div>
+            </div>
+
+            <div className="library-modal-block">
+              <p className="library-modal-block-title">Géneros</p>
+              <div className="library-provider-list">
+                {genreLabels.map((genreLabel) => (
+                  <span key={`${movie.tmdb_id}-${genreLabel}`} className="library-provider-pill">
+                    {genreLabel}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <p className="library-modal-overview">
+              {movie.overview || "Todavía no tenemos una sinopsis ampliada para esta película."}
+            </p>
+
+            {providers.length > 0 ? (
+              <div className="library-modal-block">
+                <p className="library-modal-block-title">Disponible en</p>
+                <div className="library-provider-list">
+                  {providers.map((provider) => (
+                    <span key={`${movie.tmdb_id}-${provider.provider_id}`} className="library-provider-pill">
+                      {provider.provider_name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function HistoryScreen({ onProfileChange, token }) {
+  const [historyItems, setHistoryItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [detailMovie, setDetailMovie] = useState(null);
+  const [removingId, setRemovingId] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadHistory() {
+      if (!token) {
+        setHistoryItems([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await getHistoryMovies(token);
+        if (!cancelled) {
+          setHistoryItems(Array.isArray(response.items) ? response.items : []);
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError.message || "No pudimos cargar tu historial.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const historyCountLabel = `${historyItems.length} película${historyItems.length !== 1 ? "s" : ""} vista${historyItems.length !== 1 ? "s" : ""}`;
+
+  async function handleRemove(movie) {
+    if (!token) {
+      return;
+    }
+
+    setRemovingId(movie.tmdb_id);
+    setError("");
+
+    try {
+      const response = await deleteHistoryMovie(token, movie.tmdb_id);
+      setHistoryItems((current) => current.filter((item) => item.tmdb_id !== movie.tmdb_id));
+      onProfileChange?.(response.item);
+      if (detailMovie?.tmdb_id === movie.tmdb_id) {
+        setDetailMovie(null);
+      }
+    } catch (removeError) {
+      setError(removeError.message || "No pudimos quitar esta película del historial.");
+    } finally {
+      setRemovingId(null);
+    }
+  }
 
   return (
     <section className="history-screen">
       <header className="history-screen-header">
         <div>
-          <h1 className="history-section-title">
-            Tu historial de visualización
-          </h1>
-          <p className="history-screen-description">
-            Aquí podrás revisar lo último que viste en MoodFix y retomar recomendaciones cuando te
-            apetezca volver sobre ellas.
-          </p>
+          <h1 className="history-section-title">Tu historial de visualización</h1>
+          {historyItems.length > 0 ? (
+            <p className="history-screen-description">{historyCountLabel}</p>
+          ) : (
+            <p className="history-screen-description">
+              Aquí reuniremos las películas que ya has marcado como vistas.
+            </p>
+          )}
         </div>
 
         <Link className="ghost-button" to="/inicio">
@@ -90,45 +209,86 @@ export default function HistoryScreen() {
         </Link>
       </header>
 
-      {historyItems.length > 0 ? (
+      {error ? <p className="library-feedback library-feedback-error">{error}</p> : null}
+
+      {loading ? (
+        <section className="history-empty-card">
+          <div className="history-empty-icon" aria-hidden="true">⏳</div>
+          <h2>Cargando tu historial...</h2>
+          <p>Estamos recuperando las películas que ya has marcado como vistas.</p>
+        </section>
+      ) : historyItems.length > 0 ? (
         <section className="history-grid" aria-label="Historial de visualización">
           {historyItems.map((item) => (
-            <article className="history-card" key={item.id}>
+            <article className="history-card" key={item.tmdb_id}>
               <div className="history-poster-wrapper">
-                {item.poster ? (
-                  <img alt={item.title} className="history-poster" src={item.poster} />
+                {item.poster_path ? (
+                  <img
+                    alt={item.title}
+                    className="history-poster"
+                    src={getPosterUrl(item)}
+                    onError={(event) => {
+                      event.target.onerror = null;
+                      event.target.style.display = "none";
+                      event.target.parentNode.classList.add("history-poster-has-fallback");
+                    }}
+                  />
                 ) : (
                   <div className="history-poster-fallback" aria-hidden="true" />
                 )}
-                <div className="history-card-badge" aria-hidden="true">
-                  🎬
-                </div>
+                <button
+                  className="history-card-badge"
+                  type="button"
+                  aria-label="Quitar del historial"
+                  disabled={removingId === item.tmdb_id}
+                  onClick={() => {
+                    void handleRemove(item);
+                  }}
+                >
+                  ✕
+                </button>
               </div>
 
               <div className="history-card-body">
                 <h2 className="history-card-title">{item.title}</h2>
-                <p className="history-card-genre">{item.genre}</p>
+                <p className="history-card-genre">{getPrimaryGenreLabel(item)}</p>
                 <p className="history-card-date">
                   <span className="history-date-icon" aria-hidden="true">
                     📅
                   </span>
-                  {item.viewedAt}
+                  {item.release_year ?? "Sin año"}
                 </p>
 
-                <button className="history-card-button" type="button">
-                  Ver detalles
-                </button>
+                <div className="history-card-actions">
+                  <button
+                    className="history-card-button"
+                    type="button"
+                    onClick={() => setDetailMovie(item)}
+                  >
+                    Ver detalles
+                  </button>
+                  <button
+                    className="history-card-button history-card-button-secondary"
+                    disabled={removingId === item.tmdb_id}
+                    type="button"
+                    onClick={() => {
+                      void handleRemove(item);
+                    }}
+                  >
+                    {removingId === item.tmdb_id ? "Quitando..." : "Quitar del historial"}
+                  </button>
+                </div>
               </div>
             </article>
           ))}
         </section>
       ) : (
         <section className="history-empty-card">
-          <div className="history-empty-icon">🕘</div>
+          <div className="history-empty-icon" aria-hidden="true">🕘</div>
           <h2>Aún no hay recorrido guardado</h2>
           <p>
-            En cuanto empecemos a persistir las sesiones, aquí verás tus búsquedas recientes y las
-            recomendaciones que te hemos ido dando.
+            Cuando marques una peli como <strong>Ya la he visto</strong> o <strong>¡Quiero esta!</strong>,
+            aparecerá aquí.
           </p>
           <div className="history-empty-actions">
             <Link className="primary-button" to="/sesion">
@@ -137,6 +297,10 @@ export default function HistoryScreen() {
           </div>
         </section>
       )}
+
+      {detailMovie ? (
+        <HistoryDetailModal movie={detailMovie} onClose={() => setDetailMovie(null)} />
+      ) : null}
     </section>
   );
 }

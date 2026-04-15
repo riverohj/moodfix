@@ -416,10 +416,54 @@
 .session-results-header {
   grid-template-columns: 1fr auto;
   align-items: end;
+  width: min(1120px, 100%);
+  margin: 0 auto 36px;
 }
 
 .session-results-actions {
   justify-content: flex-end;
+}
+
+.session-carousel-shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.session-carousel-nav {
+  width: min(1120px, 100%);
+  margin: 18px auto 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 220px));
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.session-carousel-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 132px;
+  min-height: 56px;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 245, 245, 0.14);
+  background: rgba(15, 15, 15, 0.92);
+  color: #f5f5f5;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.session-carousel-arrow:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(229, 9, 20, 0.6);
+  background: rgba(22, 22, 22, 0.98);
+}
+
+.session-carousel-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .session-results-actions .ghost-button,
@@ -444,6 +488,53 @@
   gap: 20px;
   width: min(1080px, 100%);
   margin: 0 auto;
+}
+
+.rc-feature {
+  display: grid;
+  grid-template-columns: minmax(360px, 560px) minmax(360px, 1fr);
+  gap: 0;
+  width: 100%;
+  min-height: 680px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 12, 12, 0.98);
+  overflow: hidden;
+  box-shadow: 0 38px 100px rgba(0, 0, 0, 0.78);
+}
+
+.rc-feature-media {
+  min-height: 100%;
+}
+
+.rc-feature-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 38px 38px 34px;
+  min-width: 0;
+}
+
+.rc-poster-feature {
+  height: 100%;
+  min-height: 680px;
+}
+
+.rc-feature-counter {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 1;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: rgba(8, 8, 8, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f5f5f5;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
 }
 
 /* ── Card base ─────────────────────────────────────────── */
@@ -580,6 +671,12 @@
   letter-spacing: -0.025em;
 }
 
+.rc-title-feature {
+  font-size: clamp(2.1rem, 3vw, 3.2rem);
+  line-height: 0.94;
+  overflow-wrap: anywhere;
+}
+
 .rc-overview {
   margin: 0;
   font-size: 0.85rem;
@@ -589,6 +686,62 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.rc-overview-feature {
+  font-size: 1.06rem;
+  line-height: 1.78;
+  color: rgba(245, 245, 245, 0.76);
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rc-platform-block {
+  display: grid;
+  gap: 10px;
+}
+
+.rc-platform-title {
+  margin: 0;
+  color: rgba(245, 245, 245, 0.68);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.rc-provider-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rc-provider-links-compact {
+  justify-content: center;
+}
+
+.rc-provider-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 9, 20, 0.28);
+  background: rgba(229, 9, 20, 0.08);
+  color: #ffd4d7;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: default;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.rc-provider-link:hover {
+  background: rgba(229, 9, 20, 0.14);
+  border-color: rgba(229, 9, 20, 0.5);
+  color: #fff2f2;
 }
 
 /* ── Acciones ─────────────────────────────────────────── */
@@ -601,39 +754,69 @@
   padding-top: 14px;
 }
 
+.rc-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
 /* Primarios y dismiss fluyen al mismo flex; el dismiss wrappea solo si no cabe */
 .rc-actions-primary {
   display: contents;
 }
 
+.rc-btn-watch,
 .rc-btn-save,
 .rc-btn-seen,
 .rc-btn-dismiss {
-  border-radius: 999px;
-  padding: 8px 15px;
-  font-size: 0.82rem;
-  font-weight: 700;
+  min-height: 54px;
+  border-radius: 18px;
+  padding: 0 18px;
+  font-size: 0.94rem;
+  font-weight: 800;
   cursor: pointer;
-  white-space: nowrap;
-  transition: background 180ms, border-color 180ms, color 180ms, transform 180ms;
+  transition: background 180ms, border-color 180ms, color 180ms, transform 180ms, opacity 180ms;
+}
+
+.rc-btn-watch:disabled,
+.rc-btn-save:disabled,
+.rc-btn-seen:disabled,
+.rc-btn-dismiss:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rc-btn-watch {
+  border: 0;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #f5fff7;
+  box-shadow: 0 18px 34px rgba(34, 197, 94, 0.22);
+}
+
+.rc-btn-watch:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #28d366, #15803d);
 }
 
 .rc-btn-save {
-  border: 1px solid rgba(245, 245, 245, 0.15);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(245, 245, 245, 0.8);
+  border: 1px solid rgba(34, 197, 94, 0.34);
+  background: rgba(34, 197, 94, 0.14);
+  color: #d8ffe6;
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.05);
 }
 
 .rc-btn-save:hover {
-  border-color: rgba(245, 245, 245, 0.3);
-  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.22);
   transform: translateY(-1px);
 }
 
 .rc-btn-save-active {
-  border-color: rgba(245, 245, 245, 0.36);
-  background: rgba(255, 255, 255, 0.1);
-  color: #f5f5f5;
+  border-color: rgba(34, 197, 94, 0.58);
+  background: rgba(34, 197, 94, 0.3);
+  color: #f5fff7;
 }
 
 .rc-btn-seen {
@@ -659,16 +842,25 @@
 
 /* "No me interesa" — mismo sistema, más discreto */
 .rc-btn-dismiss {
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: transparent;
-  color: rgba(160, 160, 160, 0.48);
-  padding: 8px 12px;
+  border: 1px solid rgba(229, 9, 20, 0.24);
+  background: rgba(229, 9, 20, 0.08);
+  color: rgba(255, 224, 226, 0.86);
 }
 
 .rc-btn-dismiss:hover {
-  border-color: rgba(229, 9, 20, 0.28);
-  background: rgba(229, 9, 20, 0.05);
-  color: rgba(229, 9, 20, 0.72);
+  border-color: rgba(229, 9, 20, 0.48);
+  background: rgba(229, 9, 20, 0.18);
+  color: #fff1f2;
+}
+
+.rc-inline-error {
+  width: 100%;
+  margin: 0;
+}
+
+.rc-inline-notice {
+  width: 100%;
+  margin: 0;
 }
 
 /* ── Valoración (microtarea) ──────────────────────────── */
@@ -753,6 +945,100 @@
 
 .rc-more-btn:hover {
   color: #e50914;
+}
+
+.session-success-card {
+  position: relative;
+  width: min(760px, 100%);
+  min-height: 520px;
+  margin: 0 auto;
+  padding: 54px 42px 38px;
+  border-radius: 32px;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  background:
+    radial-gradient(circle at top, rgba(34, 197, 94, 0.16), transparent 40%),
+    rgba(12, 12, 12, 0.98);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  text-align: center;
+  overflow: hidden;
+  box-shadow: 0 38px 100px rgba(0, 0, 0, 0.78);
+}
+
+.session-success-card-muted {
+  border-color: rgba(229, 9, 20, 0.18);
+  background:
+    radial-gradient(circle at top, rgba(229, 9, 20, 0.12), transparent 38%),
+    rgba(12, 12, 12, 0.98);
+}
+
+.session-success-title,
+.session-success-copy {
+  margin: 0;
+}
+
+.session-success-title {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1;
+  color: #f5f5f5;
+}
+
+.session-success-copy {
+  max-width: 48ch;
+  color: rgba(245, 245, 245, 0.78);
+  line-height: 1.75;
+}
+
+.session-success-hint {
+  max-width: 46ch;
+  margin: -4px 0 0;
+  color: rgba(245, 245, 245, 0.56);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.session-feedback-success {
+  color: #d8ffe6;
+  background: rgba(11, 92, 43, 0.7);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.session-success-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.popcorn-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.popcorn-piece {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 1.8rem;
+  opacity: 0;
+  transform: rotate(var(--angle)) translateY(0) scale(0.3);
+  animation: popcorn-burst 1600ms cubic-bezier(0.2, 0.85, 0.3, 1) forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes popcorn-burst {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateY(0) scale(0.3);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateY(calc(var(--distance) * -1)) scale(1.1);
+  }
 }
 
 /* ── Modal de detalle ─────────────────────────────────── */
@@ -870,6 +1156,65 @@
   line-height: 1.7;
 }
 
+.rc-modal-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.rc-modal-fact {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rc-modal-fact-label {
+  color: rgba(245, 245, 245, 0.45);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.rc-modal-fact-value {
+  color: #f5f5f5;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.rc-modal-genre-block {
+  display: grid;
+  gap: 10px;
+}
+
+.rc-modal-section-title {
+  margin: 0;
+  color: rgba(245, 245, 245, 0.54);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.rc-modal-genre-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rc-modal-genre-pill {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(245, 245, 245, 0.86);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 /* ── Card descartada (colapsada) ──────────────────────── */
 
 .rc-card-dismissed {
@@ -959,8 +1304,26 @@
   .session-results-actions > *,
   .session-detail-actions > *,
   .session-inline-nudge-actions > *,
-  .session-nav-arrow {
+  .session-nav-arrow,
+  .session-carousel-arrow {
     width: 100%;
+  }
+
+  .session-carousel-nav {
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+  }
+
+  .rc-feature {
+    grid-template-columns: 1fr;
+  }
+
+  .rc-poster-feature {
+    min-height: 420px;
+  }
+
+  .rc-feature-body {
+    padding: 24px 20px 22px;
   }
 }
 
@@ -1013,5 +1376,9 @@
 
   .session-pill {
     min-width: 0;
+  }
+
+  .rc-action-grid {
+    grid-template-columns: 1fr;
   }
 }

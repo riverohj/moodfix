@@ -133,8 +133,22 @@ def get_or_create_profile(*, user_id: int) -> dict[str, Any]:
     return _decode_row(row)
 
 
+def _normalizar_tmdb_id(value: Any) -> int:
+    if isinstance(value, bool):
+        raise ValueError("`tmdb_id` debe ser un entero positivo.")
+    try:
+        tmdb_id = int(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError("`tmdb_id` debe ser un entero positivo.") from error
+
+    if tmdb_id <= 0:
+        raise ValueError("`tmdb_id` debe ser un entero positivo.")
+
+    return tmdb_id
+
+
 def agregar_pelicula_a_lista(
-    tmdb_id: int,
+    tmdb_id: Any,
     campo: str,
     *,
     user_id: int,
@@ -144,6 +158,7 @@ def agregar_pelicula_a_lista(
         raise ValueError(f"Campo no soportado para listas de peliculas: {campo}.")
     if get_user_by_id(user_id) is None:
         raise ValueError("Usuario no encontrado para actualizar su perfil.")
+    normalized_tmdb_id = _normalizar_tmdb_id(tmdb_id)
 
     db_path = get_db_path()
     with sqlite3.connect(db_path) as connection:
@@ -161,9 +176,12 @@ def agregar_pelicula_a_lista(
         profile = _decode_row(row)
         assert profile is not None
 
-        lista = list(profile.get(campo) or [])
-        if tmdb_id not in lista:
-            lista.append(tmdb_id)
+        lista = [
+            item
+            for item in (profile.get(campo) or [])
+            if not isinstance(item, bool) and item != normalized_tmdb_id
+        ]
+        lista.append(normalized_tmdb_id)
 
         payload: dict[str, str] = {campo: _serialize_list(lista)}
         for campo_limpiar in campos_limpiar:
@@ -171,7 +189,11 @@ def agregar_pelicula_a_lista(
                 raise ValueError(
                     f"Campo no soportado para limpiar listas de peliculas: {campo_limpiar}."
                 )
-            lista_limpia = [x for x in (profile.get(campo_limpiar) or []) if x != tmdb_id]
+            lista_limpia = [
+                item
+                for item in (profile.get(campo_limpiar) or [])
+                if not isinstance(item, bool) and item != normalized_tmdb_id
+            ]
             payload[campo_limpiar] = _serialize_list(lista_limpia)
 
         fields = list(payload.keys())
@@ -186,6 +208,54 @@ def agregar_pelicula_a_lista(
             WHERE user_id = ?
             """,
             (*values, user_id),
+        )
+        connection.commit()
+
+    return get_or_create_profile(user_id=user_id)
+
+
+def quitar_pelicula_de_lista(
+    tmdb_id: Any,
+    campo: str,
+    *,
+    user_id: int,
+) -> dict[str, Any]:
+    if campo not in LIST_FIELDS:
+        raise ValueError(f"Campo no soportado para listas de peliculas: {campo}.")
+    if get_user_by_id(user_id) is None:
+        raise ValueError("Usuario no encontrado para actualizar su perfil.")
+    normalized_tmdb_id = _normalizar_tmdb_id(tmdb_id)
+
+    db_path = get_db_path()
+    with sqlite3.connect(db_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("BEGIN IMMEDIATE")
+
+        row = _get_profile_row(connection, user_id=user_id)
+        if row is None:
+            connection.execute(
+                "INSERT INTO user_profiles (profile_key, user_id) VALUES (?, ?)",
+                (_profile_key_for_user(user_id), user_id),
+            )
+            row = _get_profile_row(connection, user_id=user_id)
+
+        profile = _decode_row(row)
+        assert profile is not None
+
+        lista = [
+            item
+            for item in (profile.get(campo) or [])
+            if not isinstance(item, bool) and item != normalized_tmdb_id
+        ]
+
+        connection.execute(
+            f"""
+            UPDATE user_profiles
+            SET {campo} = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = ?
+            """,
+            (_serialize_list(lista), user_id),
         )
         connection.commit()
 

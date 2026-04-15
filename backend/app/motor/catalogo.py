@@ -99,3 +99,106 @@ def cargar_catalogo_por_pais(country_code: str) -> list[dict[str, Any]]:
             )
 
     return list(movies.values())
+
+
+def cargar_peliculas_por_tmdb_ids(
+    tmdb_ids: list[int],
+    *,
+    country_code: str,
+) -> list[dict[str, Any]]:
+    if not tmdb_ids:
+        return []
+
+    db_path = get_db_path()
+    if not db_path.exists():
+        return []
+
+    ordered_tmdb_ids: list[int] = []
+    seen_tmdb_ids: set[int] = set()
+    for item in tmdb_ids:
+        if isinstance(item, bool):
+            continue
+        try:
+            tmdb_id = int(item)
+        except (TypeError, ValueError):
+            continue
+        if tmdb_id <= 0 or tmdb_id in seen_tmdb_ids:
+            continue
+        seen_tmdb_ids.add(tmdb_id)
+        ordered_tmdb_ids.append(tmdb_id)
+
+    if not ordered_tmdb_ids:
+        return []
+
+    placeholders = ", ".join("?" for _ in ordered_tmdb_ids)
+
+    with sqlite3.connect(db_path) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            f"""
+            SELECT
+                movies.id,
+                movies.tmdb_id,
+                movies.title,
+                movies.poster_path,
+                movies.runtime,
+                movies.release_year,
+                movies.original_language,
+                movies.overview,
+                movies.popularity,
+                movies.vote_count,
+                movies.genre_ids,
+                movie_providers.provider_id,
+                movie_providers.provider_name,
+                movie_providers.provider_type
+            FROM movies
+            LEFT JOIN movie_providers
+                ON movie_providers.movie_id = movies.id
+                AND movie_providers.country_code = ?
+            WHERE movies.tmdb_id IN ({placeholders})
+            ORDER BY movies.popularity DESC, movies.vote_count DESC, movies.id DESC
+            """,
+            (country_code, *ordered_tmdb_ids),
+        ).fetchall()
+
+    movies_by_tmdb_id: dict[int, dict[str, Any]] = {}
+
+    for row in rows:
+        tmdb_id = row["tmdb_id"]
+        movie = movies_by_tmdb_id.get(tmdb_id)
+        if movie is None:
+            movie = {
+                "id": row["id"],
+                "tmdb_id": row["tmdb_id"],
+                "title": row["title"],
+                "poster_path": row["poster_path"],
+                "runtime": row["runtime"],
+                "release_year": row["release_year"],
+                "original_language": row["original_language"],
+                "overview": row["overview"],
+                "popularity": row["popularity"] or 0,
+                "vote_count": row["vote_count"] or 0,
+                "genre_ids": _decode_genre_ids(row["genre_ids"]),
+                "providers": [],
+            }
+            movies_by_tmdb_id[tmdb_id] = movie
+
+        if row["provider_id"] is not None:
+            movie["providers"].append(
+                {
+                    "provider_id": row["provider_id"],
+                    "provider_name": row["provider_name"],
+                    "provider_type": row["provider_type"],
+                }
+            )
+
+    ordered_movies: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    for tmdb_id in reversed(ordered_tmdb_ids):
+        movie = movies_by_tmdb_id.get(tmdb_id)
+        if movie is None or tmdb_id in seen:
+            continue
+        seen.add(tmdb_id)
+        ordered_movies.append(movie)
+
+    return ordered_movies

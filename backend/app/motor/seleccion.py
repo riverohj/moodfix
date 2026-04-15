@@ -17,6 +17,9 @@ def _serializar_pelicula(movie: dict[str, Any]) -> dict[str, Any]:
         "release_year": movie["release_year"],
         "original_language": movie["original_language"],
         "overview": movie["overview"],
+        "popularity": movie.get("popularity") or 0,
+        "vote_count": movie.get("vote_count") or 0,
+        "genre_ids": movie.get("genre_ids") or [],
         "providers": movie["providers"],
     }
 
