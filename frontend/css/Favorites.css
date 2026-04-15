@@ -180,6 +180,19 @@
   font-size: 12px;
   line-height: 1;
   padding: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  appearance: none;
+}
+
+.favorito-card-badge:hover:not(:disabled) {
+  background: rgba(229, 9, 20, 0.3);
+  transform: scale(1.08);
+}
+
+.favorito-card-badge:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .favorito-card-body {
@@ -300,6 +313,11 @@
   text-align: center;
 }
 
+.favorites-empty-actions {
+  width: 100%;
+  max-width: 280px;
+}
+
 .library-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -346,6 +364,7 @@
 }
 
 .library-modal-poster-shell {
+  position: relative;
   border-radius: 22px;
   overflow: hidden;
   background: #1f1f1f;
@@ -364,6 +383,16 @@
 }
 
 .library-modal-poster-fallback {
+  display: grid;
+  place-items: center;
+  font-size: 4rem;
+  color: rgba(245, 245, 245, 0.72);
+}
+
+.library-modal-poster-shell-has-fallback::after {
+  content: '🎬';
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
   font-size: 4rem;

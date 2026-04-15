@@ -50,6 +50,11 @@ function HistoryDetailModal({ movie, onClose }) {
                 alt={movie.title}
                 className="library-modal-poster"
                 src={getPosterUrl(movie, "w342")}
+                onError={(event) => {
+                  event.target.onerror = null;
+                  event.target.style.display = "none";
+                  event.target.parentNode.classList.add("library-modal-poster-shell-has-fallback");
+                }}
               />
             ) : (
               <div className="library-modal-poster-fallback" aria-hidden="true">
@@ -161,6 +166,8 @@ export default function HistoryScreen({ onProfileChange, token }) {
     };
   }, [token]);
 
+  const historyCountLabel = `${historyItems.length} película${historyItems.length !== 1 ? "s" : ""} vista${historyItems.length !== 1 ? "s" : ""}`;
+
   async function handleRemove(movie) {
     if (!token) {
       return;
@@ -187,13 +194,14 @@ export default function HistoryScreen({ onProfileChange, token }) {
     <section className="history-screen">
       <header className="history-screen-header">
         <div>
-          <h1 className="history-section-title">
-            Tu historial de visualización
-          </h1>
-          <p className="history-screen-description">
-            Aquí podrás revisar lo último que viste en MoodFix y retomar recomendaciones cuando te
-            apetezca volver sobre ellas.
-          </p>
+          <h1 className="history-section-title">Tu historial de visualización</h1>
+          {historyItems.length > 0 ? (
+            <p className="history-screen-description">{historyCountLabel}</p>
+          ) : (
+            <p className="history-screen-description">
+              Aquí reuniremos las películas que ya has marcado como vistas.
+            </p>
+          )}
         </div>
 
         <Link className="ghost-button" to="/inicio">
@@ -205,7 +213,7 @@ export default function HistoryScreen({ onProfileChange, token }) {
 
       {loading ? (
         <section className="history-empty-card">
-          <div className="history-empty-icon">⏳</div>
+          <div className="history-empty-icon" aria-hidden="true">⏳</div>
           <h2>Cargando tu historial...</h2>
           <p>Estamos recuperando las películas que ya has marcado como vistas.</p>
         </section>
@@ -215,13 +223,30 @@ export default function HistoryScreen({ onProfileChange, token }) {
             <article className="history-card" key={item.tmdb_id}>
               <div className="history-poster-wrapper">
                 {item.poster_path ? (
-                  <img alt={item.title} className="history-poster" src={getPosterUrl(item)} />
+                  <img
+                    alt={item.title}
+                    className="history-poster"
+                    src={getPosterUrl(item)}
+                    onError={(event) => {
+                      event.target.onerror = null;
+                      event.target.style.display = "none";
+                      event.target.parentNode.classList.add("history-poster-has-fallback");
+                    }}
+                  />
                 ) : (
                   <div className="history-poster-fallback" aria-hidden="true" />
                 )}
-                <div className="history-card-badge" aria-hidden="true">
-                  🎬
-                </div>
+                <button
+                  className="history-card-badge"
+                  type="button"
+                  aria-label="Quitar del historial"
+                  disabled={removingId === item.tmdb_id}
+                  onClick={() => {
+                    void handleRemove(item);
+                  }}
+                >
+                  ✕
+                </button>
               </div>
 
               <div className="history-card-body">
@@ -259,7 +284,7 @@ export default function HistoryScreen({ onProfileChange, token }) {
         </section>
       ) : (
         <section className="history-empty-card">
-          <div className="history-empty-icon">🕘</div>
+          <div className="history-empty-icon" aria-hidden="true">🕘</div>
           <h2>Aún no hay recorrido guardado</h2>
           <p>
             Cuando marques una peli como <strong>Ya la he visto</strong> o <strong>¡Quiero esta!</strong>,

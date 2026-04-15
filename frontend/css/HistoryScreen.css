@@ -7,6 +7,7 @@
   --history-accent: #e50914;
   --history-accent-hover: #c4060f;
   display: block;
+  padding: 2.5rem 2rem 4rem;
   background-color: var(--history-bg-main);
   font-family: 'Inter', -apple-system, sans-serif;
   color: var(--history-text);
@@ -131,6 +132,16 @@
   content: '🎬';
 }
 
+.history-poster-has-fallback::after {
+  content: '🎬';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
 .history-card-badge {
   position: absolute;
   top: 8px;
@@ -147,6 +158,19 @@
   font-size: 12px;
   line-height: 1;
   padding: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  appearance: none;
+}
+
+.history-card-badge:hover:not(:disabled) {
+  background: rgba(229, 9, 20, 0.3);
+  transform: scale(1.08);
+}
+
+.history-card-badge:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .history-card-body {
@@ -251,6 +275,11 @@
   line-height: 1.05;
 }
 
+.history-empty-card p {
+  max-width: 420px;
+  text-align: center;
+}
+
 .history-empty-actions {
   width: 100%;
   max-width: 280px;
@@ -302,6 +331,7 @@
 }
 
 .library-modal-poster-shell {
+  position: relative;
   border-radius: 22px;
   overflow: hidden;
   background: #1f1f1f;
@@ -320,6 +350,16 @@
 }
 
 .library-modal-poster-fallback {
+  display: grid;
+  place-items: center;
+  font-size: 4rem;
+  color: rgba(245, 245, 245, 0.72);
+}
+
+.library-modal-poster-shell-has-fallback::after {
+  content: '🎬';
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
   font-size: 4rem;

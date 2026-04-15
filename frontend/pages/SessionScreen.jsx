@@ -19,6 +19,7 @@ import {
   formatLanguageLabel,
   formatPopularity,
   formatVoteCount,
+  getFlatrateProviders,
   getGenreLabels,
 } from "../src/lib/movieMetadata";
 
@@ -275,14 +276,16 @@ function QuestionStep({
 
 function MovieDetailModal({ movie, onClose }) {
   useEffect(() => {
-    function handleKey(e) {
-      if (e.key === "Escape") onClose();
+    function handleKey(event) {
+      if (event.key === "Escape") {
+        onClose();
+      }
     }
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  const allProviders = movie.providers.filter((p) => p.provider_type === "flatrate");
+  const allProviders = getFlatrateProviders(movie);
   const genreLabels = getGenreLabels(movie);
 
   return (
@@ -290,9 +293,9 @@ function MovieDetailModal({ movie, onClose }) {
       <div
         className="rc-modal"
         role="dialog"
-        aria-modal
+        aria-modal="true"
         aria-label={movie.title}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
       >
         <button
           aria-label="Cerrar"
@@ -319,20 +322,22 @@ function MovieDetailModal({ movie, onClose }) {
 
         <div className="rc-modal-body">
           <div className="rc-meta">
-            <span className="rc-year">{movie.release_year}</span>
-            <span className="rc-dot" aria-hidden>·</span>
-            <span className="rc-runtime">{movie.runtime} min</span>
-            {movie.original_language && movie.original_language !== "es" ? (
+            <span className="rc-year">{movie.release_year ?? "Sin año"}</span>
+            <span className="rc-dot" aria-hidden="true">·</span>
+            <span className="rc-runtime">
+              {movie.runtime ? `${movie.runtime} min` : "Duración sin dato"}
+            </span>
+            {movie.original_language ? (
               <>
-                <span className="rc-dot" aria-hidden>·</span>
-                <span className="rc-lang">{movie.original_language.toUpperCase()}</span>
+                <span className="rc-dot" aria-hidden="true">·</span>
+                <span className="rc-lang">{formatLanguageLabel(movie.original_language)}</span>
               </>
             ) : null}
             {allProviders.length > 0 ? (
               <>
-                <span className="rc-dot" aria-hidden>·</span>
+                <span className="rc-dot" aria-hidden="true">·</span>
                 <span className="rc-provider">
-                  {allProviders.map((p) => p.provider_name).join(", ")}
+                  {allProviders.map((provider) => provider.provider_name).join(", ")}
                 </span>
               </>
             ) : null}
@@ -347,11 +352,15 @@ function MovieDetailModal({ movie, onClose }) {
             </div>
             <div className="rc-modal-fact">
               <span className="rc-modal-fact-label">Duración</span>
-              <span className="rc-modal-fact-value">{movie.runtime ? `${movie.runtime} min` : "Sin dato"}</span>
+              <span className="rc-modal-fact-value">
+                {movie.runtime ? `${movie.runtime} min` : "Sin dato"}
+              </span>
             </div>
             <div className="rc-modal-fact">
               <span className="rc-modal-fact-label">Idioma original</span>
-              <span className="rc-modal-fact-value">{formatLanguageLabel(movie.original_language)}</span>
+              <span className="rc-modal-fact-value">
+                {formatLanguageLabel(movie.original_language)}
+              </span>
             </div>
             <div className="rc-modal-fact">
               <span className="rc-modal-fact-label">Popularidad</span>
@@ -418,7 +427,7 @@ function StarRating({ value, onRate }) {
 }
 
 function ProviderLinks({ movie, compact = false }) {
-  const flatrateProviders = movie.providers.filter((provider) => provider.provider_type === "flatrate");
+  const flatrateProviders = getFlatrateProviders(movie);
 
   if (flatrateProviders.length === 0) {
     return null;
@@ -428,7 +437,7 @@ function ProviderLinks({ movie, compact = false }) {
     <div className={`rc-provider-links ${compact ? "rc-provider-links-compact" : ""}`}>
       {flatrateProviders.map((provider) => (
         <span
-          key={`${movie.id}-${provider.provider_id}`}
+          key={`${movie.tmdb_id}-${provider.provider_id}`}
           className="rc-provider-link"
         >
           {provider.provider_name}
@@ -500,9 +509,7 @@ function ResultCard({
   const [savingAction, setSavingAction] = useState(false);
   const [actionError, setActionError] = useState("");
 
-  const flatrateProviders = movie.providers
-    .filter((p) => p.provider_type === "flatrate")
-    .map((p) => p.provider_name);
+  const flatrateProviders = getFlatrateProviders(movie).map((provider) => provider.provider_name);
 
   async function persistAction(nextAction) {
     setSavingAction(true);
@@ -521,10 +528,7 @@ function ResultCard({
   }
 
   async function handleWatchNow() {
-    const saved = await persistAction("watch_now");
-    if (!saved) {
-      return;
-    }
+    await persistAction("watch_now");
   }
 
   async function handleSeen() {
@@ -583,7 +587,7 @@ function ResultCard({
   return (
     <article className={`rc-feature ${action === "seen" ? "rc-feature-seen" : ""} ${action === "saved" ? "rc-feature-saved" : ""}`}>
       <div className="rc-feature-media">
-        <div className="rc-poster rc-poster-feature" aria-hidden>
+        <div className="rc-poster rc-poster-feature" aria-hidden="true">
           {movie.poster_path ? (
             <img
               alt={movie.title}
@@ -602,18 +606,20 @@ function ResultCard({
 
       <div className="rc-feature-body">
         <div className="rc-meta">
-          <span className="rc-year">{movie.release_year}</span>
-          <span className="rc-dot" aria-hidden>·</span>
-          <span className="rc-runtime">{movie.runtime} min</span>
-          {movie.original_language && movie.original_language !== "es" ? (
+          <span className="rc-year">{movie.release_year ?? "Sin año"}</span>
+          <span className="rc-dot" aria-hidden="true">·</span>
+          <span className="rc-runtime">
+            {movie.runtime ? `${movie.runtime} min` : "Duración sin dato"}
+          </span>
+          {movie.original_language ? (
             <>
-              <span className="rc-dot" aria-hidden>·</span>
-              <span className="rc-lang">{movie.original_language.toUpperCase()}</span>
+              <span className="rc-dot" aria-hidden="true">·</span>
+              <span className="rc-lang">{formatLanguageLabel(movie.original_language)}</span>
             </>
           ) : null}
           {flatrateProviders.length > 0 ? (
             <>
-              <span className="rc-dot" aria-hidden>·</span>
+              <span className="rc-dot" aria-hidden="true">·</span>
               <span className="rc-provider">{flatrateProviders.join(", ")}</span>
             </>
           ) : null}
@@ -623,10 +629,12 @@ function ResultCard({
 
         <p className="rc-overview rc-overview-feature">{movie.overview}</p>
 
-        <div className="rc-platform-block">
-          <p className="rc-platform-title">Disponible en</p>
-          <ProviderLinks movie={movie} />
-        </div>
+        {flatrateProviders.length > 0 ? (
+          <div className="rc-platform-block">
+            <p className="rc-platform-title">Disponible en</p>
+            <ProviderLinks movie={movie} />
+          </div>
+        ) : null}
 
         <button className="rc-more-btn" type="button" onClick={onOpenDetail}>
           Ver ficha completa

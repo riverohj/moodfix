@@ -197,6 +197,7 @@ export default function App() {
   function handleProfileChange(nextProfile) {
     setProfile(nextProfile);
     setDraft(mergeProfileIntoDraft(nextProfile));
+    setStepIndex(firstIncompleteStepIndex(nextProfile));
   }
 
   async function saveCurrentStep(markCompleted = false) {

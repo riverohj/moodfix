@@ -67,18 +67,32 @@ def patch_profile():
 
 def _get_tmdb_id_from_payload() -> int:
     payload = get_json_payload()
-    if not isinstance(payload, dict):
-        raise RequestValidationError("El body JSON debe ser un objeto.")
     tmdb_id = payload.get("tmdb_id")
-    if isinstance(tmdb_id, bool) or not isinstance(tmdb_id, int):
-        raise RequestValidationError("`tmdb_id` es obligatorio y debe ser un entero.")
+    if isinstance(tmdb_id, bool):
+        raise RequestValidationError("`tmdb_id` debe ser un entero positivo.")
+    try:
+        tmdb_id = int(tmdb_id)
+    except (TypeError, ValueError) as error:
+        raise RequestValidationError("`tmdb_id` debe ser un entero positivo.") from error
+    if tmdb_id <= 0:
+        raise RequestValidationError("`tmdb_id` debe ser un entero positivo.")
     return tmdb_id
 
 
 def _listar_peliculas_del_perfil(*, user_id: int, campo: str) -> list[dict]:
     profile = get_or_create_profile(user_id=user_id)
     country_code = _normalizar_codigo_pais(profile.get("pais"))
-    tmdb_ids = [int(item) for item in (profile.get(campo) or []) if isinstance(item, int)]
+    tmdb_ids: list[int] = []
+    for item in profile.get(campo) or []:
+        if isinstance(item, bool):
+            continue
+        try:
+            tmdb_id = int(item)
+        except (TypeError, ValueError):
+            continue
+        if tmdb_id <= 0:
+            continue
+        tmdb_ids.append(tmdb_id)
     return cargar_peliculas_por_tmdb_ids(tmdb_ids, country_code=country_code)
 
 

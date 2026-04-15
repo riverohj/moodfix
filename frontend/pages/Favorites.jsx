@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import "../css/Favorites.css";
@@ -50,6 +50,11 @@ function MovieDetailModal({ movie, onClose }) {
                 alt={movie.title}
                 className="library-modal-poster"
                 src={getPosterUrl(movie, "w342")}
+                onError={(event) => {
+                  event.target.onerror = null;
+                  event.target.style.display = "none";
+                  event.target.parentNode.classList.add("library-modal-poster-shell-has-fallback");
+                }}
               />
             ) : (
               <div className="library-modal-poster-fallback" aria-hidden="true">
@@ -222,6 +227,11 @@ function Favorites({ onProfileChange, token }) {
           <p>
             Cuando en sesión pulses <strong>Ver luego</strong>, tus pelis aparecerán aquí para recuperarlas rápido.
           </p>
+          <div className="favorites-empty-actions">
+            <Link className="primary-button" to="/sesion">
+              Encontrar película
+            </Link>
+          </div>
         </section>
       ) : (
         <section className="favorites-grid" aria-label="Películas guardadas para ver luego">
@@ -242,7 +252,17 @@ function Favorites({ onProfileChange, token }) {
                 ) : (
                   <div className="favorito-poster-fallback" aria-hidden="true" />
                 )}
-                <div className="favorito-card-badge" aria-hidden="true">❤️</div>
+                <button
+                  className="favorito-card-badge"
+                  type="button"
+                  aria-label="Quitar de Ver luego"
+                  disabled={removingId === movie.tmdb_id}
+                  onClick={() => {
+                    void handleRemove(movie);
+                  }}
+                >
+                  ❤
+                </button>
               </div>
 
               <div className="favorito-card-body">
