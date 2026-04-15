@@ -114,9 +114,23 @@ def init_db() -> None:
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             );
+
+            CREATE TABLE IF NOT EXISTS recommendation_sets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                mode TEXT NOT NULL,
+                tmdb_ids TEXT NOT NULL DEFAULT '[]',
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
             """
         )
         _ensure_column(connection, "movies", "genre_ids", "TEXT NOT NULL DEFAULT '[]'")
+        _ensure_index(
+            connection,
+            "idx_recommendation_sets_user_id",
+            "CREATE INDEX idx_recommendation_sets_user_id ON recommendation_sets(user_id)",
+        )
         _ensure_column(connection, "user_profiles", "user_id", "INTEGER")
         _ensure_index(
             connection,
