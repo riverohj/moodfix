@@ -71,6 +71,14 @@ export function getProfile(token) {
   return apiRequest("/profile", { token });
 }
 
+export function getWatchlistMovies(token) {
+  return apiRequest("/watchlist", { token });
+}
+
+export function getHistoryMovies(token) {
+  return apiRequest("/history", { token });
+}
+
 export function patchProfile(token, body) {
   return apiRequest("/profile", {
     method: "PATCH",
@@ -100,5 +108,45 @@ export function postSessionRecommend(token, body) {
     method: "POST",
     token,
     body,
+  });
+}
+
+export function postHistoryMovie(token, tmdbId) {
+  return apiRequest("/history", {
+    method: "POST",
+    token,
+    body: { tmdb_id: tmdbId },
+  });
+}
+
+export function deleteHistoryMovie(token, tmdbId) {
+  return apiRequest("/history", {
+    method: "DELETE",
+    token,
+    body: { tmdb_id: tmdbId },
+  });
+}
+
+export function postWatchlistMovie(token, tmdbId) {
+  return apiRequest("/watchlist", {
+    method: "POST",
+    token,
+    body: { tmdb_id: tmdbId },
+  });
+}
+
+export function deleteWatchlistMovie(token, tmdbId) {
+  return apiRequest("/watchlist", {
+    method: "DELETE",
+    token,
+    body: { tmdb_id: tmdbId },
+  });
+}
+
+export function postDiscardMovie(token, tmdbId) {
+  return apiRequest("/discard", {
+    method: "POST",
+    token,
+    body: { tmdb_id: tmdbId },
   });
 }

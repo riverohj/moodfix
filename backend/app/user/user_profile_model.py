@@ -171,3 +171,79 @@ def save_profile(
         connection.commit()
 
     return get_or_create_profile(user_id=user_id)
+
+
+def _normalizar_tmdb_id(value: Any) -> int:
+    if isinstance(value, bool):
+        raise ValueError("`tmdb_id` debe ser un entero positivo.")
+    try:
+        tmdb_id = int(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError("`tmdb_id` debe ser un entero positivo.") from error
+
+    if tmdb_id <= 0:
+        raise ValueError("`tmdb_id` debe ser un entero positivo.")
+
+    return tmdb_id
+
+
+def _asegurar_lista_permitida(field_name: str) -> None:
+    if field_name not in LIST_FIELDS:
+        raise ValueError(f"`{field_name}` no es un campo de lista soportado.")
+
+
+def agregar_pelicula_a_lista(
+    tmdb_id: Any,
+    field_name: str,
+    *,
+    user_id: int,
+) -> dict[str, Any]:
+    _asegurar_lista_permitida(field_name)
+    normalized_tmdb_id = _normalizar_tmdb_id(tmdb_id)
+
+    profile = get_or_create_profile(user_id=user_id)
+    current_items = list(profile.get(field_name) or [])
+    filtered_items = [
+        item
+        for item in current_items
+        if not isinstance(item, bool) and item != normalized_tmdb_id
+    ]
+    filtered_items.append(normalized_tmdb_id)
+
+    payload: dict[str, Any] = {field_name: filtered_items}
+
+    if field_name == "historial":
+        payload["ver_luego"] = [
+            item
+            for item in (profile.get("ver_luego") or [])
+            if not isinstance(item, bool) and item != normalized_tmdb_id
+        ]
+
+    if field_name == "titulos_descartados":
+        payload["ver_luego"] = [
+            item
+            for item in (profile.get("ver_luego") or [])
+            if not isinstance(item, bool) and item != normalized_tmdb_id
+        ]
+
+    return save_profile(payload, user_id=user_id, merge=True)
+
+
+def quitar_pelicula_de_lista(
+    tmdb_id: Any,
+    field_name: str,
+    *,
+    user_id: int,
+) -> dict[str, Any]:
+    _asegurar_lista_permitida(field_name)
+    normalized_tmdb_id = _normalizar_tmdb_id(tmdb_id)
+
+    profile = get_or_create_profile(user_id=user_id)
+    current_items = list(profile.get(field_name) or [])
+    next_items = [
+        item
+        for item in current_items
+        if not isinstance(item, bool) and item != normalized_tmdb_id
+    ]
+
+    return save_profile({field_name: next_items}, user_id=user_id, merge=True)
