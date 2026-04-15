@@ -6,10 +6,6 @@ from typing import Any
 
 from .db import get_db_path
 
-# Cuántas sesiones recientes se consultan para evitar repeticiones en el motor
-RECENT_SETS_LIMIT = 5
-
-
 def save_recommendation_set(*, user_id: int, mode: str, tmdb_ids: list[int]) -> None:
     db_path = get_db_path()
     with sqlite3.connect(db_path) as conn:
@@ -22,8 +18,8 @@ def save_recommendation_set(*, user_id: int, mode: str, tmdb_ids: list[int]) -> 
         )
 
 
-def get_recent_tmdb_ids(user_id: int, limit: int = RECENT_SETS_LIMIT) -> list[int]:
-    """Devuelve los tmdb_ids mostrados en las últimas `limit` sesiones del usuario."""
+def get_recent_tmdb_ids(user_id: int) -> list[int]:
+    """Devuelve todos los tmdb_ids mostrados en sesiones anteriores del usuario."""
     db_path = get_db_path()
     with sqlite3.connect(db_path) as conn:
         rows = conn.execute(
@@ -31,9 +27,8 @@ def get_recent_tmdb_ids(user_id: int, limit: int = RECENT_SETS_LIMIT) -> list[in
             SELECT tmdb_ids FROM recommendation_sets
             WHERE user_id = ?
             ORDER BY created_at DESC
-            LIMIT ?
             """,
-            (user_id, limit),
+            (user_id,),
         ).fetchall()
 
     seen: set[int] = set()

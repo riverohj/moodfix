@@ -30,7 +30,7 @@ def recommend_session():
         user = get_authenticated_user_from_request(required=False)
         profile_context = _contexto_perfil_para_peticion()
         if user is not None:
-            profile_context["peliculas_mostradas_recientemente"] = get_recent_tmdb_ids(user["id"])
+            profile_context["peliculas_mostradas_recientemente"] = get_recent_tmdb_ids(user["id"])  # todas las sesiones
         result = recomendar_peliculas(profile_context, session_payload)
         items = result["seleccion_final"]
     except RequestValidationError as error:
