@@ -288,6 +288,26 @@
   background: rgba(229, 9, 20, 0.14);
 }
 
+.session-pill-has-sub {
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 28px;
+}
+
+.session-pill-label {
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+
+.session-pill-sublabel {
+  font-size: 0.75rem;
+  color: rgba(245, 245, 245, 0.45);
+  font-weight: 400;
+}
+
 .session-pill-grid-centered {
   width: min(760px, 100%);
   margin: 0 auto;
@@ -675,6 +695,14 @@
   font-size: clamp(2.1rem, 3vw, 3.2rem);
   line-height: 0.94;
   overflow-wrap: anywhere;
+}
+
+.rc-razon-ia {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: rgba(245, 245, 245, 0.6);
+  line-height: 1.5;
 }
 
 .rc-overview {
@@ -1269,28 +1297,31 @@
 
   .session-home-card,
   .session-detail-card,
-  .session-question-card {
-    padding: 38px 24px;
-  }
-
   .session-question-shell {
     min-height: auto;
     padding: 0 0 24px;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .session-question-card {
+    padding: 32px 20px;
+    min-height: 0;
+    width: 100%;
+    border-radius: 24px;
+    order: 1;
   }
 
   .session-nav-arrow {
     position: static;
     transform: none;
+    order: 2;
   }
 
   .session-nav-arrow:first-child,
   .session-nav-arrow:last-child {
     left: auto;
     right: auto;
-  }
-
-  .session-question-card {
-    min-height: 0;
   }
 
   .session-page-actions,
@@ -1372,10 +1403,19 @@
 
   .session-pill-grid {
     gap: 10px;
+    flex-direction: column;
+    align-items: center;
   }
 
   .session-pill {
     min-width: 0;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .session-pill-grid-centered {
+    width: 100%;
   }
 
   .rc-action-grid {

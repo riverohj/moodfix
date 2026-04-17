@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import Blueprint, jsonify
 
 from .motor import normalizar_contexto_perfil, normalizar_payload_sesion, recomendar_peliculas
+from .motor.ia import elegir_con_ia
 from .recommendation_sets_model import get_recent_tmdb_ids, save_recommendation_set
 from .user.auth_model import AuthError, RequestValidationError, get_authenticated_user_from_request
 from .user.request_utils import get_json_payload
@@ -32,7 +33,16 @@ def recommend_session():
         if user is not None:
             profile_context["peliculas_mostradas_recientemente"] = get_recent_tmdb_ids(user["id"])  # todas las sesiones
         result = recomendar_peliculas(profile_context, session_payload)
-        items = result["seleccion_final"]
+        lista_corta = result["lista_corta"]
+        seleccion_motor = result["seleccion_final"]
+
+        # IA elige el #1 de la lista corta; el motor completa con los siguientes
+        elegida = elegir_con_ia(lista_corta, profile_context, session_payload)
+        if elegida is not None:
+            resto = [m for m in seleccion_motor if m["tmdb_id"] != elegida["tmdb_id"]]
+            items = [elegida] + resto[:2]
+        else:
+            items = seleccion_motor
     except RequestValidationError as error:
         return jsonify({"status": "error", "message": str(error)}), 400
     except AuthError as error:
