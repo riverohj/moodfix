@@ -361,4 +361,11 @@
     .mem-cards-container { flex-direction: column; }
     .guided-exp-section { padding: 80px 20px; }
     .landing-hero-slogan { padding: 40px 20px 80px; }
+    .landing-hero-slogan h2 { font-size: clamp(2rem, 8vw, 3.2rem); }
+    .sol-header-area h2 { font-size: clamp(2rem, 7vw, 3rem); }
+    .guided-gray-titles { font-size: clamp(1.6rem, 6vw, 2.4rem); }
+    .guided-white-title { font-size: clamp(1.8rem, 6vw, 2.5rem); }
+    .guided-red-main { font-size: clamp(1.8rem, 7vw, 3rem); }
+    .landing-stats-row { grid-template-columns: 1fr 1fr; }
+    .stat-number-big { font-size: clamp(2.4rem, 8vw, 3.5rem); }
 }

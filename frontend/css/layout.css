@@ -25,6 +25,7 @@ body {
   min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at top, rgba(229, 9, 20, 0.14), transparent 35%),
     linear-gradient(180deg, #111111 0%, #0d0d0d 100%);
