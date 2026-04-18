@@ -162,9 +162,9 @@ export default function Home({ ctaLabel = "Encuentra tu Película", onPrimaryAct
 
         <div className="mem-cards-container">
           <div className="mem-card mem-card-red-border reveal-child reveal-delay-1">
-            <div className="mem-icon-box">⭐</div>
-            <h4>Favoritas</h4>
-            <p>Guarda las películas que realmente te gustaron. Sin perderlas nunca.</p>
+            <div className="mem-icon-box">🕐</div>
+            <h4>Ver luego</h4>
+            <p>Las películas que guardaste para ver cuando tengas el momento.</p>
           </div>
           <div className="mem-card mem-card-red-border reveal-child reveal-delay-2">
             <div className="mem-icon-box">📜</div>

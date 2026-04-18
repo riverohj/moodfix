@@ -116,14 +116,15 @@ function SessionFeedback({ message }) {
   return <p className="session-feedback session-feedback-error">{message}</p>;
 }
 
-function MoodChip({ active, children, onClick }) {
+function MoodChip({ active, children, sublabel, onClick }) {
   return (
     <button
-      className={`session-pill ${active ? "session-pill-active" : ""}`}
+      className={`session-pill ${active ? "session-pill-active" : ""} ${sublabel ? "session-pill-has-sub" : ""}`}
       type="button"
       onClick={onClick}
     >
-      {children}
+      <span className="session-pill-label">{children}</span>
+      {sublabel ? <span className="session-pill-sublabel">{sublabel}</span> : null}
     </button>
   );
 }
@@ -245,6 +246,7 @@ function QuestionStep({
                 <MoodChip
                   active={stepValue === option.id}
                   key={option.id}
+                  sublabel={option.sublabel}
                   onClick={() => onSelect(step.id, option.id)}
                 >
                   {option.label}
@@ -626,6 +628,10 @@ function ResultCard({
         </div>
 
         <h3 className="rc-title rc-title-feature">{movie.title}</h3>
+
+        {movie.razon_ia ? (
+          <p className="rc-razon-ia">{movie.razon_ia}</p>
+        ) : null}
 
         <p className="rc-overview rc-overview-feature">{movie.overview}</p>
 

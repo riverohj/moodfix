@@ -28,8 +28,11 @@ def coincide_con_epoca(movie: dict[str, Any], preference: str | None) -> bool:
 
 
 def construir_tmdb_ids_excluidos(perfil_estable: dict[str, Any]) -> set[int]:
-    return set(perfil_estable["peliculas_vistas"]) | set(perfil_estable["peliculas_para_ver"]) | set(
-        perfil_estable["peliculas_descartadas"]
+    return (
+        set(perfil_estable["peliculas_vistas"])
+        | set(perfil_estable["peliculas_para_ver"])
+        | set(perfil_estable["peliculas_descartadas"])
+        | set(perfil_estable.get("peliculas_mostradas_recientemente", []))
     )
 
 
