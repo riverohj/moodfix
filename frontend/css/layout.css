@@ -25,6 +25,8 @@ body {
   min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  width: 100%;
+  max-width: 100%;
   background:
     radial-gradient(circle at top, rgba(229, 9, 20, 0.14), transparent 35%),
     linear-gradient(180deg, #111111 0%, #0d0d0d 100%);
@@ -270,6 +272,8 @@ body {
 
 .site-main {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding-top: 32px;
   padding-bottom: 32px;
 }
@@ -328,8 +332,23 @@ body {
     padding-right: 16px;
   }
 
+  .site-logo-placeholder,
+  .site-auth-actions {
+    min-width: 0;
+  }
+
   .site-navbar-inner {
     min-height: 64px;
+    gap: 12px;
+  }
+
+  .site-logo-placeholder {
+    width: auto;
+  }
+
+  .site-logo-img {
+    max-width: 128px;
+    height: auto;
   }
 
   /* Ocultar nav y botones de escritorio en móvil */
@@ -342,6 +361,12 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
+  }
+
+  .site-nav-mobile-actions .site-auth-button {
+    padding: 10px 14px;
+    font-size: 0.88rem;
   }
 
   .site-footer-inner {
@@ -360,5 +385,25 @@ body {
   .site-main {
     padding-top: 20px;
     padding-bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-shell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .site-navbar-inner {
+    gap: 8px;
+  }
+
+  .site-logo-img {
+    max-width: 108px;
+  }
+
+  .site-nav-mobile-actions .site-auth-button {
+    padding: 9px 12px;
+    font-size: 0.84rem;
   }
 }

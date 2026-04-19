@@ -50,6 +50,7 @@
   line-height: 0.95;
   letter-spacing: -0.04em;
   color: #f5f5f5;
+  overflow-wrap: anywhere;
 }
 
 .taste-sub {
@@ -58,6 +59,7 @@
   color: #a0a0a0;
   line-height: 1.55;
   max-width: 54ch;
+  overflow-wrap: anywhere;
 }
 
 .taste-nudge {
@@ -133,6 +135,7 @@
   font-size: 0.97rem;
   color: rgba(245, 245, 245, 0.88);
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .taste-row-pending {
@@ -179,5 +182,9 @@
   .taste-edit-all-btn {
     width: 100%;
     text-align: center;
+  }
+
+  .taste-row {
+    align-items: flex-start;
   }
 }

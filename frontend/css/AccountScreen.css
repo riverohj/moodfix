@@ -24,6 +24,7 @@
   line-height: 0.95;
   letter-spacing: -0.04em;
   color: #f5f5f5;
+  overflow-wrap: anywhere;
 }
 
 .account-logout-btn {
@@ -153,7 +154,6 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 
 /* ── Enlace a Mis gustos ────────────────────────────────── */
@@ -220,6 +220,15 @@
 
   .account-section-taste {
     flex-direction: column;
+  }
+
+  .account-locked-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .account-locked-badge {
+    white-space: normal;
   }
 
   .account-taste-link {

@@ -19,6 +19,7 @@
   width: 100%;
   max-width: 1050px;
   min-height: inherit;
+  box-sizing: border-box;
 }
 
 .onboarding-card {
@@ -38,6 +39,7 @@
   justify-content: center;
   gap: 24px;
   z-index: 10;
+  box-sizing: border-box;
 }
 
 .onboarding-title {
@@ -46,6 +48,7 @@
   color: #ffffff;
   margin-bottom: 12px;
   letter-spacing: -0.5px;
+  overflow-wrap: anywhere;
 }
 
 .complice-box {
@@ -55,6 +58,7 @@
   max-width: 550px;
   margin: 0 auto 28px auto;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .onboarding-title-split {
@@ -84,6 +88,7 @@
   gap: 10px;
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
   transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  box-sizing: border-box;
 }
 
 .nav-arrow.right {
@@ -165,6 +170,7 @@
   align-items: center;
   justify-content: center;
   min-height: 130px !important;
+  min-width: 0;
 }
 
 .platform-card.selected {
@@ -197,6 +203,7 @@
   color: #666;
   font-weight: 700;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .options-grid {
@@ -218,6 +225,7 @@
   border-radius: 100px;
   font-weight: 600;
   cursor: pointer;
+  overflow-wrap: anywhere;
   transition: background 0.3s, border-color 0.3s;
 }
 
@@ -244,6 +252,7 @@
   cursor: pointer;
   transition: background 0.3s, border-color 0.3s;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .option-btn-long.selected {
@@ -471,17 +480,24 @@
   }
 
   .onboarding-container {
-    width: 95%;
-    padding-bottom: 48px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    padding: 0 10px 48px;
+    gap: 14px;
   }
 
   .onboarding-card {
+    width: 100%;
+    max-width: none;
     padding: 32px 18px;
     min-height: 520px;
     border-radius: 28px;
   }
 
   .onboarding-card-intro {
+    width: 100%;
+    max-width: none;
     min-height: 420px;
   }
 
@@ -489,8 +505,84 @@
     font-size: 1.5rem;
   }
 
+  .nav-arrow {
+    position: static;
+    transform: none !important;
+    width: 100%;
+    justify-content: center;
+    padding: 14px 18px;
+    transition:
+      background 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .nav-arrow.left,
+  .nav-arrow.right {
+    left: auto;
+    right: auto;
+  }
+
+  .nav-arrow.hidden {
+    display: none;
+  }
+
+  .nav-arrow.left {
+    order: 2;
+  }
+
+  .onboarding-card {
+    order: 1;
+  }
+
+  .nav-arrow.right {
+    order: 3;
+  }
+
+  .nav-arrow:hover {
+    transform: translateY(-1px) !important;
+  }
+
+  .nav-arrow:active {
+    transform: scale(0.995) !important;
+  }
+
+  .responses-zone {
+    min-height: 0;
+  }
+
+  .options-grid,
+  .no-rotundos-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .option-btn,
+  .option-btn-long,
+  .skip-btn,
+  .modal-btn-back,
+  .modal-btn-skip-anyway,
+  .onboarding-start-btn {
+    width: 100%;
+  }
+
   .platforms-container {
     grid-template-columns: 1fr;
+  }
+
+  .skip-footer {
+    margin-top: 18px;
+  }
+
+  .onboarding-card-intro .skip-footer {
+    gap: 18px !important;
+    margin-top: 28px;
+  }
+
+  .onboarding-card-intro .skip-btn {
+    margin-top: 10px;
   }
 
   .modal-actions-custom {

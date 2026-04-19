@@ -244,33 +244,35 @@ function HardNoField({ step, draftValue, onSelect }) {
 
 function OnboardingIntro({ onStart, onSkip, savingStep }) {
   return (
-    <div className="onboarding-wrapper">
-      <div className="onboarding-container">
-        <div className="onboarding-card onboarding-card-intro">
-          <div className="card-header">
-            <h1 className="onboarding-title">Vamos a conocernos...</h1>
-            <p className="complice-box">
-              Te haremos unas pocas preguntas para afinar tus recomendaciones.
-            </p>
-          </div>
+    <main className="app-shell">
+      <div className="onboarding-wrapper">
+        <div className="onboarding-container">
+          <div className="onboarding-card onboarding-card-intro">
+            <div className="card-header">
+              <h1 className="onboarding-title">Vamos a conocernos...</h1>
+              <p className="complice-box">
+                Te haremos unas pocas preguntas para afinar tus recomendaciones.
+              </p>
+            </div>
 
-          <div className="responses-zone">
-            <p className="onboarding-intro-detail">
-              Son cinco preguntas rápidas. Y ya está.
-            </p>
-          </div>
+            <div className="responses-zone">
+              <p className="onboarding-intro-detail">
+                Son cinco preguntas rápidas. Y ya está.
+              </p>
+            </div>
 
-          <div className="skip-footer" style={{ flexDirection: "column", gap: "12px" }}>
-            <button className="onboarding-start-btn" type="button" onClick={onStart}>
-              Empezar
-            </button>
-            <button className="skip-btn" disabled={savingStep} type="button" onClick={onSkip}>
-              Saltar por ahora
-            </button>
+            <div className="skip-footer" style={{ flexDirection: "column", gap: "12px" }}>
+              <button className="onboarding-start-btn" type="button" onClick={onStart}>
+                Empezar
+              </button>
+              <button className="skip-btn" disabled={savingStep} type="button" onClick={onSkip}>
+                Saltar por ahora
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
