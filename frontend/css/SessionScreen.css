@@ -333,6 +333,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 24px;
   box-sizing: border-box;
 }
 
@@ -391,9 +392,7 @@
 }
 
 .session-nav-arrow {
-  position: absolute;
-  top: 58%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -412,20 +411,12 @@
 .session-nav-arrow:hover:not(:disabled) {
   background: rgba(30, 30, 30, 0.96);
   border-color: rgba(229, 9, 20, 0.8);
-  transform: translateY(calc(-58% - 1px));
+  transform: translateY(-1px);
 }
 
 .session-nav-arrow:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.session-nav-arrow:first-child {
-  left: -110px;
-}
-
-.session-nav-arrow:last-child {
-  right: -110px;
 }
 
 .session-nav-arrow-hidden {
@@ -1337,15 +1328,7 @@
   }
 
   .session-nav-arrow {
-    position: static;
-    transform: none;
     order: 2;
-  }
-
-  .session-nav-arrow:first-child,
-  .session-nav-arrow:last-child {
-    left: auto;
-    right: auto;
   }
 
   .session-page-actions,
