@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from typing import Any
 
 import anthropic
+
+logger = logging.getLogger(__name__)
 
 GENRE_LABELS = {
     12: "Aventura", 14: "Fantasía", 16: "Animación", 18: "Drama",
@@ -127,5 +130,6 @@ def elegir_con_ia(
 
         return {**elegida, "razon_ia": razon}
 
-    except Exception:
+    except Exception as exc:
+        logger.warning("elegir_con_ia falló: %s", exc)
         return None

@@ -978,8 +978,8 @@ export default function SessionScreen({
         showCelebration: action === "watch_now",
         actionNotice:
           action === "watch_now"
-            ? "Añadida al historial. Luego podrás puntuarla."
-            : "Añadida al historial. Cuando termines, ponle estrellas.",
+            ? "¡Añadida al historial! Que la disfrutes."
+            : "Añadida al historial. Si quieres, ponle estrellas ahora.",
       };
     }
 
