@@ -7,7 +7,7 @@ from .session_routes import session_api
 from .user import auth_api, profile_api
 
 
-def create_app() -> Flask:
+def crear_app() -> Flask:
     app = Flask(__name__)
     CORS(app)
     init_db()

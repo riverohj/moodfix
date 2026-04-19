@@ -6,68 +6,109 @@ from .filtros import coincide_con_epoca, coincide_con_tiempo
 from .moods import generos_principales_para_mood
 
 
+def _sumar_puntaje_base(pelicula: dict[str, Any]) -> int:
+    popularidad = pelicula.get("popularity") or 0
+    votos = pelicula.get("vote_count") or 0
+    return min(int(popularidad), 40) + min(votos // 100, 40)
+
+
+def _sumar_puntaje_por_idioma(pelicula: dict[str, Any], perfil_estable: dict[str, Any]) -> int:
+    if pelicula.get("original_language") in perfil_estable["idiomas_comodos"]:
+        return 12
+    return 0
+
+
+def _sumar_puntaje_por_plataforma(pelicula: dict[str, Any], perfil_estable: dict[str, Any]) -> int:
+    provider_ids = {provider["provider_id"] for provider in pelicula["providers"]}
+    plataformas_elegidas = set(perfil_estable["plataformas"])
+    puntaje = 0
+
+    if plataformas_elegidas and not provider_ids.isdisjoint(plataformas_elegidas):
+        puntaje += 18
+    if any(provider["provider_type"] == "flatrate" for provider in pelicula["providers"]):
+        puntaje += 8
+
+    return puntaje
+
+
+def _sumar_puntaje_por_mood(pelicula: dict[str, Any], sesion_actual: dict[str, Any]) -> int:
+    mood = sesion_actual.get("mood")
+    if mood is None:
+        return 0
+
+    generos_mood = set(generos_principales_para_mood(mood))
+    generos_pelicula = set(pelicula.get("genre_ids") or [])
+    coincidencias = len(generos_mood.intersection(generos_pelicula))
+
+    if coincidencias:
+        return 90 + (coincidencias * 20)
+    return -40
+
+
+def _sumar_puntaje_por_tiempo_y_epoca(
+    pelicula: dict[str, Any],
+    sesion_actual: dict[str, Any],
+) -> int:
+    puntaje = 0
+    if coincide_con_tiempo(pelicula, sesion_actual.get("preferencia_tiempo")):
+        puntaje += 20
+    if coincide_con_epoca(pelicula, sesion_actual.get("preferencia_epoca")):
+        puntaje += 18
+    return puntaje
+
+
+def _sumar_puntaje_por_energia(pelicula: dict[str, Any], sesion_actual: dict[str, Any]) -> int:
+    runtime = pelicula.get("runtime") or 0
+    energia = sesion_actual.get("preferencia_energia")
+
+    if energia == "facil":
+        if runtime and runtime < 100:
+            return 16
+        if runtime and runtime < 120:
+            return 10
+
+    if energia == "reto":
+        if runtime >= 120:
+            return 16
+        if runtime >= 100:
+            return 10
+
+    return 0
+
+
+def _sumar_puntaje_por_descubrimiento(
+    pelicula: dict[str, Any],
+    sesion_actual: dict[str, Any],
+) -> int:
+    votos = pelicula.get("vote_count") or 0
+    descubrimiento = sesion_actual.get("seguro_o_descubrir")
+
+    if descubrimiento == "seguro":
+        if votos >= 10000:
+            return 24
+        if votos >= 5000:
+            return 12
+
+    if descubrimiento == "descubrir":
+        if 1000 <= votos < 10000:
+            return 24
+        if 300 <= votos < 1000:
+            return 10
+
+    return 0
+
+
 def puntuar_pelicula(
-    movie: dict[str, Any],
+    pelicula: dict[str, Any],
     perfil_estable: dict[str, Any],
     sesion_actual: dict[str, Any],
 ) -> int:
-    score = 0
-    runtime = movie.get("runtime") or 0
-    vote_count = movie.get("vote_count") or 0
-    popularity = movie.get("popularity") or 0
-
-    score += min(int(popularity), 40)
-    score += min(vote_count // 100, 40)
-
-    if movie.get("original_language") in perfil_estable["idiomas_comodos"]:
-        score += 12
-
-    provider_ids = {provider["provider_id"] for provider in movie["providers"]}
-    selected_providers = set(perfil_estable["plataformas"])
-    if selected_providers and not provider_ids.isdisjoint(selected_providers):
-        score += 18
-
-    if any(provider["provider_type"] == "flatrate" for provider in movie["providers"]):
-        score += 8
-
-    mood = sesion_actual.get("mood")
-    if mood is not None:
-        mood_genres = set(generos_principales_para_mood(mood))
-        movie_genres = set(movie.get("genre_ids") or [])
-        mood_matches = len(mood_genres.intersection(movie_genres))
-        if mood_matches:
-            score += 90 + (mood_matches * 20)
-        else:
-            score -= 40
-
-    if coincide_con_tiempo(movie, sesion_actual.get("preferencia_tiempo")):
-        score += 20
-
-    if coincide_con_epoca(movie, sesion_actual.get("preferencia_epoca")):
-        score += 18
-
-    energy = sesion_actual.get("preferencia_energia")
-    if energy == "facil":
-        if runtime and runtime < 100:
-            score += 16
-        elif runtime and runtime < 120:
-            score += 10
-    elif energy == "reto":
-        if runtime >= 120:
-            score += 16
-        elif runtime >= 100:
-            score += 10
-
-    discovery = sesion_actual.get("seguro_o_descubrir")
-    if discovery == "seguro":
-        if vote_count >= 10000:
-            score += 24
-        elif vote_count >= 5000:
-            score += 12
-    elif discovery == "descubrir":
-        if 1000 <= vote_count < 10000:
-            score += 24
-        elif 300 <= vote_count < 1000:
-            score += 10
-
-    return score
+    puntaje = 0
+    puntaje += _sumar_puntaje_base(pelicula)
+    puntaje += _sumar_puntaje_por_idioma(pelicula, perfil_estable)
+    puntaje += _sumar_puntaje_por_plataforma(pelicula, perfil_estable)
+    puntaje += _sumar_puntaje_por_mood(pelicula, sesion_actual)
+    puntaje += _sumar_puntaje_por_tiempo_y_epoca(pelicula, sesion_actual)
+    puntaje += _sumar_puntaje_por_energia(pelicula, sesion_actual)
+    puntaje += _sumar_puntaje_por_descubrimiento(pelicula, sesion_actual)
+    return puntaje

@@ -3,13 +3,17 @@ from __future__ import annotations
 from flask import Blueprint, jsonify
 
 from ..motor.catalogo import cargar_peliculas_por_tmdb_ids
-from .auth_model import AuthError, RequestValidationError, get_authenticated_user_from_request
-from .request_utils import get_json_payload
+from .auth_model import (
+    AuthError,
+    RequestValidationError,
+    obtener_usuario_autenticado_desde_request,
+)
+from .request_utils import obtener_payload_json
 from .user_profile_model import (
     agregar_pelicula_a_lista,
-    get_or_create_profile,
+    guardar_perfil,
+    obtener_o_crear_perfil,
     quitar_pelicula_de_lista,
-    save_profile,
 )
 
 
@@ -22,51 +26,51 @@ def _normalizar_codigo_pais(value) -> str:
     return value.strip().upper()
 
 
-def _get_authenticated_profile_user_id() -> int:
-    user = get_authenticated_user_from_request(required=True)
-    return user["id"]
+def _obtener_user_id_autenticado() -> int:
+    usuario = obtener_usuario_autenticado_desde_request(required=True)
+    return usuario["id"]
 
 
 @profile_api.get("/profile")
-def get_profile():
+def ver_perfil():
     try:
-        user_id = _get_authenticated_profile_user_id()
-        profile = get_or_create_profile(user_id=user_id)
+        user_id = _obtener_user_id_autenticado()
+        perfil = obtener_o_crear_perfil(user_id=user_id)
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
-    return jsonify({"status": "ok", "item": profile})
+    return jsonify({"status": "ok", "item": perfil})
 
 
 @profile_api.put("/profile")
-def put_profile():
+def reemplazar_perfil():
     try:
-        user_id = _get_authenticated_profile_user_id()
-        payload = get_json_payload()
-        profile = save_profile(payload, user_id=user_id, merge=False)
+        user_id = _obtener_user_id_autenticado()
+        payload = obtener_payload_json()
+        perfil = guardar_perfil(payload, user_id=user_id, merge=False)
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
     except (RequestValidationError, ValueError) as error:
         return jsonify({"status": "error", "message": str(error)}), 400
 
-    return jsonify({"status": "ok", "item": profile})
+    return jsonify({"status": "ok", "item": perfil})
 
 
 @profile_api.patch("/profile")
-def patch_profile():
+def actualizar_parte_del_perfil():
     try:
-        user_id = _get_authenticated_profile_user_id()
-        payload = get_json_payload()
-        profile = save_profile(payload, user_id=user_id, merge=True)
+        user_id = _obtener_user_id_autenticado()
+        payload = obtener_payload_json()
+        perfil = guardar_perfil(payload, user_id=user_id, merge=True)
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
     except (RequestValidationError, ValueError) as error:
         return jsonify({"status": "error", "message": str(error)}), 400
 
-    return jsonify({"status": "ok", "item": profile})
+    return jsonify({"status": "ok", "item": perfil})
 
 
-def _get_tmdb_id_from_payload() -> int:
-    payload = get_json_payload()
+def _obtener_tmdb_id_del_payload() -> int:
+    payload = obtener_payload_json()
     tmdb_id = payload.get("tmdb_id")
     if isinstance(tmdb_id, bool):
         raise RequestValidationError("`tmdb_id` debe ser un entero positivo.")
@@ -80,10 +84,10 @@ def _get_tmdb_id_from_payload() -> int:
 
 
 def _listar_peliculas_del_perfil(*, user_id: int, campo: str) -> list[dict]:
-    profile = get_or_create_profile(user_id=user_id)
-    country_code = _normalizar_codigo_pais(profile.get("pais"))
+    perfil = obtener_o_crear_perfil(user_id=user_id)
+    country_code = _normalizar_codigo_pais(perfil.get("pais"))
     tmdb_ids: list[int] = []
-    for item in profile.get(campo) or []:
+    for item in perfil.get(campo) or []:
         if isinstance(item, bool):
             continue
         try:
@@ -97,9 +101,9 @@ def _listar_peliculas_del_perfil(*, user_id: int, campo: str) -> list[dict]:
 
 
 @profile_api.get("/watchlist")
-def get_watchlist_movies():
+def ver_watchlist():
     try:
-        user_id = _get_authenticated_profile_user_id()
+        user_id = _obtener_user_id_autenticado()
         items = _listar_peliculas_del_perfil(user_id=user_id, campo="ver_luego")
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
@@ -107,9 +111,9 @@ def get_watchlist_movies():
 
 
 @profile_api.get("/history")
-def get_history_movies():
+def ver_historial():
     try:
-        user_id = _get_authenticated_profile_user_id()
+        user_id = _obtener_user_id_autenticado()
         items = _listar_peliculas_del_perfil(user_id=user_id, campo="historial")
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
@@ -117,84 +121,84 @@ def get_history_movies():
 
 
 @profile_api.post("/history")
-def add_movie_seen():
+def agregar_pelicula_vista():
     try:
-        user_id = _get_authenticated_profile_user_id()
-        tmdb_id = _get_tmdb_id_from_payload()
-        profile = agregar_pelicula_a_lista(
+        user_id = _obtener_user_id_autenticado()
+        tmdb_id = _obtener_tmdb_id_del_payload()
+        perfil = agregar_pelicula_a_lista(
             tmdb_id, "historial", user_id=user_id, campos_limpiar=("ver_luego",)
         )
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
     except (RequestValidationError, ValueError) as error:
         return jsonify({"status": "error", "message": str(error)}), 400
-    return jsonify({"status": "ok", "item": profile})
+    return jsonify({"status": "ok", "item": perfil})
 
 
 @profile_api.delete("/history")
-def remove_movie_seen():
+def quitar_pelicula_vista():
     try:
-        user_id = _get_authenticated_profile_user_id()
-        tmdb_id = _get_tmdb_id_from_payload()
-        profile = quitar_pelicula_de_lista(tmdb_id, "historial", user_id=user_id)
+        user_id = _obtener_user_id_autenticado()
+        tmdb_id = _obtener_tmdb_id_del_payload()
+        perfil = quitar_pelicula_de_lista(tmdb_id, "historial", user_id=user_id)
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
     except (RequestValidationError, ValueError) as error:
         return jsonify({"status": "error", "message": str(error)}), 400
-    return jsonify({"status": "ok", "item": profile})
+    return jsonify({"status": "ok", "item": perfil})
 
 
 @profile_api.post("/watchlist")
-def add_movie_save():
+def agregar_pelicula_a_watchlist():
     try:
-        user_id = _get_authenticated_profile_user_id()
-        tmdb_id = _get_tmdb_id_from_payload()
-        profile = agregar_pelicula_a_lista(tmdb_id, "ver_luego", user_id=user_id)
+        user_id = _obtener_user_id_autenticado()
+        tmdb_id = _obtener_tmdb_id_del_payload()
+        perfil = agregar_pelicula_a_lista(tmdb_id, "ver_luego", user_id=user_id)
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
     except (RequestValidationError, ValueError) as error:
         return jsonify({"status": "error", "message": str(error)}), 400
-    return jsonify({"status": "ok", "item": profile})
+    return jsonify({"status": "ok", "item": perfil})
 
 
 @profile_api.delete("/watchlist")
-def remove_movie_save():
+def quitar_pelicula_de_watchlist():
     try:
-        user_id = _get_authenticated_profile_user_id()
-        tmdb_id = _get_tmdb_id_from_payload()
-        profile = quitar_pelicula_de_lista(tmdb_id, "ver_luego", user_id=user_id)
+        user_id = _obtener_user_id_autenticado()
+        tmdb_id = _obtener_tmdb_id_del_payload()
+        perfil = quitar_pelicula_de_lista(tmdb_id, "ver_luego", user_id=user_id)
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
     except (RequestValidationError, ValueError) as error:
         return jsonify({"status": "error", "message": str(error)}), 400
-    return jsonify({"status": "ok", "item": profile})
+    return jsonify({"status": "ok", "item": perfil})
 
 
 @profile_api.post("/discard")
-def add_movie_discard():
+def descartar_pelicula():
     try:
-        user_id = _get_authenticated_profile_user_id()
-        tmdb_id = _get_tmdb_id_from_payload()
-        profile = agregar_pelicula_a_lista(
+        user_id = _obtener_user_id_autenticado()
+        tmdb_id = _obtener_tmdb_id_del_payload()
+        perfil = agregar_pelicula_a_lista(
             tmdb_id, "titulos_descartados", user_id=user_id, campos_limpiar=("ver_luego",)
         )
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
     except (RequestValidationError, ValueError) as error:
         return jsonify({"status": "error", "message": str(error)}), 400
-    return jsonify({"status": "ok", "item": profile})
+    return jsonify({"status": "ok", "item": perfil})
 
 
 @profile_api.post("/profile/skip")
-def skip_profile():
+def saltar_onboarding():
     try:
-        user_id = _get_authenticated_profile_user_id()
-        payload = get_json_payload()
+        user_id = _obtener_user_id_autenticado()
+        payload = obtener_payload_json()
         payload["onboarding_skipped"] = True
-        profile = save_profile(payload, user_id=user_id, merge=True)
+        perfil = guardar_perfil(payload, user_id=user_id, merge=True)
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
     except (RequestValidationError, ValueError) as error:
         return jsonify({"status": "error", "message": str(error)}), 400
 
-    return jsonify({"status": "ok", "item": profile})
+    return jsonify({"status": "ok", "item": perfil})

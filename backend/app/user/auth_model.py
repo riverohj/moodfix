@@ -18,11 +18,11 @@ PBKDF2_ITERATIONS = 120_000
 
 
 class RequestValidationError(ValueError):
-    """Errores de payload o validacion del request."""
+    pass
 
 
 class AuthError(ValueError):
-    """Errores de autenticacion o autorizacion."""
+    pass
 
 
 def _get_connection() -> sqlite3.Connection:
@@ -88,24 +88,24 @@ def _decode_user(row: sqlite3.Row | None) -> dict[str, Any] | None:
     }
 
 
-def get_user_by_id(user_id: int) -> dict[str, Any] | None:
+def obtener_usuario_por_id(user_id: int) -> dict[str, Any] | None:
     with _get_connection() as connection:
         row = connection.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     return _decode_user(row)
 
 
-def register_user(email: Any, password: Any) -> dict[str, Any]:
-    clean_email = _clean_email(email)
-    valid_password = _validate_password(password)
+def registrar_usuario(email: Any, password: Any) -> dict[str, Any]:
+    email_limpio = _clean_email(email)
+    password_valida = _validate_password(password)
     salt = secrets.token_bytes(16)
-    password_hash = _hash_password(valid_password, salt)
+    hash_password = _hash_password(password_valida, salt)
 
     with _get_connection() as connection:
-        existing = connection.execute(
+        usuario_existente = connection.execute(
             "SELECT id FROM users WHERE email = ?",
-            (clean_email,),
+            (email_limpio,),
         ).fetchone()
-        if existing is not None:
+        if usuario_existente is not None:
             raise RequestValidationError("Ya existe una cuenta con ese email.")
 
         cursor = connection.execute(
@@ -113,37 +113,37 @@ def register_user(email: Any, password: Any) -> dict[str, Any]:
             INSERT INTO users (email, password_hash, password_salt)
             VALUES (?, ?, ?)
             """,
-            (clean_email, password_hash, _encode_salt(salt)),
+            (email_limpio, hash_password, _encode_salt(salt)),
         )
         connection.commit()
-        return get_user_by_id(cursor.lastrowid)
+        return obtener_usuario_por_id(cursor.lastrowid)
 
 
-def authenticate_user(email: Any, password: Any) -> dict[str, Any]:
-    clean_email = _clean_email(email)
-    valid_password = _validate_password(password)
+def autenticar_usuario(email: Any, password: Any) -> dict[str, Any]:
+    email_limpio = _clean_email(email)
+    password_valida = _validate_password(password)
 
     with _get_connection() as connection:
         row = connection.execute(
             "SELECT * FROM users WHERE email = ?",
-            (clean_email,),
+            (email_limpio,),
         ).fetchone()
 
     if row is None:
         raise AuthError("Credenciales no validas.")
 
-    expected_hash = row["password_hash"]
-    provided_hash = _hash_password(valid_password, _decode_salt(row["password_salt"]))
-    if not hmac.compare_digest(expected_hash, provided_hash):
+    hash_esperado = row["password_hash"]
+    hash_recibido = _hash_password(password_valida, _decode_salt(row["password_salt"]))
+    if not hmac.compare_digest(hash_esperado, hash_recibido):
         raise AuthError("Credenciales no validas.")
 
     return _decode_user(row)
 
 
-def create_auth_token(user_id: int) -> dict[str, Any]:
+def crear_token_auth(user_id: int) -> dict[str, Any]:
     token = secrets.token_urlsafe(32)
-    token_hash = _hash_token(token)
-    expires_at = _utc_now() + timedelta(hours=TOKEN_TTL_HOURS)
+    hash_token = _hash_token(token)
+    vencimiento = _utc_now() + timedelta(hours=TOKEN_TTL_HOURS)
 
     with _get_connection() as connection:
         connection.execute(
@@ -151,19 +151,20 @@ def create_auth_token(user_id: int) -> dict[str, Any]:
             INSERT INTO auth_tokens (user_id, token_hash, expires_at)
             VALUES (?, ?, ?)
             """,
-            (user_id, token_hash, _serialize_datetime(expires_at)),
+            (user_id, hash_token, _serialize_datetime(vencimiento)),
         )
         connection.commit()
 
     return {
         "access_token": token,
         "token_type": "Bearer",
-        "expires_at": _serialize_datetime(expires_at),
+        "expires_at": _serialize_datetime(vencimiento),
         "expires_in_seconds": TOKEN_TTL_HOURS * 60 * 60,
     }
 
 
-def revoke_token(raw_token: str) -> None:
+def revocar_token(token_crudo: str) -> None:
+    ahora = _serialize_datetime(_utc_now())
     with _get_connection() as connection:
         connection.execute(
             """
@@ -171,27 +172,27 @@ def revoke_token(raw_token: str) -> None:
             SET revoked_at = ?, expires_at = ?
             WHERE token_hash = ? AND revoked_at IS NULL
             """,
-            (_serialize_datetime(_utc_now()), _serialize_datetime(_utc_now()), _hash_token(raw_token)),
+            (ahora, ahora, _hash_token(token_crudo)),
         )
         connection.commit()
 
 
-def get_token_from_request() -> str | None:
-    authorization = request.headers.get("Authorization", "")
-    if not authorization.startswith("Bearer "):
+def obtener_token_del_request() -> str | None:
+    autorizacion = request.headers.get("Authorization", "")
+    if not autorizacion.startswith("Bearer "):
         return None
-    token = authorization.removeprefix("Bearer ").strip()
+    token = autorizacion.removeprefix("Bearer ").strip()
     return token or None
 
 
-def get_authenticated_user_from_request(required: bool = True) -> dict[str, Any] | None:
-    token = get_token_from_request()
+def obtener_usuario_autenticado_desde_request(required: bool = True) -> dict[str, Any] | None:
+    token = obtener_token_del_request()
     if token is None:
         if required:
             raise AuthError("Falta un token Bearer valido.")
         return None
 
-    token_hash = _hash_token(token)
+    hash_token = _hash_token(token)
     with _get_connection() as connection:
         row = connection.execute(
             """
@@ -206,7 +207,7 @@ def get_authenticated_user_from_request(required: bool = True) -> dict[str, Any]
             INNER JOIN users ON users.id = auth_tokens.user_id
             WHERE auth_tokens.token_hash = ?
             """,
-            (token_hash,),
+            (hash_token,),
         ).fetchone()
 
     if row is None:
