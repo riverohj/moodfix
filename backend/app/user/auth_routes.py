@@ -5,25 +5,25 @@ from flask import Blueprint, jsonify
 from .auth_model import (
     AuthError,
     RequestValidationError,
-    authenticate_user,
-    create_auth_token,
-    get_authenticated_user_from_request,
-    get_token_from_request,
-    register_user,
-    revoke_token,
+    autenticar_usuario,
+    crear_token_auth,
+    obtener_token_del_request,
+    obtener_usuario_autenticado_desde_request,
+    registrar_usuario,
+    revocar_token,
 )
-from .request_utils import get_json_payload
+from .request_utils import obtener_payload_json
 
 
 auth_api = Blueprint("auth_api", __name__)
 
 
 @auth_api.post("/auth/register")
-def register():
+def registrar():
     try:
-        payload = get_json_payload()
-        user = register_user(payload.get("email"), payload.get("password"))
-        token = create_auth_token(user["id"])
+        payload = obtener_payload_json()
+        user = registrar_usuario(payload.get("email"), payload.get("password"))
+        token = crear_token_auth(user["id"])
     except RequestValidationError as error:
         return jsonify({"status": "error", "message": str(error)}), 400
 
@@ -31,11 +31,11 @@ def register():
 
 
 @auth_api.post("/auth/login")
-def login():
+def iniciar_sesion():
     try:
-        payload = get_json_payload()
-        user = authenticate_user(payload.get("email"), payload.get("password"))
-        token = create_auth_token(user["id"])
+        payload = obtener_payload_json()
+        user = autenticar_usuario(payload.get("email"), payload.get("password"))
+        token = crear_token_auth(user["id"])
     except RequestValidationError as error:
         return jsonify({"status": "error", "message": str(error)}), 400
     except AuthError as error:
@@ -45,9 +45,9 @@ def login():
 
 
 @auth_api.get("/auth/me")
-def me():
+def ver_mi_usuario():
     try:
-        user = get_authenticated_user_from_request(required=True)
+        user = obtener_usuario_autenticado_desde_request(required=True)
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
 
@@ -55,12 +55,12 @@ def me():
 
 
 @auth_api.post("/auth/logout")
-def logout():
+def cerrar_sesion():
     try:
-        get_authenticated_user_from_request(required=True)
-        token = get_token_from_request()
+        obtener_usuario_autenticado_desde_request(required=True)
+        token = obtener_token_del_request()
         if token is not None:
-            revoke_token(token)
+            revocar_token(token)
     except AuthError as error:
         return jsonify({"status": "error", "message": str(error)}), 401
 

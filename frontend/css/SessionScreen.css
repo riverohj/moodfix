@@ -5,6 +5,7 @@
   position: relative;
   z-index: 1;
   min-height: calc(100vh - 180px);
+  overflow-x: clip;
 }
 
 .session-feedback {
@@ -44,6 +45,7 @@
   color: rgba(245, 245, 245, 0.88);
   font-size: 1rem;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .session-inline-nudge-hint {
@@ -84,6 +86,7 @@
   min-height: calc(100vh - 210px);
   margin: 0 auto;
   padding: 42px 38px;
+  box-sizing: border-box;
 }
 
 .session-view-shell-compact {
@@ -102,6 +105,7 @@
   border: 1px solid #e50914;
   border-radius: 40px;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9), 0 0 20px rgba(229, 9, 20, 0.15);
+  box-sizing: border-box;
 }
 
 .session-home-card {
@@ -125,6 +129,7 @@
   line-height: 0.98;
   letter-spacing: -0.04em;
   color: #f5f5f5;
+  overflow-wrap: anywhere;
 }
 
 .session-home-title {
@@ -142,6 +147,7 @@
   color: #a0a0a0;
   font-size: 1.05rem;
   line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 
 .session-detail-copy-wide {
@@ -204,6 +210,7 @@
 }
 
 .session-primary-button {
+  min-width: 0;
   padding: 15px 24px;
   font-size: 0.98rem;
   background: #e50914;
@@ -211,6 +218,7 @@
 }
 
 .ghost-button {
+  min-width: 0;
   padding: 15px 24px;
   font-size: 0.98rem;
   background: rgba(255, 255, 255, 0.04);
@@ -276,6 +284,7 @@
   font-size: 0.98rem;
   min-width: 220px;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .session-pill:hover {
@@ -286,6 +295,27 @@
 .session-pill-active {
   border-color: #e50914;
   background: rgba(229, 9, 20, 0.14);
+}
+
+.session-pill-has-sub {
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 28px;
+}
+
+.session-pill-label {
+  font-size: 0.98rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.session-pill-sublabel {
+  font-size: 0.75rem;
+  color: rgba(245, 245, 245, 0.45);
+  font-weight: 400;
 }
 
 .session-pill-grid-centered {
@@ -303,6 +333,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 24px;
+  box-sizing: border-box;
 }
 
 .session-question-card {
@@ -319,6 +351,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 26px;
+  box-sizing: border-box;
 }
 
 .session-question-header {
@@ -331,6 +364,7 @@
   line-height: 0.98;
   letter-spacing: -0.04em;
   color: #f5f5f5;
+  overflow-wrap: anywhere;
 }
 
 .session-question-copy {
@@ -339,6 +373,7 @@
   color: #a0a0a0;
   line-height: 1.6;
   font-size: 1.04rem;
+  overflow-wrap: anywhere;
 }
 
 .session-question-options {
@@ -357,9 +392,7 @@
 }
 
 .session-nav-arrow {
-  position: absolute;
-  top: 58%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -378,20 +411,12 @@
 .session-nav-arrow:hover:not(:disabled) {
   background: rgba(30, 30, 30, 0.96);
   border-color: rgba(229, 9, 20, 0.8);
-  transform: translateY(calc(-58% - 1px));
+  transform: translateY(-1px);
 }
 
 .session-nav-arrow:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.session-nav-arrow:first-child {
-  left: -110px;
-}
-
-.session-nav-arrow:last-child {
-  right: -110px;
 }
 
 .session-nav-arrow-hidden {
@@ -422,6 +447,7 @@
 
 .session-results-actions {
   justify-content: flex-end;
+  min-width: 0;
 }
 
 .session-carousel-shell {
@@ -445,6 +471,7 @@
   gap: 10px;
   min-width: 132px;
   min-height: 56px;
+  min-width: 0;
   border-radius: 999px;
   border: 1px solid rgba(245, 245, 245, 0.14);
   background: rgba(15, 15, 15, 0.92);
@@ -475,6 +502,7 @@
 .session-question-card .session-pill {
   width: 232px;
   min-height: 56px;
+  max-width: 100%;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -660,6 +688,7 @@
 .rc-provider {
   font-weight: 700;
   color: rgba(229, 9, 20, 0.85);
+  overflow-wrap: anywhere;
 }
 
 .rc-title {
@@ -675,6 +704,14 @@
   font-size: clamp(2.1rem, 3vw, 3.2rem);
   line-height: 0.94;
   overflow-wrap: anywhere;
+}
+
+.rc-razon-ia {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: rgba(245, 245, 245, 0.6);
+  line-height: 1.5;
 }
 
 .rc-overview {
@@ -735,6 +772,7 @@
   font-size: 0.9rem;
   font-weight: 700;
   cursor: default;
+  overflow-wrap: anywhere;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
@@ -772,11 +810,14 @@
 .rc-btn-seen,
 .rc-btn-dismiss {
   min-height: 54px;
+  min-width: 0;
   border-radius: 18px;
   padding: 0 18px;
   font-size: 0.94rem;
   font-weight: 800;
   cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
   transition: background 180ms, border-color 180ms, color 180ms, transform 180ms, opacity 180ms;
 }
 
@@ -1147,6 +1188,7 @@
   color: #f5f5f5;
   line-height: 1.1;
   letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
 }
 
 .rc-modal-overview {
@@ -1213,6 +1255,7 @@
   color: rgba(245, 245, 245, 0.86);
   font-size: 0.88rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 /* ── Card descartada (colapsada) ──────────────────────── */
@@ -1269,28 +1312,23 @@
 
   .session-home-card,
   .session-detail-card,
-  .session-question-card {
-    padding: 38px 24px;
-  }
-
   .session-question-shell {
     min-height: auto;
     padding: 0 0 24px;
-  }
-
-  .session-nav-arrow {
-    position: static;
-    transform: none;
-  }
-
-  .session-nav-arrow:first-child,
-  .session-nav-arrow:last-child {
-    left: auto;
-    right: auto;
+    flex-direction: column;
+    gap: 16px;
   }
 
   .session-question-card {
+    padding: 32px 20px;
     min-height: 0;
+    width: 100%;
+    border-radius: 24px;
+    order: 1;
+  }
+
+  .session-nav-arrow {
+    order: 2;
   }
 
   .session-page-actions,
@@ -1307,6 +1345,13 @@
   .session-nav-arrow,
   .session-carousel-arrow {
     width: 100%;
+  }
+
+  .session-results-actions,
+  .session-detail-actions,
+  .session-inline-nudge-actions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .session-carousel-nav {
@@ -1348,12 +1393,27 @@
 
 @media (max-width: 620px) {
   .session-screen {
-    padding-inline: 6px;
+    padding-inline: 0;
   }
 
   .session-home-title,
   .session-detail-title {
     font-size: 2rem;
+  }
+
+  .session-home-title .session-home-line:first-child {
+    letter-spacing: 0.01em;
+    line-height: 1.06;
+  }
+
+  .session-view-shell {
+    padding: 18px 10px 26px;
+  }
+
+  .session-home-card,
+  .session-detail-card {
+    padding: 32px 20px;
+    border-radius: 26px;
   }
 
   .session-home-actions {
@@ -1372,10 +1432,94 @@
 
   .session-pill-grid {
     gap: 10px;
+    flex-direction: column;
+    align-items: center;
   }
 
   .session-pill {
     min-width: 0;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .session-pill-grid-centered {
+    width: 100%;
+  }
+
+  .session-question-shell {
+    gap: 12px;
+  }
+
+  .session-question-card {
+    padding: 28px 16px;
+    border-radius: 24px;
+    gap: 20px;
+  }
+
+  .session-nav-arrow {
+    min-height: 48px;
+  }
+
+  .session-nav-arrow:hover:not(:disabled),
+  .session-nav-arrow:active:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .session-nav-arrow:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .session-question-options {
+    min-height: 0;
+  }
+
+  .session-question-card .session-pill {
+    width: 100%;
+  }
+
+  .session-results-header {
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .session-carousel-nav {
+    margin-top: 14px;
+    gap: 12px;
+  }
+
+  .rc-feature {
+    border-radius: 24px;
+  }
+
+  .rc-poster-feature {
+    min-height: 320px;
+  }
+
+  .rc-feature-body {
+    padding: 20px 16px 18px;
+    gap: 14px;
+  }
+
+  .rc-action-grid {
+    gap: 10px;
+  }
+
+  .rc-modal-backdrop {
+    padding: 12px;
+  }
+
+  .rc-modal {
+    max-height: 90vh;
+    border-radius: 24px;
+  }
+
+  .rc-modal-body {
+    padding: 18px 16px 20px;
+  }
+
+  .rc-modal-facts {
+    grid-template-columns: 1fr;
   }
 
   .rc-action-grid {

@@ -252,17 +252,6 @@ function Favorites({ onProfileChange, token }) {
                 ) : (
                   <div className="favorito-poster-fallback" aria-hidden="true" />
                 )}
-                <button
-                  className="favorito-card-badge"
-                  type="button"
-                  aria-label="Quitar de Ver luego"
-                  disabled={removingId === movie.tmdb_id}
-                  onClick={() => {
-                    void handleRemove(movie);
-                  }}
-                >
-                  ❤
-                </button>
               </div>
 
               <div className="favorito-card-body">

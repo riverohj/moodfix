@@ -194,7 +194,13 @@ export default function HistoryScreen({ onProfileChange, token }) {
     <section className="history-screen">
       <header className="history-screen-header">
         <div>
-          <h1 className="history-section-title">Tu historial de visualización</h1>
+          <div className="history-title-row">
+            <h1 className="history-section-title">
+              <span className="history-title-line">Tu historial</span>
+              <span className="history-title-line">de visualización</span>
+            </h1>
+            <span className="history-title-icon" aria-hidden="true">🎬</span>
+          </div>
           {historyItems.length > 0 ? (
             <p className="history-screen-description">{historyCountLabel}</p>
           ) : (
@@ -236,17 +242,6 @@ export default function HistoryScreen({ onProfileChange, token }) {
                 ) : (
                   <div className="history-poster-fallback" aria-hidden="true" />
                 )}
-                <button
-                  className="history-card-badge"
-                  type="button"
-                  aria-label="Quitar del historial"
-                  disabled={removingId === item.tmdb_id}
-                  onClick={() => {
-                    void handleRemove(item);
-                  }}
-                >
-                  ✕
-                </button>
               </div>
 
               <div className="history-card-body">

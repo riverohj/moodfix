@@ -7,7 +7,7 @@ from typing import Any
 from ..db import get_db_path
 
 
-def _decode_genre_ids(value: Any) -> list[int]:
+def _decodificar_generos(value: Any) -> list[int]:
     if not value:
         return []
 
@@ -33,6 +33,35 @@ def _decode_genre_ids(value: Any) -> list[int]:
         seen.add(genre_id)
         genre_ids.append(genre_id)
     return genre_ids
+
+
+def _crear_pelicula_desde_fila(row: sqlite3.Row) -> dict[str, Any]:
+    return {
+        "id": row["id"],
+        "tmdb_id": row["tmdb_id"],
+        "title": row["title"],
+        "poster_path": row["poster_path"],
+        "runtime": row["runtime"],
+        "release_year": row["release_year"],
+        "original_language": row["original_language"],
+        "overview": row["overview"],
+        "popularity": row["popularity"] or 0,
+        "vote_count": row["vote_count"] or 0,
+        "genre_ids": _decodificar_generos(row["genre_ids"]),
+        "providers": [],
+    }
+
+
+def _agregar_provider_si_existe(pelicula: dict[str, Any], row: sqlite3.Row) -> None:
+    if row["provider_id"] is None:
+        return
+    pelicula["providers"].append(
+        {
+            "provider_id": row["provider_id"],
+            "provider_name": row["provider_name"],
+            "provider_type": row["provider_type"],
+        }
+    )
 
 
 def cargar_catalogo_por_pais(country_code: str) -> list[dict[str, Any]]:
@@ -73,30 +102,9 @@ def cargar_catalogo_por_pais(country_code: str) -> list[dict[str, Any]]:
         movie_id = row["id"]
         movie = movies.get(movie_id)
         if movie is None:
-            movie = {
-                "id": row["id"],
-                "tmdb_id": row["tmdb_id"],
-                "title": row["title"],
-                "poster_path": row["poster_path"],
-                "runtime": row["runtime"],
-                "release_year": row["release_year"],
-                "original_language": row["original_language"],
-                "overview": row["overview"],
-                "popularity": row["popularity"] or 0,
-                "vote_count": row["vote_count"] or 0,
-                "genre_ids": _decode_genre_ids(row["genre_ids"]),
-                "providers": [],
-            }
+            movie = _crear_pelicula_desde_fila(row)
             movies[movie_id] = movie
-
-        if row["provider_id"] is not None:
-            movie["providers"].append(
-                {
-                    "provider_id": row["provider_id"],
-                    "provider_name": row["provider_name"],
-                    "provider_type": row["provider_type"],
-                }
-            )
+        _agregar_provider_si_existe(movie, row)
 
     return list(movies.values())
 
@@ -167,30 +175,9 @@ def cargar_peliculas_por_tmdb_ids(
         tmdb_id = row["tmdb_id"]
         movie = movies_by_tmdb_id.get(tmdb_id)
         if movie is None:
-            movie = {
-                "id": row["id"],
-                "tmdb_id": row["tmdb_id"],
-                "title": row["title"],
-                "poster_path": row["poster_path"],
-                "runtime": row["runtime"],
-                "release_year": row["release_year"],
-                "original_language": row["original_language"],
-                "overview": row["overview"],
-                "popularity": row["popularity"] or 0,
-                "vote_count": row["vote_count"] or 0,
-                "genre_ids": _decode_genre_ids(row["genre_ids"]),
-                "providers": [],
-            }
+            movie = _crear_pelicula_desde_fila(row)
             movies_by_tmdb_id[tmdb_id] = movie
-
-        if row["provider_id"] is not None:
-            movie["providers"].append(
-                {
-                    "provider_id": row["provider_id"],
-                    "provider_name": row["provider_name"],
-                    "provider_type": row["provider_type"],
-                }
-            )
+        _agregar_provider_si_existe(movie, row)
 
     ordered_movies: list[dict[str, Any]] = []
     seen: set[int] = set()

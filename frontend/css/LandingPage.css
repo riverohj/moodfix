@@ -4,6 +4,8 @@
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
   position: relative;
+  width: 100%;
+  max-width: 100%;
 
   /*
    * FONDO INSPIRACIÓN: sala de cine oscura.
@@ -63,11 +65,11 @@
 }
 
 /* SOCIAL PROOF */
-.social-proof-row-fixed { display: flex; align-items: center; justify-content: center; gap: 15px; }
-.proof-dots-container { display: flex; align-items: center; }
+.social-proof-row-fixed { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; max-width: 100%; min-width: 0; }
+.proof-dots-container { display: flex; align-items: center; min-width: 0; }
 .proof-dot-item { width: 32px; height: 32px; background: #1a1a1a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: -10px; border: 2px solid #000; font-size: 0.9rem; }
 .proof-dot-item.dot-plus { background: #333; margin-right: 0; margin-left: 5px; color: #888; font-size: 0.8rem; }
-.proof-text-label { color: #555; font-size: 0.95rem; margin: 0; }
+.proof-text-label { color: #555; font-size: 0.95rem; margin: 0; min-width: 0; }
 .proof-text-label span { color: #999; font-weight: 700; }
 
 /* --- STATS --- */
@@ -340,6 +342,89 @@
 }
 
 @media (max-width: 768px) {
+    .landing-container {
+        width: 100%;
+    }
+    .landing-hero-slogan {
+        padding: 32px 16px 56px;
+    }
+    .landing-hero-slogan h2 {
+        font-size: 2.5rem;
+        line-height: 1.08;
+        margin-bottom: 20px;
+        overflow-wrap: anywhere;
+    }
+    .top-recomendador {
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+    .burger-emoji-main {
+        font-size: 3rem;
+        margin-bottom: 14px;
+    }
+    .slogan-description {
+        font-size: 1rem;
+        margin-bottom: 28px;
+        overflow-wrap: anywhere;
+    }
+    .cta-scroll-btn-styled {
+        width: 100%;
+        max-width: 320px;
+        padding: 16px 20px;
+        font-size: 1rem;
+    }
+    .social-proof-row-fixed {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    .proof-text-label {
+        max-width: 100%;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+    .landing-stats-row {
+        grid-template-columns: 1fr;
+        padding: 44px 16px;
+        gap: 18px;
+    }
+    .stat-box-unit {
+        padding-left: 16px;
+    }
+    .landing-problem-split,
+    .landing-solution-section,
+    .guided-exp-section,
+    .mem-memory-section,
+    .final-cta-section {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .problem-card-side,
+    .sol-card-item,
+    .mem-card {
+        padding: 24px 18px;
+    }
+    .quote-body {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .quote-red-divider {
+        width: 48px;
+        height: 3px;
+    }
+    .quote-main-text,
+    .guided-footer-text,
+    .mem-card p,
+    .final-cta-description {
+        overflow-wrap: anywhere;
+    }
+    .final-register-btn {
+        width: 100%;
+        max-width: 320px;
+        padding: 18px 20px;
+        font-size: 1rem;
+    }
     .guided-gray-titles { font-size: 1.8rem; }
     .guided-white-title { font-size: 2rem; }
     .guided-red-main { font-size: 2rem; }

@@ -12,6 +12,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 80px 80px 60px;
   position: relative;
   overflow: hidden;
@@ -35,6 +38,7 @@
 .home-card {
   max-width: 1100px;
   width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -50,6 +54,7 @@
   gap: 16px;
   align-items: center;
   width: min(100%, 760px);
+  min-width: 0;
 }
 
 .home-copy p {
@@ -64,12 +69,14 @@
   letter-spacing: -0.02em;
   color: #f5f5f5;
   text-shadow: 0 0 60px rgba(229, 9, 20, 0.25);
+  overflow-wrap: anywhere;
 }
 
 .home-subtitle {
   margin: 0;
   font-size: clamp(1.1rem, 2vw, 1.4rem);
   color: #555;
+  overflow-wrap: anywhere;
 }
 
 .home-highlight {
@@ -79,6 +86,7 @@
   color: #e50914;
   line-height: 1.1;
   text-shadow: 0 0 30px rgba(229, 9, 20, 0.45);
+  overflow-wrap: anywhere;
 }
 
 .home-description {
@@ -86,6 +94,7 @@
   font-size: clamp(1rem, 1.8vw, 1.2rem);
   color: #a0a0a0;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .home-cta {
@@ -114,7 +123,7 @@
 
 @media (max-width: 768px) {
   .home-page {
-    padding: 40px 20px;
+    padding: 32px 16px 28px;
   }
 
   .home-page::before {
@@ -129,6 +138,10 @@
 
   .home-copy p {
     width: 100%;
+  }
+
+  .home-copy h1 {
+    font-size: 2.5rem;
   }
 
   .home-cta {

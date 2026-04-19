@@ -4,11 +4,11 @@ import json
 import sqlite3
 from typing import Any
 
-from .auth_model import get_user_by_id
 from ..db import get_db_path
+from .auth_model import obtener_usuario_por_id
 
 
-PROFILE_FIELDS = (
+CAMPOS_PERFIL = (
     "pais",
     "plataformas",
     "idiomas_comodos",
@@ -20,7 +20,7 @@ PROFILE_FIELDS = (
     "onboarding_completed",
     "onboarding_skipped",
 )
-LIST_FIELDS = (
+CAMPOS_LISTA = (
     "plataformas",
     "idiomas_comodos",
     "no_rotundos",
@@ -28,10 +28,10 @@ LIST_FIELDS = (
     "ver_luego",
     "titulos_descartados",
 )
-ALLOWED_FIELDS = set(PROFILE_FIELDS)
+CAMPOS_PERMITIDOS = set(CAMPOS_PERFIL)
 
 
-def _default_profile_payload() -> dict[str, Any]:
+def _perfil_vacio() -> dict[str, Any]:
     return {
         "pais": None,
         "plataformas": [],
@@ -46,105 +46,145 @@ def _default_profile_payload() -> dict[str, Any]:
     }
 
 
-def _serialize_list(value: Any) -> str:
-    if value is None:
+def _conectar_bd() -> sqlite3.Connection:
+    conexion = sqlite3.connect(get_db_path())
+    conexion.row_factory = sqlite3.Row
+    return conexion
+
+
+def _asegurar_usuario(user_id: int) -> None:
+    if obtener_usuario_por_id(user_id) is None:
+        raise ValueError("Usuario no encontrado para actualizar su perfil.")
+
+
+def _serializar_lista(valor: Any) -> str:
+    if valor is None:
         return "[]"
-    if not isinstance(value, list):
+    if not isinstance(valor, list):
         raise ValueError("Los campos de lista deben enviarse como arrays.")
-    return json.dumps(value)
+    return json.dumps(valor)
 
 
-def _serialize_flag(value: Any) -> int:
-    return 1 if bool(value) else 0
+def _serializar_bandera(valor: Any) -> int:
+    return 1 if bool(valor) else 0
 
 
-def normalize_profile_payload(payload: dict[str, Any]) -> dict[str, Any]:
-    if not isinstance(payload, dict):
-        raise ValueError("El payload del perfil debe ser un objeto JSON.")
-
-    unknown_fields = sorted(set(payload) - ALLOWED_FIELDS)
-    if unknown_fields:
-        raise ValueError(f"Campos no soportados en perfil: {', '.join(unknown_fields)}.")
-
-    normalized: dict[str, Any] = {}
-
-    for field in LIST_FIELDS:
-        if field in payload:
-            normalized[field] = _serialize_list(payload[field])
-
-    if "pais" in payload:
-        normalized["pais"] = payload["pais"] or None
-
-    if "tolerancia_subtitulos" in payload:
-        value = payload["tolerancia_subtitulos"]
-        if value not in (None, "si", "no"):
-            raise ValueError("`tolerancia_subtitulos` solo permite `si`, `no` o null.")
-        normalized["tolerancia_subtitulos"] = value
-
-    for flag in ("onboarding_completed", "onboarding_skipped"):
-        if flag in payload:
-            normalized[flag] = _serialize_flag(payload[flag])
-
-    return normalized
-
-
-def _decode_row(row: sqlite3.Row | None) -> dict[str, Any] | None:
-    if row is None:
+def _decodificar_fila(fila: sqlite3.Row | None) -> dict[str, Any] | None:
+    if fila is None:
         return None
 
-    profile = dict(row)
-    for field in LIST_FIELDS:
-        profile[field] = json.loads(profile[field] or "[]")
-
-    profile["onboarding_completed"] = bool(profile["onboarding_completed"])
-    profile["onboarding_skipped"] = bool(profile["onboarding_skipped"])
-    return profile
-
-
-def _profile_key_for_user(user_id: int) -> str:
-    return f"user:{user_id}"
+    perfil = dict(fila)
+    for campo in CAMPOS_LISTA:
+        perfil[campo] = json.loads(perfil[campo] or "[]")
+    perfil["onboarding_completed"] = bool(perfil["onboarding_completed"])
+    perfil["onboarding_skipped"] = bool(perfil["onboarding_skipped"])
+    return perfil
 
 
-def _get_profile_row(connection: sqlite3.Connection, user_id: int) -> sqlite3.Row | None:
-    return connection.execute(
+def _leer_fila_perfil(conexion: sqlite3.Connection, user_id: int) -> sqlite3.Row | None:
+    return conexion.execute(
         "SELECT * FROM user_profiles WHERE user_id = ?",
         (user_id,),
     ).fetchone()
 
 
-def get_or_create_profile(*, user_id: int) -> dict[str, Any]:
-    if get_user_by_id(user_id) is None:
-        raise ValueError("Usuario no encontrado para crear su perfil.")
+def _crear_perfil_si_falta(conexion: sqlite3.Connection, user_id: int) -> sqlite3.Row:
+    fila = _leer_fila_perfil(conexion, user_id)
+    if fila is not None:
+        return fila
 
-    db_path = get_db_path()
-
-    with sqlite3.connect(db_path) as connection:
-        connection.row_factory = sqlite3.Row
-        row = _get_profile_row(connection, user_id=user_id)
-
-        if row is None:
-            connection.execute(
-                "INSERT INTO user_profiles (profile_key, user_id) VALUES (?, ?)",
-                (_profile_key_for_user(user_id), user_id),
-            )
-            connection.commit()
-            row = _get_profile_row(connection, user_id=user_id)
-
-    return _decode_row(row)
+    conexion.execute(
+        "INSERT INTO user_profiles (profile_key, user_id) VALUES (?, ?)",
+        (f"user:{user_id}", user_id),
+    )
+    return _leer_fila_perfil(conexion, user_id)
 
 
-def _normalizar_tmdb_id(value: Any) -> int:
-    if isinstance(value, bool):
+def _armar_update(campos: dict[str, Any]) -> tuple[str, list[Any]]:
+    nombres = list(campos.keys())
+    asignaciones = ", ".join(f"{campo} = ?" for campo in nombres)
+    valores = [campos[campo] for campo in nombres]
+    return asignaciones, valores
+
+
+def _guardar_campos(conexion: sqlite3.Connection, user_id: int, campos: dict[str, Any]) -> None:
+    if not campos:
+        return
+    asignaciones, valores = _armar_update(campos)
+    conexion.execute(
+        f"""
+        UPDATE user_profiles
+        SET {asignaciones},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ?
+        """,
+        (*valores, user_id),
+    )
+
+
+def _normalizar_tmdb_id(valor: Any) -> int:
+    if isinstance(valor, bool):
         raise ValueError("`tmdb_id` debe ser un entero positivo.")
     try:
-        tmdb_id = int(value)
+        tmdb_id = int(valor)
     except (TypeError, ValueError) as error:
         raise ValueError("`tmdb_id` debe ser un entero positivo.") from error
-
     if tmdb_id <= 0:
         raise ValueError("`tmdb_id` debe ser un entero positivo.")
-
     return tmdb_id
+
+
+def _limpiar_lista_ids(lista: list[Any], tmdb_id: int) -> list[int]:
+    limpia: list[int] = []
+    for item in lista or []:
+        if isinstance(item, bool) or item == tmdb_id:
+            continue
+        limpia.append(item)
+    return limpia
+
+
+def normalizar_payload_perfil(payload: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise ValueError("El payload del perfil debe ser un objeto JSON.")
+
+    campos_desconocidos = sorted(set(payload) - CAMPOS_PERMITIDOS)
+    if campos_desconocidos:
+        raise ValueError(f"Campos no soportados en perfil: {', '.join(campos_desconocidos)}.")
+
+    perfil_normalizado: dict[str, Any] = {}
+
+    for campo in CAMPOS_LISTA:
+        if campo in payload:
+            perfil_normalizado[campo] = _serializar_lista(payload[campo])
+
+    if "pais" in payload:
+        perfil_normalizado["pais"] = payload["pais"] or None
+
+    if "tolerancia_subtitulos" in payload:
+        valor = payload["tolerancia_subtitulos"]
+        if valor not in (None, "si", "no"):
+            raise ValueError("`tolerancia_subtitulos` solo permite `si`, `no` o null.")
+        perfil_normalizado["tolerancia_subtitulos"] = valor
+
+    if "onboarding_completed" in payload:
+        perfil_normalizado["onboarding_completed"] = _serializar_bandera(
+            payload["onboarding_completed"]
+        )
+
+    if "onboarding_skipped" in payload:
+        perfil_normalizado["onboarding_skipped"] = _serializar_bandera(
+            payload["onboarding_skipped"]
+        )
+
+    return perfil_normalizado
+
+
+def obtener_o_crear_perfil(*, user_id: int) -> dict[str, Any]:
+    _asegurar_usuario(user_id)
+    with _conectar_bd() as conexion:
+        fila = _crear_perfil_si_falta(conexion, user_id)
+        conexion.commit()
+    return _decodificar_fila(fila)
 
 
 def agregar_pelicula_a_lista(
@@ -154,64 +194,34 @@ def agregar_pelicula_a_lista(
     user_id: int,
     campos_limpiar: tuple[str, ...] = (),
 ) -> dict[str, Any]:
-    if campo not in LIST_FIELDS:
+    if campo not in CAMPOS_LISTA:
         raise ValueError(f"Campo no soportado para listas de peliculas: {campo}.")
-    if get_user_by_id(user_id) is None:
-        raise ValueError("Usuario no encontrado para actualizar su perfil.")
-    normalized_tmdb_id = _normalizar_tmdb_id(tmdb_id)
 
-    db_path = get_db_path()
-    with sqlite3.connect(db_path) as connection:
-        connection.row_factory = sqlite3.Row
-        connection.execute("BEGIN IMMEDIATE")
-
-        row = _get_profile_row(connection, user_id=user_id)
-        if row is None:
-            connection.execute(
-                "INSERT INTO user_profiles (profile_key, user_id) VALUES (?, ?)",
-                (_profile_key_for_user(user_id), user_id),
+    for campo_limpiar in campos_limpiar:
+        if campo_limpiar not in CAMPOS_LISTA:
+            raise ValueError(
+                f"Campo no soportado para limpiar listas de peliculas: {campo_limpiar}."
             )
-            row = _get_profile_row(connection, user_id=user_id)
 
-        profile = _decode_row(row)
-        assert profile is not None
+    _asegurar_usuario(user_id)
+    tmdb_id = _normalizar_tmdb_id(tmdb_id)
 
-        lista = [
-            item
-            for item in (profile.get(campo) or [])
-            if not isinstance(item, bool) and item != normalized_tmdb_id
-        ]
-        lista.append(normalized_tmdb_id)
+    with _conectar_bd() as conexion:
+        conexion.execute("BEGIN IMMEDIATE")
+        perfil = _decodificar_fila(_crear_perfil_si_falta(conexion, user_id))
 
-        payload: dict[str, str] = {campo: _serialize_list(lista)}
+        lista_principal = _limpiar_lista_ids(perfil.get(campo) or [], tmdb_id)
+        lista_principal.append(tmdb_id)
+
+        cambios = {campo: _serializar_lista(lista_principal)}
         for campo_limpiar in campos_limpiar:
-            if campo_limpiar not in LIST_FIELDS:
-                raise ValueError(
-                    f"Campo no soportado para limpiar listas de peliculas: {campo_limpiar}."
-                )
-            lista_limpia = [
-                item
-                for item in (profile.get(campo_limpiar) or [])
-                if not isinstance(item, bool) and item != normalized_tmdb_id
-            ]
-            payload[campo_limpiar] = _serialize_list(lista_limpia)
+            lista_limpia = _limpiar_lista_ids(perfil.get(campo_limpiar) or [], tmdb_id)
+            cambios[campo_limpiar] = _serializar_lista(lista_limpia)
 
-        fields = list(payload.keys())
-        assignments = ", ".join(f"{field} = ?" for field in fields)
-        values = [payload[field] for field in fields]
+        _guardar_campos(conexion, user_id, cambios)
+        conexion.commit()
 
-        connection.execute(
-            f"""
-            UPDATE user_profiles
-            SET {assignments},
-                updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ?
-            """,
-            (*values, user_id),
-        )
-        connection.commit()
-
-    return get_or_create_profile(user_id=user_id)
+    return obtener_o_crear_perfil(user_id=user_id)
 
 
 def quitar_pelicula_de_lista(
@@ -220,83 +230,39 @@ def quitar_pelicula_de_lista(
     *,
     user_id: int,
 ) -> dict[str, Any]:
-    if campo not in LIST_FIELDS:
+    if campo not in CAMPOS_LISTA:
         raise ValueError(f"Campo no soportado para listas de peliculas: {campo}.")
-    if get_user_by_id(user_id) is None:
-        raise ValueError("Usuario no encontrado para actualizar su perfil.")
-    normalized_tmdb_id = _normalizar_tmdb_id(tmdb_id)
 
-    db_path = get_db_path()
-    with sqlite3.connect(db_path) as connection:
-        connection.row_factory = sqlite3.Row
-        connection.execute("BEGIN IMMEDIATE")
+    _asegurar_usuario(user_id)
+    tmdb_id = _normalizar_tmdb_id(tmdb_id)
 
-        row = _get_profile_row(connection, user_id=user_id)
-        if row is None:
-            connection.execute(
-                "INSERT INTO user_profiles (profile_key, user_id) VALUES (?, ?)",
-                (_profile_key_for_user(user_id), user_id),
-            )
-            row = _get_profile_row(connection, user_id=user_id)
+    with _conectar_bd() as conexion:
+        conexion.execute("BEGIN IMMEDIATE")
+        perfil = _decodificar_fila(_crear_perfil_si_falta(conexion, user_id))
+        lista = _limpiar_lista_ids(perfil.get(campo) or [], tmdb_id)
+        _guardar_campos(conexion, user_id, {campo: _serializar_lista(lista)})
+        conexion.commit()
 
-        profile = _decode_row(row)
-        assert profile is not None
-
-        lista = [
-            item
-            for item in (profile.get(campo) or [])
-            if not isinstance(item, bool) and item != normalized_tmdb_id
-        ]
-
-        connection.execute(
-            f"""
-            UPDATE user_profiles
-            SET {campo} = ?,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ?
-            """,
-            (_serialize_list(lista), user_id),
-        )
-        connection.commit()
-
-    return get_or_create_profile(user_id=user_id)
+    return obtener_o_crear_perfil(user_id=user_id)
 
 
-def save_profile(
+def guardar_perfil(
     payload: dict[str, Any],
     *,
     user_id: int,
     merge: bool = True,
 ) -> dict[str, Any]:
-    existing = get_or_create_profile(user_id=user_id)
-    merged: dict[str, Any] = (
-        {
-            field: existing.get(field)
-            for field in PROFILE_FIELDS
-            if field in existing
-        }
+    perfil_actual = obtener_o_crear_perfil(user_id=user_id)
+    perfil_base = (
+        {campo: perfil_actual.get(campo) for campo in CAMPOS_PERFIL if campo in perfil_actual}
         if merge
-        else _default_profile_payload()
+        else _perfil_vacio()
     )
-    merged.update(payload)
-    normalized = normalize_profile_payload(merged)
+    perfil_base.update(payload)
+    cambios = normalizar_payload_perfil(perfil_base)
 
-    fields = [field for field in PROFILE_FIELDS if field in normalized]
-    assert set(fields).issubset(ALLOWED_FIELDS)
-    assignments = ", ".join(f"{field} = ?" for field in fields)
-    values = [normalized[field] for field in fields]
+    with _conectar_bd() as conexion:
+        _guardar_campos(conexion, user_id, cambios)
+        conexion.commit()
 
-    db_path = get_db_path()
-    with sqlite3.connect(db_path) as connection:
-        connection.execute(
-            f"""
-            UPDATE user_profiles
-            SET {assignments},
-                updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ?
-            """,
-            (*values, user_id),
-        )
-        connection.commit()
-
-    return get_or_create_profile(user_id=user_id)
+    return obtener_o_crear_perfil(user_id=user_id)
