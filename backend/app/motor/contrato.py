@@ -14,7 +14,6 @@ DEFAULT_PERFIL_ESTABLE = {
     "peliculas_vistas": [],
     "peliculas_para_ver": [],
     "peliculas_descartadas": [],
-    "peliculas_mostradas_recientemente": [],
 }
 
 VALID_MODES = {"sorprendeme", "preguntame"}

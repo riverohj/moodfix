@@ -5,7 +5,7 @@ from flask import request
 from .auth_model import RequestValidationError
 
 
-def get_json_payload() -> dict:
+def obtener_payload_json() -> dict:
     payload = request.get_json(silent=True)
     if payload is None:
         return {}

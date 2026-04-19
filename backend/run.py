@@ -7,21 +7,21 @@ try:
 except ImportError:
     pass
 
-from app import create_app
+from app import crear_app
 
 
-app = create_app()
+app = crear_app()
 
 
-def env_flag(name: str, default: bool = False) -> bool:
-    value = os.getenv(name)
-    if value is None:
-        return default
-    return value.strip().lower() in {"1", "true", "yes", "on"}
+def leer_bandera_entorno(nombre: str, por_defecto: bool = False) -> bool:
+    valor = os.getenv(nombre)
+    if valor is None:
+        return por_defecto
+    return valor.strip().lower() in {"1", "true", "yes", "on"}
 
 
 if __name__ == "__main__":
     host = os.getenv("API_HOST", "0.0.0.0")
     port = int(os.getenv("API_PORT", "5001"))
-    debug = env_flag("FLASK_DEBUG", default=False)
+    debug = leer_bandera_entorno("FLASK_DEBUG", por_defecto=False)
     app.run(host=host, port=port, debug=debug, use_reloader=debug)

@@ -1,18 +1,4 @@
 #!/usr/bin/env python3
-"""
-EPIC 1 — Ingestion inicial del catalogo de peliculas
-=====================================================
-Popula la base de datos SQLite local con una carga inicial ampliada,
-incluyendo solo proveedores permitidos para las regiones indicadas.
-
-Uso:
-    python backend/scripts/ingest.py
-    python backend/scripts/ingest.py --limit 500 --countries ES
-
-Requisitos:
-    pip install requests python-dotenv
-    Configura TMDB_READ_ACCESS_TOKEN en tu archivo .env
-"""
 
 import argparse
 import json
@@ -32,9 +18,9 @@ except ImportError:
 try:
     from dotenv import load_dotenv
 except ImportError:
-    def load_dotenv(*a, **kw): pass
+    def load_dotenv(*a, **kw):
+        pass
 
-# ── Configuracion ──────────────────────────────────────────────────────────────
 ROOT_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(ROOT_DIR / ".env")
 
@@ -71,7 +57,6 @@ ALLOWED_PROVIDER_ALIASES = {
 }
 
 
-# ── DB path (misma logica que db.py) ──────────────────────────────────────────
 def get_db_path() -> Path:
     configured = os.getenv("DATABASE_PATH")
     if configured:
@@ -82,7 +67,6 @@ def get_db_path() -> Path:
     return ROOT_DIR / "backend" / "data" / "moodfix.db"
 
 
-# ── TMDb helpers ──────────────────────────────────────────────────────────────
 def tmdb_get(endpoint: str, params: Optional[Dict] = None, retries: int = 3) -> Dict:
     params = dict(params or {})
     url = f"{TMDB_BASE}/{endpoint}"
@@ -103,38 +87,38 @@ def tmdb_get(endpoint: str, params: Optional[Dict] = None, retries: int = 3) -> 
                 return {}
             resp.raise_for_status()
             return resp.json()
-        except requests.RequestException as e:
+        except requests.RequestException:
             if attempt == retries - 1:
                 return {}
             time.sleep(2 ** attempt)
     return {}
 
 
-def normalize_provider_name(name: Optional[str]) -> str:
+def normalizar_nombre_provider(name: Optional[str]) -> str:
     if not name:
         return ""
     normalized = "".join(ch for ch in name.lower() if ch.isalnum() or ch == "+")
     return ALLOWED_PROVIDER_ALIASES.get(normalized, "")
 
 
-# ── Fetch funciones ───────────────────────────────────────────────────────────
-def extend_movie_ids(movie_ids: List[int], seen_ids: Set[int], results: List[Dict], limit: int) -> None:
-    for movie in results:
-        movie_id = movie.get("id")
-        if not movie_id or movie_id in seen_ids:
+def agregar_ids_peliculas(
+    ids_peliculas: List[int],
+    ids_vistos: Set[int],
+    resultados: List[Dict],
+    limite: int,
+) -> None:
+    for pelicula in resultados:
+        movie_id = pelicula.get("id")
+        if not movie_id or movie_id in ids_vistos:
             continue
-        seen_ids.add(movie_id)
-        movie_ids.append(movie_id)
-        if len(movie_ids) >= limit:
+        ids_vistos.add(movie_id)
+        ids_peliculas.append(movie_id)
+        if len(ids_peliculas) >= limite:
             break
 
 
-def fetch_movie_ids(limit: int) -> List[int]:
-    """Construye una lista mixta de IDs para reducir sesgo de catalogo."""
-    movie_ids: List[int] = []
-    seen_ids: Set[int] = set()
-
-    query_batches = [
+def crear_lotes_consulta(limit: int) -> List[Dict]:
+    lotes = [
         {
             "label": "popularidad",
             "params": {
@@ -156,11 +140,11 @@ def fetch_movie_ids(limit: int) -> List[int]:
         },
     ]
 
-    remaining = max(limit - sum(batch["target"] for batch in query_batches), 0)
-    genre_target = max(remaining // max(len(MOOD_GENRE_IDS), 1), 1) if remaining else 0
+    faltantes = max(limit - sum(lote["target"] for lote in lotes), 0)
+    objetivo_por_genero = max(faltantes // max(len(MOOD_GENRE_IDS), 1), 1) if faltantes else 0
 
     for genre_id in MOOD_GENRE_IDS:
-        query_batches.append(
+        lotes.append(
             {
                 "label": f"genero_{genre_id}",
                 "params": {
@@ -169,49 +153,53 @@ def fetch_movie_ids(limit: int) -> List[int]:
                     "with_runtime.gte": MIN_RUNTIME,
                     "with_genres": genre_id,
                 },
-                "target": genre_target,
+                "target": objetivo_por_genero,
             }
         )
 
-    for batch in query_batches:
-        if len(movie_ids) >= limit:
+    return lotes
+
+
+def fetch_movie_ids(limit: int) -> List[int]:
+    ids_peliculas: List[int] = []
+    ids_vistos: Set[int] = set()
+
+    for lote in crear_lotes_consulta(limit):
+        if len(ids_peliculas) >= limit:
             break
 
-        target = min(batch["target"], limit - len(movie_ids))
-        if target <= 0:
+        objetivo = min(lote["target"], limit - len(ids_peliculas))
+        if objetivo <= 0:
             continue
 
-        page = 1
-        collected_for_batch = 0
+        pagina = 1
+        agregadas = 0
 
-        while collected_for_batch < target and page <= MAX_PAGES_PER_QUERY and len(movie_ids) < limit:
-            params = dict(batch["params"])
-            params["page"] = page
-            params["language"] = "es-ES"
+        while agregadas < objetivo and pagina <= MAX_PAGES_PER_QUERY and len(ids_peliculas) < limit:
+            params = dict(lote["params"])
+            params["page"] = pagina
             data = tmdb_get("discover/movie", params)
-            results = data.get("results", [])
-            if not results:
+            resultados = data.get("results", [])
+            if not resultados:
                 break
 
-            before = len(movie_ids)
-            extend_movie_ids(movie_ids, seen_ids, results, limit)
-            collected_for_batch += len(movie_ids) - before
+            antes = len(ids_peliculas)
+            agregar_ids_peliculas(ids_peliculas, ids_vistos, resultados, limit)
+            agregadas += len(ids_peliculas) - antes
 
-            total_pages = data.get("total_pages", 1)
-            if page >= min(total_pages, MAX_PAGES_PER_QUERY):
+            total_paginas = data.get("total_pages", 1)
+            if pagina >= min(total_paginas, MAX_PAGES_PER_QUERY):
                 break
-            page += 1
+            pagina += 1
 
-    return movie_ids[:limit]
+    return ids_peliculas[:limit]
 
 
 def fetch_detail(tmdb_id: int) -> dict:
-    """Detalles completos de una pelicula."""
-    return tmdb_get(f"movie/{tmdb_id}", {"language": "es-ES"})
+    return tmdb_get(f"movie/{tmdb_id}")
 
 
 def fetch_providers(tmdb_id: int, countries: List[str]) -> List[Dict]:
-    """Proveedores permitidos para los paises dados."""
     data = tmdb_get(f"movie/{tmdb_id}/watch/providers")
     results = data.get("results", {})
 
@@ -223,43 +211,52 @@ def fetch_providers(tmdb_id: int, countries: List[str]) -> List[Dict]:
                 continue
             if not isinstance(providers, list):
                 continue
-            for p in providers:
-                canonical_name = normalize_provider_name(p.get("provider_name"))
-                if not canonical_name:
+            for provider in providers:
+                provider_name = normalizar_nombre_provider(provider.get("provider_name"))
+                if not provider_name:
                     continue
-                rows.append({
-                    "country_code": country_code,
-                    "provider_id": p.get("provider_id"),
-                    "provider_name": canonical_name,
-                    "provider_type": provider_type,
-                })
+                rows.append(
+                    {
+                        "country_code": country_code,
+                        "provider_id": provider.get("provider_id"),
+                        "provider_name": provider_name,
+                        "provider_type": provider_type,
+                    }
+                )
     return rows
 
 
-# ── DB helpers ────────────────────────────────────────────────────────────────
-def upsert_movie(conn: sqlite3.Connection, detail: dict):
-    """Inserta o actualiza una pelicula. Devuelve el id local o None si se descarta."""
-    tmdb_id = detail.get("id")
-    title = detail.get("title")
-    if not tmdb_id or not title:
-        return None
-
+def _leer_release_year(detail: dict) -> int | None:
     release_date = detail.get("release_date", "")
-    release_year = int(release_date[:4]) if release_date and len(release_date) >= 4 else None
+    if release_date and len(release_date) >= 4:
+        return int(release_date[:4])
+    return None
 
-    runtime = detail.get("runtime") or 0
-    vote_count = detail.get("vote_count") or 0
-    genre_ids = [
+
+def _leer_genre_ids(detail: dict) -> list[int]:
+    return [
         genre.get("id")
         for genre in detail.get("genres", [])
         if isinstance(genre, dict) and genre.get("id") is not None
     ]
 
-    # Filtros de calidad
-    if runtime < MIN_RUNTIME or vote_count < MIN_VOTE_COUNT:
+
+def _pelicula_valida(detail: dict) -> bool:
+    runtime = detail.get("runtime") or 0
+    vote_count = detail.get("vote_count") or 0
+    return runtime >= MIN_RUNTIME and vote_count >= MIN_VOTE_COUNT
+
+
+def upsert_movie(conn: sqlite3.Connection, detail: dict):
+    tmdb_id = detail.get("id")
+    title = detail.get("title")
+    if not tmdb_id or not title:
         return None
 
-    cur = conn.execute(
+    if not _pelicula_valida(detail):
+        return None
+
+    conn.execute(
         """
         INSERT INTO movies
             (tmdb_id, title, poster_path, runtime, release_year,
@@ -281,25 +278,23 @@ def upsert_movie(conn: sqlite3.Connection, detail: dict):
             tmdb_id,
             title,
             detail.get("poster_path"),
-            runtime,
-            release_year,
+            detail.get("runtime") or 0,
+            _leer_release_year(detail),
             detail.get("original_language"),
             detail.get("overview"),
             detail.get("popularity"),
-            vote_count,
-            json.dumps(genre_ids),
+            detail.get("vote_count") or 0,
+            json.dumps(_leer_genre_ids(detail)),
         ),
     )
-    # Recuperar el id real (en upsert lastrowid puede ser 0)
     row = conn.execute("SELECT id FROM movies WHERE tmdb_id = ?", (tmdb_id,)).fetchone()
     return row[0] if row else None
 
 
 def insert_providers(conn: sqlite3.Connection, movie_db_id: int, providers: List[Dict]) -> int:
-    """Inserta proveedores ignorando duplicados. Devuelve cantidad insertada."""
     count = 0
-    for p in providers:
-        if not p.get("provider_id") or not p.get("provider_name"):
+    for provider in providers:
+        if not provider.get("provider_id") or not provider.get("provider_name"):
             continue
         try:
             cursor = conn.execute(
@@ -310,10 +305,10 @@ def insert_providers(conn: sqlite3.Connection, movie_db_id: int, providers: List
                 """,
                 (
                     movie_db_id,
-                    p["country_code"],
-                    p["provider_id"],
-                    p["provider_name"],
-                    p["provider_type"],
+                    provider["country_code"],
+                    provider["provider_id"],
+                    provider["provider_name"],
+                    provider["provider_type"],
                 ),
             )
             if cursor.rowcount == 1:
@@ -323,82 +318,109 @@ def insert_providers(conn: sqlite3.Connection, movie_db_id: int, providers: List
     return count
 
 
-# ── Runner principal ──────────────────────────────────────────────────────────
-def run(limit: int, countries: List[str]) -> None:
+def _validar_configuracion() -> None:
     if not TMDB_READ_ACCESS_TOKEN:
         print("TMDB_READ_ACCESS_TOKEN no esta configurado. Añadelo a tu archivo .env")
         sys.exit(1)
 
-    db_path = get_db_path()
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    normalized_countries = [country.upper() for country in countries]
+
+def _normalizar_paises(countries: List[str]) -> List[str]:
+    return [country.upper() for country in countries]
+
+
+def _imprimir_resumen_inicial(db_path: Path, limit: int, countries: List[str]) -> None:
+    providers = ", ".join(sorted(set(ALLOWED_PROVIDER_ALIASES.values())))
 
     print(f"Base de datos : {db_path}")
-    print(f"Objetivo      : {limit} peliculas | Paises: {', '.join(normalized_countries)}")
+    print(f"Objetivo      : {limit} peliculas | Paises: {', '.join(countries)}")
     print("Auth TMDb     : bearer via TMDB_READ_ACCESS_TOKEN")
-    print(f"Providers     : {', '.join(sorted(set(ALLOWED_PROVIDER_ALIASES.values())))}")
+    print(f"Providers     : {providers}")
     print()
 
-    # Inicializar tablas (reutiliza init_db de Juan)
+
+def _inicializar_bd() -> None:
     sys.path.insert(0, str(ROOT_DIR))
     from backend.app.db import init_db
+
     init_db()
 
+
+def _crear_conexion(db_path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
+    return conn
+
+
+def _procesar_pelicula(
+    conn: sqlite3.Connection,
+    tmdb_id: int,
+    countries: List[str],
+) -> tuple[int, str] | None:
+    detail = fetch_detail(tmdb_id)
+    if not detail:
+        return None
+
+    providers = fetch_providers(tmdb_id, countries)
+    if not providers:
+        return None
+
+    with conn:
+        movie_db_id = upsert_movie(conn, detail)
+    if movie_db_id is None:
+        return None
+
+    with conn:
+        providers_insertados = insert_providers(conn, movie_db_id, providers)
+
+    titulo = (detail.get("title") or "")[:38]
+    return providers_insertados, titulo
+
+
+def run(limit: int, countries: List[str]) -> None:
+    _validar_configuracion()
+
+    db_path = get_db_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    paises = _normalizar_paises(countries)
+
+    _imprimir_resumen_inicial(db_path, limit, paises)
+    _inicializar_bd()
+    conn = _crear_conexion(db_path)
 
     print("Buscando IDs en TMDb con estrategia mixta...")
     movie_ids = fetch_movie_ids(limit)
     print(f"   {len(movie_ids)} candidatos encontrados")
     print()
 
-    inserted = 0
-    skipped = 0
+    peliculas_ok = 0
+    peliculas_descartadas = 0
     total_providers = 0
 
     for i, tmdb_id in enumerate(movie_ids, start=1):
-        detail = fetch_detail(tmdb_id)
-        if not detail:
-            skipped += 1
+        resultado = _procesar_pelicula(conn, tmdb_id, paises)
+        if resultado is None:
+            peliculas_descartadas += 1
             continue
 
-        providers = fetch_providers(tmdb_id, normalized_countries)
-        if not providers:
-            skipped += 1
-            continue
-
-        with conn:
-            movie_db_id = upsert_movie(conn, detail)
-
-        if movie_db_id is None:
-            skipped += 1
-            continue
-
-        with conn:
-            n = insert_providers(conn, movie_db_id, providers)
-
-        total_providers += n
-        inserted += 1
-
-        title_short = (detail.get("title") or "")[:38]
-        print(f"[{i:>3}/{len(movie_ids)}] {title_short:<38} | {n} proveedores")
-
-        time.sleep(0.07)  # ~14 req/s, bien dentro del limite de TMDb
+        providers_insertados, titulo = resultado
+        total_providers += providers_insertados
+        peliculas_ok += 1
+        print(f"[{i:>3}/{len(movie_ids)}] {titulo:<38} | {providers_insertados} proveedores")
+        time.sleep(0.07)
 
     conn.close()
 
     print()
     print("=" * 52)
     print("Ingestion completada!")
-    print(f"  Peliculas insertadas/actualizadas : {inserted}")
-    print(f"  Peliculas descartadas             : {skipped}")
+    print(f"  Peliculas insertadas/actualizadas : {peliculas_ok}")
+    print(f"  Peliculas descartadas             : {peliculas_descartadas}")
     print(f"  Filas de proveedores              : {total_providers}")
     print(f"  Base de datos                     : {db_path}")
     print("=" * 52)
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Ingesta inicial de peliculas TMDb → moodfix.db"
