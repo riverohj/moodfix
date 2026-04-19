@@ -52,10 +52,7 @@ export default function AccountScreen({ onLogout, user }) {
             label="Cambiar contraseña"
             description="Establece una nueva contraseña de acceso."
           />
-          <LockedRow
-            label="Sesiones activas"
-            description="Consulta y cierra sesiones abiertas en otros dispositivos."
-          />
+
         </ul>
       </section>
 
