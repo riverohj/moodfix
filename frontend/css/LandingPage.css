@@ -384,12 +384,25 @@
         overflow-wrap: anywhere;
     }
     .landing-stats-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         padding: 44px 16px;
-        gap: 18px;
+        gap: 14px;
     }
     .stat-box-unit {
-        padding-left: 16px;
+        padding-left: 12px;
+        min-height: 132px;
+        display: flex;
+        flex-direction: column;
+    }
+    .stat-number-big {
+        font-size: clamp(1.85rem, 8.8vw, 2.5rem);
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+    .stat-box-unit p {
+        font-size: 0.84rem;
+        line-height: 1.35;
+        overflow-wrap: break-word;
     }
     .landing-problem-split,
     .landing-solution-section,
@@ -425,9 +438,30 @@
         padding: 18px 20px;
         font-size: 1rem;
     }
+    .final-cta-titles {
+        margin-bottom: 28px;
+    }
+    .final-title-dark,
+    .final-title-white,
+    .final-title-red {
+        line-height: 1;
+    }
+    .final-title-white,
+    .final-title-red {
+        margin-top: 8px;
+    }
     .guided-gray-titles { font-size: 1.8rem; }
     .guided-white-title { font-size: 2rem; }
     .guided-red-main { font-size: 2rem; }
+    .mem-main-title {
+        font-size: clamp(1.95rem, 8.5vw, 2.45rem);
+        overflow-wrap: normal;
+        word-break: normal;
+        hyphens: none;
+    }
+    .mem-main-subtitle {
+        overflow-wrap: break-word;
+    }
     .mem-cards-container { flex-direction: column; }
     .final-cta-section { padding: 80px 20px; }
     .final-cta-description br { display: none; }
