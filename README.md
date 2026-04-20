@@ -101,3 +101,54 @@ Endpoint minimo de consulta de catalogo:
 2. Validar la integracion real del onboarding frontend contra la API.
 3. Cerrar EPIC 2 con flujo completo de registro o login, onboarding y re-edicion.
 4. Pasar despues a EPIC 3 para preguntas de sesion y handoff guest -> autenticado.
+
+---
+
+## Diagrama de arquitectura
+
+```mermaid
+architecture-beta
+    group frontend(cloud)[Frontend · React + Vite]
+    group backend(server)[Backend · Flask]
+    group external(internet)[Servicios externos]
+
+    service usuario(internet)[Usuario] in frontend
+    service react(disk)[React App] in frontend
+
+    service flask(server)[API Flask] in backend
+    service motor(disk)[Motor · IA + Determinista] in backend
+    service db(database)[SQLite] in backend
+
+    service tmdb(internet)[TMDB API] in external
+    service claude(internet)[Claude Haiku · Anthropic] in external
+
+    usuario:R --> L:react
+    react:R --> L:flask
+    flask:R --> L:motor
+    motor:B --> T:db
+    motor:R --> L:claude
+    flask:B --> T:tmdb
+```
+
+## Flujo de una recomendación
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant Frontend
+    participant Backend
+    participant Motor
+    participant Claude as Claude Haiku
+    participant TMDB
+
+    Usuario->>Frontend: Elige estado de ánimo
+    Frontend->>Backend: POST /api/session/recommend
+    Backend->>Motor: recomendar_peliculas(perfil, sesión)
+    Motor->>Motor: Filtra catálogo local por perfil
+    Motor->>Motor: Puntúa y ordena (lista corta de 10)
+    Motor->>Claude: Elige la mejor para este usuario
+    Claude-->>Motor: tmdb_id + razón personalizada
+    Motor-->>Backend: [película IA, #2, #3]
+    Backend-->>Frontend: items con razon_ia
+    Frontend-->>Usuario: Muestra 3 recomendaciones
+```
