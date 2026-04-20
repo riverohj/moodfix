@@ -2,6 +2,102 @@
 
 MoodFix es un recomendador de peliculas para reducir fatiga de decision. TMDb actua como fuente de datos y Mood Radar como logica propia del sistema.
 
+---
+
+## Equipo
+
+| Nombre | GitHub | Rol |
+|---|---|---|
+| **Juan Rivero** | [@riverohj](https://github.com/riverohj) | Tech Lead · Arquitectura · Backend · Gestión de PRs |
+| **Jose Angel Rodriguez Montilla** | [@rodriguezmontillajose39-dotcom](https://github.com/rodriguezmontillajose39-dotcom) | Backend · Auth · Perfil de usuario · Integración |
+| **Lourdes Miranda** | [@lourdescoronela](https://github.com/lourdescoronela) | Frontend · Motor IA · Sesiones · Historial · UX |
+| **Burcu Cukurluoz** | — | UI/UX Design · Pantallas de auth · Favoritos · Responsive |
+
+### Contribuciones por persona
+
+**Juan Rivero** arrancó el proyecto desde cero: configuró el boilerplate full stack, definió todos los contratos de épicas (docs/contracts/), implementó la ingesta del catálogo TMDB (Epic 1), construyó el motor determinista de recomendación (Epic 4), desarrolló las pantallas de sesión y gestionó la mayoría de los merges y PRs del equipo.
+
+**Jose Angel Rodriguez Montilla** lideró el backend de autenticación y perfil de usuario (Epic 2), realizó el refactor del backend para simplificar la arquitectura, conectó el frontend con la API real y trabajó en la integración final del stack completo.
+
+**Lourdes Miranda** construyó la mayor parte del frontend funcional: rediseñó la landing page con animaciones, implementó la persistencia de acciones de sesión (Epic 4), la memoria de recommendation sets (Epic 5), la integración con Claude Haiku para recomendaciones con IA (Epic 6), el historial y el pulido de navbar/footer.
+
+**Burcu Cukurluoz** diseñó e implementó las pantallas de login/registro, la thank-you page, la vista de favoritos, alineó las pantallas de favoritos e historial, y realizó el pulido responsive final en todo el frontend.
+
+---
+
+## La idea
+
+### Problema que resuelve
+
+Abrir Netflix y quedarse 20 minutos buscando qué ver. La fatiga de decisión frente a un catálogo infinito hace que muchas veces se termine viendo algo ya visto o nada en absoluto.
+
+### Solución
+
+MoodFix es un recomendador de películas guiado por el estado de ánimo. En lugar de mostrar un catálogo, hace unas pocas preguntas sobre cómo se siente el usuario en ese momento y devuelve **3 películas concretas**, personalizadas a su perfil y a su estado actual.
+
+### Cómo funciona
+
+1. El usuario crea un perfil respondiendo preguntas de onboarding (géneros, actores, décadas preferidas, lo que no quiere ver).
+2. Al iniciar una sesión elige entre "Sorpréndeme" (modo rápido) o "Pregúntame" (modo guiado con preguntas de estado de ánimo).
+3. Un **motor determinista** filtra el catálogo local (TMDB) por compatibilidad con el perfil y construye una shortlist de 10 películas.
+4. **Claude Haiku (Anthropic)** elige la mejor opción de esa shortlist y genera una razón personalizada para el usuario.
+5. El usuario ve las 3 recomendaciones, puede guardarlas en favoritos, marcarlas como vistas, o pedir nuevas.
+
+El sistema aprende de las sesiones anteriores excluyendo recommendation sets ya vistos, evitando repeticiones.
+
+---
+
+## Arquitectura del sistema
+
+```mermaid
+architecture-beta
+    group frontend(cloud)[Frontend · React + Vite]
+    group backend(server)[Backend · Flask]
+    group external(internet)[Servicios externos]
+
+    service usuario(internet)[Usuario] in frontend
+    service react(disk)[React App] in frontend
+
+    service flask(server)[API Flask] in backend
+    service motor(disk)[Motor · IA + Determinista] in backend
+    service db(database)[SQLite] in backend
+
+    service tmdb(internet)[TMDB API] in external
+    service claude(internet)[Claude Haiku · Anthropic] in external
+
+    usuario:R --> L:react
+    react:R --> L:flask
+    flask:R --> L:motor
+    motor:B --> T:db
+    motor:R --> L:claude
+    flask:B --> T:tmdb
+```
+
+## Flujo de una recomendación
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant Frontend
+    participant Backend
+    participant Motor
+    participant Claude as Claude Haiku
+    participant TMDB
+
+    Usuario->>Frontend: Elige estado de ánimo
+    Frontend->>Backend: POST /api/session/recommend
+    Backend->>Motor: recomendar_peliculas(perfil, sesión)
+    Motor->>Motor: Filtra catálogo local por perfil
+    Motor->>Motor: Puntúa y ordena (lista corta de 10)
+    Motor->>Claude: Elige la mejor para este usuario
+    Claude-->>Motor: tmdb_id + razón personalizada
+    Motor-->>Backend: [película IA, #2, #3]
+    Backend-->>Frontend: items con razon_ia
+    Frontend-->>Usuario: Muestra 3 recomendaciones
+```
+
+---
+
 Este repositorio arranca con un boilerplate full stack sencillo:
 
 - `frontend/`: app React con Vite
@@ -102,53 +198,3 @@ Endpoint minimo de consulta de catalogo:
 3. Cerrar EPIC 2 con flujo completo de registro o login, onboarding y re-edicion.
 4. Pasar despues a EPIC 3 para preguntas de sesion y handoff guest -> autenticado.
 
----
-
-## Diagrama de arquitectura
-
-```mermaid
-architecture-beta
-    group frontend(cloud)[Frontend · React + Vite]
-    group backend(server)[Backend · Flask]
-    group external(internet)[Servicios externos]
-
-    service usuario(internet)[Usuario] in frontend
-    service react(disk)[React App] in frontend
-
-    service flask(server)[API Flask] in backend
-    service motor(disk)[Motor · IA + Determinista] in backend
-    service db(database)[SQLite] in backend
-
-    service tmdb(internet)[TMDB API] in external
-    service claude(internet)[Claude Haiku · Anthropic] in external
-
-    usuario:R --> L:react
-    react:R --> L:flask
-    flask:R --> L:motor
-    motor:B --> T:db
-    motor:R --> L:claude
-    flask:B --> T:tmdb
-```
-
-## Flujo de una recomendación
-
-```mermaid
-sequenceDiagram
-    actor Usuario
-    participant Frontend
-    participant Backend
-    participant Motor
-    participant Claude as Claude Haiku
-    participant TMDB
-
-    Usuario->>Frontend: Elige estado de ánimo
-    Frontend->>Backend: POST /api/session/recommend
-    Backend->>Motor: recomendar_peliculas(perfil, sesión)
-    Motor->>Motor: Filtra catálogo local por perfil
-    Motor->>Motor: Puntúa y ordena (lista corta de 10)
-    Motor->>Claude: Elige la mejor para este usuario
-    Claude-->>Motor: tmdb_id + razón personalizada
-    Motor-->>Backend: [película IA, #2, #3]
-    Backend-->>Frontend: items con razon_ia
-    Frontend-->>Usuario: Muestra 3 recomendaciones
-```
