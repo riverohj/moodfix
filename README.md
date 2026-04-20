@@ -50,27 +50,30 @@ El sistema aprende de las sesiones anteriores excluyendo recommendation sets ya 
 ## Arquitectura del sistema
 
 ```mermaid
-architecture-beta
-    group frontend(cloud)[Frontend · React + Vite]
-    group backend(server)[Backend · Flask]
-    group external(internet)[Servicios externos]
+flowchart TD
+    subgraph FE["🖥️ Frontend — React + Vite"]
+        U([Usuario])
+        R[React App]
+    end
 
-    service usuario(internet)[Usuario] in frontend
-    service react(disk)[React App] in frontend
+    subgraph BE["⚙️ Backend — Flask"]
+        A[API Flask]
+        M[Motor IA y Determinista]
+        D[(SQLite)]
+    end
 
-    service flask(server)[API Flask] in backend
-    service motor(disk)[Motor · IA + Determinista] in backend
-    service db(database)[SQLite] in backend
+    subgraph EX["🌐 Servicios externos"]
+        T[TMDB API]
+        C[Claude Haiku]
+    end
 
-    service tmdb(internet)[TMDB API] in external
-    service claude(internet)[Claude Haiku · Anthropic] in external
-
-    usuario:R --> L:react
-    react:R --> L:flask
-    flask:R --> L:motor
-    motor:B --> T:db
-    motor:R --> L:claude
-    flask:B --> T:tmdb
+    U --> R
+    R -->|HTTP / JSON| A
+    A --> M
+    M --> D
+    M -->|shortlist de 10| C
+    C -->|top 1 + razon| M
+    A -->|catalogo| T
 ```
 
 ## Flujo de una recomendación
