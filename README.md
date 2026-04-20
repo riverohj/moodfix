@@ -11,7 +11,7 @@ MoodFix es un recomendador de peliculas para reducir fatiga de decision. TMDb ac
 | **Juan Rivero** | [@riverohj](https://github.com/riverohj) | Tech Lead · Arquitectura · Backend · Gestión de PRs |
 | **Jose Angel Rodriguez Montilla** | [@rodriguezmontillajose39-dotcom](https://github.com/rodriguezmontillajose39-dotcom) | Backend · Auth · Perfil de usuario · Integración |
 | **Lourdes Miranda** | [@lourdescoronela](https://github.com/lourdescoronela) | Frontend · Motor IA · Sesiones · Historial · UX |
-| **Burcu Cukurluoz** | — | UI/UX Design · Pantallas de auth · Favoritos · Responsive |
+| **Burcu Cukurluoz** | [@burcuc-tech](https://github.com/burcuc-tech) | UI/UX Design · Pantallas de auth · Favoritos · Responsive |
 
 ### Contribuciones por persona
 
