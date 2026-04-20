@@ -1,37 +1,41 @@
 import "../css/AboutScreen.css";
+import fotoJuan from "../src/assets/platform/foto_juan.png";
+import fotoJose from "../src/assets/platform/jose_foto.jpg";
+import fotoBurcu from "../src/assets/platform/Burcu_foto.jpg";
+import fotoLourdes from "../src/assets/platform/Lour_foto.jpg";
 
 const TEAM = [
   {
     name: "Juan Rivero",
-    role: "Full Stack Developer",
-    avatar: "JR",
+    role: "Tech Lead",
+    photo: fotoJuan,
     color: "#e50914",
-    tags: ["Backend", "Motor IA", "Arquitectura"],
-    bio: "El cerebro detrás del motor de recomendación. Diseñó la arquitectura del sistema determinista, separó la lógica en módulos limpios y dejó la base técnica sobre la que todo el equipo construye. Si MoodFix recomienda bien, es gracias a Juan.",
+    tags: ["Arquitectura", "Auth", "Base de datos"],
+    bio: "Diseñó la arquitectura del proyecto desde cero: boilerplate inicial, sistema de autenticación con tokens y el esquema de base de datos que sostiene toda la app. La base técnica sobre la que el equipo construyó.",
   },
   {
     name: "José Angel Rodriguez",
-    role: "Full Stack Developer",
-    avatar: "JA",
+    role: "Backend Lead",
+    photo: fotoJose,
     color: "#e87c2a",
-    tags: ["Backend", "API", "Base de datos"],
-    bio: "Arquitecto del backend. Construyó la integración con TMDb, diseñó el esquema de base de datos local y dejó los endpoints listos para que el frontend funcionara sin fricciones. El catálogo de 417 películas que alimenta MoodFix es trabajo suyo.",
+    tags: ["Motor determinista", "Refactor", "API"],
+    bio: "Construyó el motor de recomendación determinista, refactorizó el backend para que fuera más claro y mantenible, y dejó los endpoints de sesión listos para conectar con el frontend. El catálogo de películas que alimenta MoodFix es trabajo suyo.",
   },
   {
     name: "Burcu Çukurluöz",
-    role: "Full Stack Developer",
-    avatar: "BÇ",
+    role: "Frontend Lead",
+    photo: fotoBurcu,
     color: "#9b59b6",
-    tags: ["Frontend", "UI/UX", "Historial"],
-    bio: "La responsable de que MoodFix sea bonito de usar. Implementó el historial, pulió la experiencia de usuario y se encargó de que cada pantalla tuviera coherencia visual. Tiene ojo para el detalle que no todo el mundo tiene.",
+    tags: ["Historial", "Ver luego", "Responsive"],
+    bio: "Implementó el historial de películas, la lista de ver luego y los favoritos. Se encargó del responsive de todas las pantallas para que la app funcione bien en cualquier dispositivo. Tiene ojo para el detalle que no todo el mundo tiene.",
   },
   {
     name: "Lourdes Miranda",
-    role: "Full Stack Developer",
-    avatar: "LM",
+    role: "IA & Integración",
+    photo: fotoLourdes,
     color: "#27ae60",
-    tags: ["Frontend", "Backend", "Producto"],
-    bio: "Full stack de verdad. Construyó el onboarding, la home privada, los endpoints de persistencia de sesión y dio varias vueltas al diseño hasta que quedó como tenía que quedar. La que conecta los puntos entre lo que el equipo construye y lo que el usuario experimenta.",
+    tags: ["Claude Haiku", "Pregúntame", "Landing"],
+    bio: "Integró la IA de Claude Haiku para elegir la película perfecta con una razón personalizada. Desarrolló el flujo Pregúntame, la landing page y los ajustes de CSS para que todo encajara. La que conecta lo técnico con lo que el usuario experimenta.",
   },
 ];
 
@@ -49,8 +53,8 @@ export default function AboutScreen() {
       <div className="about-grid">
         {TEAM.map((member) => (
           <article className="about-card" key={member.name}>
-            <div className="about-avatar" style={{ background: `${member.color}22`, borderColor: `${member.color}55` }}>
-              <span className="about-avatar-initials" style={{ color: member.color }}>{member.avatar}</span>
+            <div className="about-avatar" style={{ borderColor: `${member.color}55` }}>
+              <img src={member.photo} alt={member.name} className="about-avatar-img" />
             </div>
             <div className="about-card-body">
               <h2 className="about-name">{member.name}</h2>
