@@ -73,7 +73,7 @@ flowchart TD
     M --> D
     M -->|shortlist de 10| C
     C -->|top 1 + razon| M
-    A -->|catalogo| T
+    T -.->|ingesta previa| D
 ```
 
 ## Flujo de una recomendación
@@ -84,18 +84,27 @@ sequenceDiagram
     participant Frontend
     participant Backend
     participant Motor
+    participant SQLite
     participant Claude as Claude Haiku
-    participant TMDB
 
-    Usuario->>Frontend: Elige estado de ánimo
-    Frontend->>Backend: POST /api/session/recommend
+    Usuario->>Frontend: Elige estado de ánimo y preferencias
+    Frontend->>Backend: POST /session/recommend
+    Backend->>Backend: Construye contexto de perfil (plataformas, géneros bloqueados, historial)
     Backend->>Motor: recomendar_peliculas(perfil, sesión)
-    Motor->>Motor: Filtra catálogo local por perfil
-    Motor->>Motor: Puntúa y ordena (lista corta de 10)
-    Motor->>Claude: Elige la mejor para este usuario
-    Claude-->>Motor: tmdb_id + razón personalizada
-    Motor-->>Backend: [película IA, #2, #3]
-    Backend-->>Frontend: items con razon_ia
+    Motor->>SQLite: Carga catálogo local por país
+    SQLite-->>Motor: Lista de películas
+    Motor->>Motor: Filtra candidatas (plataformas, idioma, no_rotundos, ya vistas)
+    Motor->>Motor: Puntúa y ordena por mood, época, duración, energía
+    Motor-->>Backend: lista_corta (top 10) + seleccion_final (top 3)
+    Backend->>Claude: elegir_con_ia(top 10, perfil, sesión)
+    alt Claude responde con éxito
+        Claude-->>Backend: tmdb_id + razon (max 20 palabras)
+        Backend->>Backend: items = [elegida_IA, #2_motor, #3_motor]
+    else Claude falla o no disponible
+        Backend->>Backend: items = [#1_motor, #2_motor, #3_motor]
+    end
+    Backend->>SQLite: Guarda recommendation_set (evita repetir en próximas sesiones)
+    Backend-->>Frontend: items con razon_ia (si IA fue exitosa)
     Frontend-->>Usuario: Muestra 3 recomendaciones
 ```
 
