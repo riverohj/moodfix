@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "/api";
+  (import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? "") + "/api";
 
 async function apiRequest(path, { method = "GET", token, body } = {}) {
   const headers = {
@@ -33,6 +33,10 @@ async function apiRequest(path, { method = "GET", token, body } = {}) {
     error.status = response.status;
     error.payload = payload;
     throw error;
+  }
+
+  if (payload === null) {
+    throw new Error("Respuesta inválida del servidor. Comprueba que la API esté disponible.");
   }
 
   return payload;

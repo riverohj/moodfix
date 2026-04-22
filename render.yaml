@@ -2,6 +2,7 @@ services:
   - type: web
     name: moodfix-backend
     runtime: python
+    plan: free
     buildCommand: pip install -r backend/requirements.txt && python backend/scripts/ingest.py
     startCommand: python backend/run.py
     envVars:
