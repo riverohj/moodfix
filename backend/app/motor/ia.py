@@ -106,6 +106,8 @@ def elegir_con_ia(
         return None
 
     try:
+        prompt = _build_prompt(candidatas, perfil, sesion)
+        logger.info("=== PROMPT ENVIADO A CLAUDE ===\n%s\n=== FIN DEL PROMPT ===", prompt)
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model="claude-haiku-4-5-20251001",
