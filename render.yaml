@@ -2,7 +2,7 @@ services:
   - type: web
     name: moodfix-backend
     runtime: python
-    buildCommand: pip install -r backend/requirements.txt
+    buildCommand: pip install -r backend/requirements.txt && python backend/scripts/ingest.py
     startCommand: python backend/run.py
     envVars:
       - key: FLASK_DEBUG
@@ -13,7 +13,6 @@ services:
         sync: false
       - key: TMDB_READ_ACCESS_TOKEN
         sync: false
-    postDeployCommand: python backend/scripts/ingest.py
 
   - type: web
     name: moodfix-frontend
