@@ -22,6 +22,6 @@ def leer_bandera_entorno(nombre: str, por_defecto: bool = False) -> bool:
 
 if __name__ == "__main__":
     host = os.getenv("API_HOST", "0.0.0.0")
-    port = int(os.getenv("API_PORT", "5001"))
+    port = int(os.getenv("PORT") or os.getenv("API_PORT", "5001"))
     debug = leer_bandera_entorno("FLASK_DEBUG", por_defecto=False)
     app.run(host=host, port=port, debug=debug, use_reloader=debug)
