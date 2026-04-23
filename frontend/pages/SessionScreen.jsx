@@ -16,7 +16,6 @@ import {
   postWatchlistMovie,
 } from "../src/lib/api";
 import {
-  formatLanguageLabel,
   formatPopularity,
   formatVoteCount,
   getFlatrateProviders,
@@ -329,12 +328,6 @@ function MovieDetailModal({ movie, onClose }) {
             <span className="rc-runtime">
               {movie.runtime ? `${movie.runtime} min` : "Duración sin dato"}
             </span>
-            {movie.original_language ? (
-              <>
-                <span className="rc-dot" aria-hidden="true">·</span>
-                <span className="rc-lang">{formatLanguageLabel(movie.original_language)}</span>
-              </>
-            ) : null}
             {allProviders.length > 0 ? (
               <>
                 <span className="rc-dot" aria-hidden="true">·</span>
@@ -356,12 +349,6 @@ function MovieDetailModal({ movie, onClose }) {
               <span className="rc-modal-fact-label">Duración</span>
               <span className="rc-modal-fact-value">
                 {movie.runtime ? `${movie.runtime} min` : "Sin dato"}
-              </span>
-            </div>
-            <div className="rc-modal-fact">
-              <span className="rc-modal-fact-label">Idioma original</span>
-              <span className="rc-modal-fact-value">
-                {formatLanguageLabel(movie.original_language)}
               </span>
             </div>
             <div className="rc-modal-fact">
@@ -613,12 +600,6 @@ function ResultCard({
           <span className="rc-runtime">
             {movie.runtime ? `${movie.runtime} min` : "Duración sin dato"}
           </span>
-          {movie.original_language ? (
-            <>
-              <span className="rc-dot" aria-hidden="true">·</span>
-              <span className="rc-lang">{formatLanguageLabel(movie.original_language)}</span>
-            </>
-          ) : null}
           {flatrateProviders.length > 0 ? (
             <>
               <span className="rc-dot" aria-hidden="true">·</span>

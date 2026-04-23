@@ -178,6 +178,7 @@ def fetch_movie_ids(limit: int) -> List[int]:
         while agregadas < objetivo and pagina <= MAX_PAGES_PER_QUERY and len(ids_peliculas) < limit:
             params = dict(lote["params"])
             params["page"] = pagina
+            params["language"] = "es-ES"
             data = tmdb_get("discover/movie", params)
             resultados = data.get("results", [])
             if not resultados:
@@ -196,7 +197,7 @@ def fetch_movie_ids(limit: int) -> List[int]:
 
 
 def fetch_detail(tmdb_id: int) -> dict:
-    return tmdb_get(f"movie/{tmdb_id}")
+    return tmdb_get(f"movie/{tmdb_id}", {"language": "es-ES"})
 
 
 def fetch_providers(tmdb_id: int, countries: List[str]) -> List[Dict]:
