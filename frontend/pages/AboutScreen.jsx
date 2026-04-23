@@ -1,5 +1,5 @@
 import "../css/AboutScreen.css";
-import fotoJuan from "../src/assets/platform/foto_juan.png";
+import fotoJuan from "../src/assets/platform/juan_huevo.png";
 import fotoJose from "../src/assets/platform/jose_foto.jpg";
 import fotoBurcu from "../src/assets/platform/Burcu_foto.jpg";
 import fotoLourdes from "../src/assets/platform/Lour_foto.jpg";
