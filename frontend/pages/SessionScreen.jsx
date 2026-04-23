@@ -611,7 +611,9 @@ function ResultCard({
         <h3 className="rc-title rc-title-feature">{movie.title}</h3>
 
         {movie.razon_ia ? (
-          <p className="rc-razon-ia">{movie.razon_ia}</p>
+          <p className="rc-razon-ia">
+            <span className="rc-razon-ia-tag">✦ IA · </span>{movie.razon_ia}
+          </p>
         ) : null}
 
         <p className="rc-overview rc-overview-feature">{movie.overview}</p>

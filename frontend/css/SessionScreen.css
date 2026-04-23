@@ -714,6 +714,13 @@
   line-height: 1.5;
 }
 
+.rc-razon-ia-tag {
+  font-style: normal;
+  font-weight: 600;
+  color: rgba(245, 245, 245, 0.45);
+  letter-spacing: 0.02em;
+}
+
 .rc-overview {
   margin: 0;
   font-size: 0.85rem;
