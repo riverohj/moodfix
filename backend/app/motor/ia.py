@@ -85,19 +85,20 @@ SESIÓN DE HOY:
 
 CANDIDATAS VÁLIDAS (ya filtradas, todas son viables):
 {lista}
-Elige LA MEJOR película para este usuario hoy. Responde ÚNICAMENTE con este JSON, sin texto adicional:
-{{
-  "tmdb_id": <número>,
-  "razon": "<Una frase directa explicando por qué esta película es perfecta para este usuario hoy. Máximo 20 palabras.>"
-}}"""
+Elige tus 3 MEJORES películas para este usuario hoy, ordenadas de mejor a peor. Responde ÚNICAMENTE con este JSON, sin texto adicional:
+[
+  {{"tmdb_id": <número>, "razon": "<Una frase directa explicando por qué esta película es perfecta para este usuario hoy. Máximo 20 palabras.>"}},
+  {{"tmdb_id": <número>, "razon": "<...>"}},
+  {{"tmdb_id": <número>, "razon": "<...>"}}
+]"""
 
 
-def elegir_con_ia(
+def elegir_top3_con_ia(
     candidatas: list[dict[str, Any]],
     perfil: dict[str, Any],
     sesion: dict[str, Any],
-) -> dict[str, Any] | None:
-    """Devuelve la candidata elegida por IA con su razon, o None si falla."""
+) -> list[dict[str, Any]] | None:
+    """Devuelve hasta 3 candidatas elegidas por IA, cada una con su razon, o None si falla."""
     if not candidatas:
         return None
 
@@ -111,8 +112,8 @@ def elegir_con_ia(
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=256,
-            messages=[{"role": "user", "content": _build_prompt(candidatas, perfil, sesion)}],
+            max_tokens=512,
+            messages=[{"role": "user", "content": prompt}],
         )
         raw = message.content[0].text.strip()
         # Quitar bloques markdown ```json ... ``` si los hay
@@ -122,16 +123,27 @@ def elegir_con_ia(
                 raw = raw[4:]
             raw = raw.strip()
         data = json.loads(raw)
-        tmdb_id = int(data["tmdb_id"])
-        razon = str(data["razon"])
-
-        # Buscar la película elegida en las candidatas
-        elegida = next((m for m in candidatas if m["tmdb_id"] == tmdb_id), None)
-        if elegida is None:
+        if not isinstance(data, list):
             return None
 
-        return {**elegida, "razon_ia": razon}
+        candidatas_por_id = {m["tmdb_id"]: m for m in candidatas}
+        vistos: set[int] = set()
+        elegidas: list[dict[str, Any]] = []
+        for item in data:
+            tmdb_id = int(item["tmdb_id"])
+            razon = str(item["razon"])
+            if tmdb_id in vistos:
+                continue
+            pelicula = candidatas_por_id.get(tmdb_id)
+            if pelicula is None:
+                continue
+            vistos.add(tmdb_id)
+            elegidas.append({**pelicula, "razon_ia": razon})
+            if len(elegidas) == 3:
+                break
+
+        return elegidas or None
 
     except Exception as exc:
-        logger.warning("elegir_con_ia falló: %s", exc)
+        logger.warning("elegir_top3_con_ia falló: %s", exc)
         return None

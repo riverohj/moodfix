@@ -1,5 +1,7 @@
-const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? "") + "/api";
+const RAW_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? "";
+const API_BASE_URL = RAW_BASE_URL.endsWith("/api")
+  ? RAW_BASE_URL
+  : `${RAW_BASE_URL}/api`;
 
 async function apiRequest(path, { method = "GET", token, body } = {}) {
   const headers = {
