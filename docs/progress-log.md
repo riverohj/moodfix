@@ -131,6 +131,13 @@ Cada actualizacion debe incluir:
 - Bloqueos o riesgos: mientras `Sesion` siga con mocks en frontend, la UX ya puede validarse, pero el aprendizaje y la persistencia real de historial, ver luego y descartes siguen siendo solo preparacion visual.
 - Bloqueos o riesgos: el filtro real de `no_rotundos` ya esta preparado en codigo, pero la BD local necesita refrescar o reingestar `genre_ids` para que el catalogo actual lo respete de verdad.
 
+### 2026-08-26
+
+- Que se hizo: se detecto que el backend en Render se estaba cobrando en la cuenta personal de Lourdes porque los datos de usuario (cuentas, perfiles, favoritos, historial) compartian un unico archivo SQLite con el catalogo, y necesitaban un disco persistente para sobrevivir a los redeploys; los discos persistentes de Render solo existen en planes de pago.
+- Que se hizo: se separo el esquema en `db.py` en catalogo (efimero, sigue en disco local, se reconstruye en cada build via `ingest.py`) y datos de usuario (persistentes, migran a Turso). Se actualizaron `auth_model.py`, `user_profile_model.py` y `recommendation_sets_model.py` para usar la nueva conexion `get_user_connection()`. Sin `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` configuradas, todo sigue cayendo en el archivo local de siempre, asi que el desarrollo local individual no cambia.
+- Que queda: crear la cuenta y base de datos en Turso, probar registro/login/favoritos en local contra Turso real (con especial atencion a la transaccion `BEGIN IMMEDIATE` de `agregar_pelicula_a_lista`/`quitar_pelicula_de_lista`), decidir que hacer con los usuarios ya existentes en el disco actual de Render, y solo despues quitar ese disco y confirmar que el servicio vuelve a plan Free.
+- Bloqueos o riesgos: hasta que no se valide con una Turso real, el codigo nuevo esta sin probar contra el protocolo remoto; localmente si es seguro de probar porque usa el mismo fallback de siempre.
+
 ## Regla de uso
 
 Actualizar este archivo al cerrar una tarea importante o cuando aparezca un bloqueo real que pueda afectar al equipo.

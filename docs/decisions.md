@@ -246,6 +246,13 @@ Cada entrada debe incluir:
 - Impacto: marcar una pelicula como vista (`/history`) la saca de `ver_luego` si estaba. Descartarla (`/discard`) tambien la saca de `ver_luego`. La funcion `agregar_pelicula_a_lista` en `user_profile_model.py` gestiona la operacion dentro de una transaccion SQLite y evita duplicados. Las rutas coinciden con los TODOs del `SessionScreen.jsx` para facilitar la conexion del frontend.
 - Responsable o acuerdo del equipo: implementado por Lourdes en rama `feat/epic-4-persistencia-acciones`, pendiente de revision del equipo.
 
+### 2026-08-26 · Separacion de catalogo (efimero) y datos de usuario (Turso) para volver a Render free
+
+- Decision: la base de datos deja de ser un unico archivo SQLite. El catalogo (`movies`, `movie_providers`) sigue en el disco local del backend, efimero, porque `ingest.py` lo reconstruye por completo en cada build. Los datos de usuario (`users`, `user_profiles`, `auth_tokens`, `recommendation_sets`) pasan a Turso (SQLite-compatible, hosted, free tier) via `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN`. Sin esas dos variables configuradas, el backend cae automaticamente al mismo archivo local de siempre, asi que el flujo de desarrollo individual con backend y BD local no cambia para nadie del equipo.
+- Motivo: el despliegue en Render se estaba cobrando en una cuenta personal porque los datos de usuario necesitaban sobrevivir a cada redeploy, y eso solo es posible con un disco persistente de Render — y los discos persistentes no existen en el plan gratuito, solo en planes de pago (Starter, desde $7/mes). Con el catalogo y los datos de usuario separados, el backend ya no necesita disco y puede volver a encajar en el free tier real de Render.
+- Impacto: `db.py`, `auth_model.py`, `user_profile_model.py` y `recommendation_sets_model.py` usan una conexion nueva (`get_user_connection`) para todo lo relacionado con cuentas, perfil, favoritos e historial. Pendiente de validar en real: crear la base de datos en Turso, probar registro/login/favoritos contra ella, y solo entonces quitar el disco persistente del servicio en el dashboard de Render.
+- Responsable o acuerdo del equipo: propuesto por Lourdes tras detectar el cobro personal en Render; implementado con ayuda de Claude, pendiente de que el equipo confirme el corte de Render y decida si migra datos de usuario ya existentes antes de cambiar la variable de entorno en produccion.
+
 ## Regla de uso
 
 Si una decision afecta al alcance, al modelo de datos, al contrato API o a Mood Radar, debe quedar registrada aqui.
