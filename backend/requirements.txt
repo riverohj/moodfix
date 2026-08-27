@@ -4,3 +4,4 @@ python-dotenv==1.0.1
 requests==2.32.3
 urllib3<2
 anthropic>=0.40.0
+turso_serverless>=0.1.0

@@ -10,7 +10,7 @@ from typing import Any
 
 from flask import request
 
-from ..db import get_db_path
+from ..db import apply_row_factory, get_user_connection
 
 
 TOKEN_TTL_HOURS = 2
@@ -26,8 +26,8 @@ class AuthError(ValueError):
 
 
 def _get_connection() -> sqlite3.Connection:
-    connection = sqlite3.connect(get_db_path())
-    connection.row_factory = sqlite3.Row
+    connection = get_user_connection()
+    apply_row_factory(connection)
     return connection
 
 

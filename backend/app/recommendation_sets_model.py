@@ -4,11 +4,10 @@ import json
 import sqlite3
 from typing import Any
 
-from .db import get_db_path
+from .db import apply_row_factory, get_user_connection
 
 def save_recommendation_set(*, user_id: int, mode: str, tmdb_ids: list[int]) -> None:
-    db_path = get_db_path()
-    with sqlite3.connect(db_path) as conn:
+    with get_user_connection() as conn:
         conn.execute(
             """
             INSERT INTO recommendation_sets (user_id, mode, tmdb_ids)
@@ -20,8 +19,7 @@ def save_recommendation_set(*, user_id: int, mode: str, tmdb_ids: list[int]) -> 
 
 def get_recent_tmdb_ids(user_id: int) -> list[int]:
     """Devuelve todos los tmdb_ids mostrados en sesiones anteriores del usuario."""
-    db_path = get_db_path()
-    with sqlite3.connect(db_path) as conn:
+    with get_user_connection() as conn:
         rows = conn.execute(
             """
             SELECT tmdb_ids FROM recommendation_sets
@@ -47,9 +45,8 @@ def get_recent_tmdb_ids(user_id: int) -> list[int]:
 
 def get_recommendation_history(user_id: int) -> list[dict[str, Any]]:
     """Devuelve el historial completo de sets de recomendación del usuario."""
-    db_path = get_db_path()
-    with sqlite3.connect(db_path) as conn:
-        conn.row_factory = sqlite3.Row
+    with get_user_connection() as conn:
+        apply_row_factory(conn)
         rows = conn.execute(
             """
             SELECT id, mode, tmdb_ids, created_at

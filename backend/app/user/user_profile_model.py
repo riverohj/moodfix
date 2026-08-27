@@ -4,7 +4,7 @@ import json
 import sqlite3
 from typing import Any
 
-from ..db import get_db_path
+from ..db import apply_row_factory, get_user_connection
 from .auth_model import obtener_usuario_por_id
 
 
@@ -47,8 +47,8 @@ def _perfil_vacio() -> dict[str, Any]:
 
 
 def _conectar_bd() -> sqlite3.Connection:
-    conexion = sqlite3.connect(get_db_path())
-    conexion.row_factory = sqlite3.Row
+    conexion = get_user_connection()
+    apply_row_factory(conexion)
     return conexion
 
 

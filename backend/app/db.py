@@ -4,10 +4,16 @@ import os
 import sqlite3
 from pathlib import Path
 
+import turso_serverless
+
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_DB_PATH = ROOT_DIR / "backend" / "data" / "moodfix.db"
-ESQUEMA_DB = """
+REMOTE_URL_PREFIXES = ("libsql://", "https://", "http://")
+
+# Catalogo: se reconstruye por completo en cada build via ingest.py, asi que
+# puede vivir en el filesystem efimero de Render sin necesitar persistencia real.
+ESQUEMA_CATALOGO = """
 CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     tmdb_id INTEGER NOT NULL UNIQUE,
@@ -35,7 +41,11 @@ CREATE TABLE IF NOT EXISTS movie_providers (
     FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
     UNIQUE (movie_id, country_code, provider_id, provider_type)
 );
+"""
 
+# Datos de usuario: deben sobrevivir a cada redeploy, asi que viven en Turso en
+# produccion (ver get_user_connection) en vez de en el disco efimero del servicio.
+ESQUEMA_USUARIOS = """
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL UNIQUE,
@@ -107,12 +117,15 @@ def _ensure_index(connection: sqlite3.Connection, index_name: str, statement: st
         connection.execute(statement)
 
 
-def _crear_tablas(connection: sqlite3.Connection) -> None:
-    connection.executescript(ESQUEMA_DB)
+def _crear_tablas(connection, esquema: str) -> None:
+    connection.executescript(esquema)
 
 
-def _asegurar_ajustes(connection: sqlite3.Connection) -> None:
+def _asegurar_ajustes_catalogo(connection: sqlite3.Connection) -> None:
     _ensure_column(connection, "movies", "genre_ids", "TEXT NOT NULL DEFAULT '[]'")
+
+
+def _asegurar_ajustes_usuarios(connection) -> None:
     _ensure_column(connection, "user_profiles", "user_id", "INTEGER")
     _ensure_index(
         connection,
@@ -137,6 +150,8 @@ def _asegurar_ajustes(connection: sqlite3.Connection) -> None:
 
 
 def get_db_path() -> Path:
+    """Ruta local del catalogo (movies/movie_providers). Siempre en disco local,
+    efimero o no: se reconstruye por completo en cada build via ingest.py."""
     configured = os.getenv("DATABASE_PATH")
     if configured:
         path = Path(configured)
@@ -146,11 +161,48 @@ def get_db_path() -> Path:
     return DEFAULT_DB_PATH
 
 
+def get_user_db_target() -> str | Path:
+    """Turso en produccion (persiste entre redeploys). Sin credenciales configuradas
+    cae en el mismo archivo local que el catalogo, para no romper el flujo de
+    desarrollo local de cada persona del equipo."""
+    turso_url = os.getenv("TURSO_DATABASE_URL")
+    if turso_url:
+        return turso_url
+    return get_db_path()
+
+
+def get_user_connection() -> sqlite3.Connection:
+    target = get_user_db_target()
+    if isinstance(target, str) and target.startswith(REMOTE_URL_PREFIXES):
+        # turso_serverless habla HTTP (Hrana v2 pipeline), no el esquema libsql://
+        http_url = target.replace("libsql://", "https://", 1)
+        return turso_serverless.connect(http_url, auth_token=os.getenv("TURSO_AUTH_TOKEN"))
+    return sqlite3.connect(target)
+
+
+def apply_row_factory(connection) -> None:
+    """sqlite3.Row y turso_serverless.Row no son intercambiables: cada conexion
+    necesita su propia clase de fila para el acceso por nombre de columna."""
+    if isinstance(connection, sqlite3.Connection):
+        connection.row_factory = sqlite3.Row
+    else:
+        connection.row_factory = turso_serverless.Row
+
+
 def init_db() -> None:
     db_path = get_db_path()
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
     with sqlite3.connect(db_path) as connection:
         connection.execute("PRAGMA foreign_keys = ON")
-        _crear_tablas(connection)
-        _asegurar_ajustes(connection)
+        _crear_tablas(connection, ESQUEMA_CATALOGO)
+        _asegurar_ajustes_catalogo(connection)
+
+    user_connection = get_user_connection()
+    try:
+        user_connection.execute("PRAGMA foreign_keys = ON")
+        _crear_tablas(user_connection, ESQUEMA_USUARIOS)
+        _asegurar_ajustes_usuarios(user_connection)
+        user_connection.commit()
+    finally:
+        user_connection.close()
